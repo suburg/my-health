@@ -38,7 +38,7 @@ Tauri-приложение: бэкенд в `src-tauri/`, фронтенд в `s
 **⚠️ КРИТИЧНО**: Ни одна пользовательская история не может начаться, пока эта фаза не завершена
 
 - [x] T006 [P] Определить общие TypeScript-типы в `src/types/index.ts` (Profile, AppConfig, IPC-ответы)
-- [ ] T007 [P] Создать zod-схемы валидации в `src/lib/validations.ts` (profileSchema, pinSchema, loginSchema)
+- [x] T007 [P] Создать zod-схемы валидации в `src/lib/validations.ts` (profileSchema, pinSchema, loginSchema)
 - [ ] T008 [P] Реализовать Rust-модуль файлового хранилища `src-tauri/src/storage/json_store.rs` (чтение/запись JSON, атомарная запись)
 - [ ] T009 [P] Реализовать Rust-модуль `src-tauri/src/storage/mod.rs` (публичный интерфейс)
 - [ ] T010 Добавить зависимость `argon2` в `src-tauri/Cargo.toml`
