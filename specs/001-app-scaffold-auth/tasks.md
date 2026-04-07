@@ -25,7 +25,7 @@ Tauri-приложение: бэкенд в `src-tauri/`, фронтенд в `s
 
 - [X] T001 Инициализировать Tauri-проект (`create-tauri-app`) в `src-tauri/` с Rust backend и React + TypeScript frontend в `src/`
 - [x] T002 [P] Создать структуру каталогов согласно плану: `src/components/`, `src/services/`, `src/hooks/`, `src/lib/`, `src/config/`, `src/styles/`, `src/types/`, `src-tauri/src/commands/`, `src-tauri/src/storage/`
-- [ ] T003 [P] Настроить Tailwind CSS + shadcn/ui в `src/` (init shadcn, настроить `tailwind.config.js`, `globals.css`)
+- [x] T003 [P] Настроить Tailwind CSS + shadcn/ui в `src/` (init shadcn, настроить `tailwind.config.js`, `globals.css`)
 - [ ] T004 [P] Настроить ESLint + Prettier, TypeScript `strict: true` в `tsconfig.json`
 - [ ] T005 Создать Makefile с целями: `install`, `dev`, `build`, `clean`
 
