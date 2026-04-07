@@ -57,11 +57,6 @@ pub fn write_json<T: Serialize>(path: &Path, value: &T) -> Result<(), StoreError
     Ok(())
 }
 
-/// Проверить существование файла.
-pub fn file_exists(path: &Path) -> bool {
-    path.exists()
-}
-
 /// Удалить файл (если существует).
 pub fn delete(path: &Path) -> Result<(), StoreError> {
     if path.exists() {
@@ -210,26 +205,15 @@ mod tests {
     }
 
     #[test]
-    fn test_file_exists() {
-        let dir = temp_path();
-        let path = dir.path().join("exists.json");
-
-        assert!(!file_exists(&path));
-
-        write_json(&path, &"test").expect("записать");
-        assert!(file_exists(&path));
-    }
-
-    #[test]
     fn test_delete() {
         let dir = temp_path();
         let path = dir.path().join("delete.json");
 
         write_json(&path, &"test").expect("записать");
-        assert!(file_exists(&path));
+        assert!(path.exists());
 
         delete(&path).expect("удалить");
-        assert!(!file_exists(&path));
+        assert!(!path.exists());
 
         // Удаление несуществующего файла — не ошибка
         delete(&path).expect("повторное удаление не ошибка");

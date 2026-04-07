@@ -4,4 +4,4 @@
 /// и удаление JSON-файлов.
 pub mod json_store;
 
-pub use json_store::{delete, file_exists, read_json, write_json, StoreError};
+pub use json_store::{delete, read_json, write_json, StoreError};
