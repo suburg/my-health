@@ -43,7 +43,7 @@ Tauri-приложение: бэкенд в `src-tauri/`, фронтенд в `s
 - [x] T009 [P] Реализовать Rust-модуль `src-tauri/src/storage/mod.rs` (публичный интерфейс)
 - [x] T010 Добавить зависимость `argon2` в `src-tauri/Cargo.toml`
 - [x] T011 Реализовать систему логирования в `src/lib/logger.ts` (debug-режим, запись логов через Tauri fs, новый файл при каждом запуске)
-- [ ] T012 Настроить конфигурацию приложения `src/lib/app-config.ts` (чтение config.json, debug-флаг, dataDir через Tauri path API)
+- [x] T012 Настроить конфигурацию приложения `src/lib/app-config.ts` (чтение config.json, debug-флаг, dataDir через Tauri path API)
 
 **Контрольная точка**: Фундамент готов — можно начинать реализацию пользовательских историй параллельно
 
