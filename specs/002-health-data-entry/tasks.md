@@ -1,4 +1,4 @@
-# Задачи: Ввод и визуализация данных о здоровье
+﻿# Задачи: Ввод и визуализация данных о здоровье
 
 **Входные данные**: Проектная документация из `/specs/002-health-data-entry/`
 **Предварительные требования**: plan.md (обязательно), spec.md (обязательно), data-model.md, contracts/, research.md, quickstart.md
@@ -55,26 +55,26 @@ Tauri-приложение: бэкенд в `src-tauri/`, фронтенд в `s
 
 #### Backend (Rust/Tauri)
 
-- [ ] T009 [P] [US1] Реализовать IPC-команду `get_entries` в `src-tauri/src/commands/health.rs` (чтение health.json, возврат массива entries)
-- [ ] T010 [P] [US1] Реализовать IPC-команду `add_entry` в `src-tauri/src/commands/health.rs` (валидация, атомарная запись, замена если дата существует)
-- [ ] T011 [P] [US1] Реализовать IPC-команду `get_metric_config` в `src-tauri/src/commands/health.rs` (чтение metric-config.json)
-- [ ] T012 [US1] Зарегистрировать IPC-команды в `src-tauri/src/lib.rs` (get_entries, add_entry, get_metric_config)
+- [x] T009 [P] [US1] Реализовать IPC-команду `get_entries` в `src-tauri/src/commands/health.rs` (чтение health.json, возврат массива entries)
+- [x] T010 [P] [US1] Реализовать IPC-команду `add_entry` в `src-tauri/src/commands/health.rs` (валидация, атомарная запись, замена если дата существует)
+- [x] T011 [P] [US1] Реализовать IPC-команду `get_metric_config` в `src-tauri/src/commands/health.rs` (чтение metric-config.json)
+- [x] T012 [US1] Зарегистрировать IPC-команды в `src-tauri/src/lib.rs` (get_entries, add_entry, get_metric_config)
 
 #### Frontend — утилиты и сервисы
 
-- [ ] T013 [P] [US1] Реализовать утилиту расчёта отклонений в `src/lib/deviation-utils.ts` (функция calculateDeviation: предыдущее значение, текущее → абсолютное и процентное отклонение, форматирование с единицами измерения)
-- [ ] T014 [P] [US1] Реализовать health-сервис в `src/services/health-service.ts` (обёртка IPC: getEntries, addEntry, getMetricConfig; расчёт отклонений через deviation-utils)
+- [x] T013 [P] [US1] Реализовать утилиту расчёта отклонений в `src/lib/deviation-utils.ts` (функция calculateDeviation: предыдущее значение, текущее → абсолютное и процентное отклонение, форматирование с единицами измерения)
+- [x] T014 [P] [US1] Реализовать health-сервис в `src/services/health-service.ts` (обёртка IPC: getEntries, addEntry, getMetricConfig; расчёт отклонений через deviation-utils)
 
 #### Frontend — компоненты
 
-- [ ] T015 [P] [US1] Создать компонент EditableCell в `src/components/health/EditableCell.tsx` (inline-редактирование: текст → input по клику, сохранение по Enter/blur, inline-валидация разумных границ из MetricDefinition, 3 типа ввода: number/compound/duration)
-- [ ] T016 [P] [US1] Создать компонент DeviationTooltip в `src/components/health/DeviationTooltip.tsx` (отображение предыдущего значения + отклонение в абсолюте и процентах из deviation-utils)
-- [ ] T017 [US1] Создать компонент HealthTable в `src/components/health/HealthTable.tsx` (таблица: строки=показатели из metric-config, столбцы=замеры, фиксация первого столбца через sticky, кнопка «Новый замер», рендер EditableCell с DeviationTooltip)
+- [x] T015 [P] [US1] Создать компонент EditableCell в `src/components/health/EditableCell.tsx` (inline-редактирование: текст → input по клику, сохранение по Enter/blur, inline-валидация разумных границ из MetricDefinition, 3 типа ввода: number/compound/duration)
+- [x] T016 [P] [US1] Создать компонент DeviationTooltip в `src/components/health/DeviationTooltip.tsx` (отображение предыдущего значения + отклонение в абсолюте и процентах из deviation-utils)
+- [x] T017 [US1] Создать компонент HealthTable в `src/components/health/HealthTable.tsx` (таблица: строки=показатели из metric-config, столбцы=замеры, фиксация первого столбца через sticky, кнопка «Новый замер», рендер EditableCell с DeviationTooltip)
 
 #### Интеграция
 
-- [ ] T018 [US1] Связать HealthTable → health-service.getEntries / addEntry → автозаполнение показателей с autofill=true из предыдущего замера
-- [ ] T019 [US1] Добавить навигацию к экрану здоровья в `src/App.tsx` (пункт «Здоровье» в NavMenu существующего MainScreen → рендер HealthTable)
+- [x] T018 [US1] Связать HealthTable → health-service.getEntries / addEntry → автозаполнение показателей с autofill=true из предыдущего замера
+- [x] T019 [US1] Добавить навигацию к экрану здоровья в `src/App.tsx` (пункт «Здоровье» в NavMenu существующего MainScreen → рендер HealthTable)
 
 **Контрольная точка**: Пользовательская история 1 полностью функциональна и тестируема независимо
 
@@ -238,4 +238,4 @@ Tauri-приложение: бэкенд в `src-tauri/`, фронтенд в `s
 - Каждая пользовательская история должна быть независимо завершаема и тестируема
 - Фиксировать после каждой задачи или логической группы
 - Останавливаться на любой контрольной точке для независимой проверки истории
-- Избегать: неопределенных задач, конфликтов одних и тех же файлов, кросс-исторических зависимостей, нарушающих независимость
+- Избегать: неопределённых задач, конфликтов одних и тех же файлов, кросс-исторических зависимостей, нарушающих независимость
