@@ -109,8 +109,8 @@ Tauri-приложение: бэкенд в `src-tauri/`, фронтенд в `s
 
 ### Backend (Rust/Tauri)
 
-- [ ] T028 [P] [US3] Реализовать IPC-команду `update_profile` в `src-tauri/src/commands/profile.rs` (частичное обновление profile.json, атомарная запись)
-- [ ] T029 [P] [US3] Реализовать IPC-команду `change_pin` в `src-tauri/src/commands/auth.rs` (проверка текущего PIN, хэширование нового, обновление profile.json)
+- [x] T028 [P] [US3] Реализовать IPC-команду `update_profile` в `src-tauri/src/commands/profile.rs` (частичное обновление profile.json, атомарная запись)
+- [x] T029 [P] [US3] Реализовать IPC-команду `change_pin` в `src-tauri/src/commands/auth.rs` (проверка текущего PIN, хэширование нового, обновление profile.json)
 
 ### Frontend — сервисы
 

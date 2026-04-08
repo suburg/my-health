@@ -230,3 +230,63 @@ pub fn verify_pin(
         first_name: profile_file.profile.first_name,
     })
 }
+
+// ============================================================================
+// change_pin
+// ============================================================================
+
+/// Запрос на смену пин-кода
+#[derive(Debug, Deserialize)]
+pub struct ChangePinRequest {
+    pub current_pin: String,
+    pub new_pin: String,
+}
+
+/// Сменить пин-код.
+/// Проверяет текущий PIN, хэширует новый и обновляет profile.json.
+#[tauri::command]
+pub fn change_pin(
+    app: tauri::AppHandle,
+    request: ChangePinRequest,
+) -> Result<serde_json::Value, String> {
+    let path = profile_path(&app);
+
+    // Проверяем что профиль существует
+    if !path.exists() {
+        return Err("NOT_REGISTERED".into());
+    }
+
+    // Загружаем профиль
+    let mut profile_file: ProfileFile =
+        storage::read_json(&path)
+            .map_err(|e| e.to_string())?
+            .ok_or("NOT_REGISTERED".to_string())?;
+
+    // Проверяем текущий PIN
+    let parsed_hash = argon2::password_hash::PasswordHash::new(&profile_file.pin_hash)
+        .map_err(|_| "Ошибка парсинга хэша PIN".to_string())?;
+
+    let argon2 = Argon2::default();
+    let valid = argon2
+        .verify_password(request.current_pin.as_bytes(), &parsed_hash)
+        .is_ok();
+
+    if !valid {
+        return Err("INVALID_CURRENT_PIN".into());
+    }
+
+    // Валидация нового PIN
+    validate_pin(&request.new_pin)?;
+
+    // Хэширование нового PIN
+    let new_pin_hash = hash_pin(&request.new_pin)?;
+
+    // Обновляем профиль
+    profile_file.pin_hash = new_pin_hash;
+    profile_file.updated_at = Utc::now().to_rfc3339();
+
+    // Атомарная запись
+    storage::write_json(&path, &profile_file).map_err(|e| e.to_string())?;
+
+    Ok(serde_json::json!({ "success": true }))
+}

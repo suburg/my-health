@@ -12,7 +12,9 @@ pub fn run() {
             commands::auth::check_registration,
             commands::auth::register_user,
             commands::auth::verify_pin,
+            commands::auth::change_pin,
             commands::profile::get_profile,
+            commands::profile::update_profile,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
