@@ -18,6 +18,8 @@ pub fn run() {
             commands::profile::update_profile,
             commands::health::get_entries,
             commands::health::add_entry,
+            commands::health::update_entry,
+            commands::health::delete_entry,
             commands::health::get_metric_config,
         ])
         .run(tauri::generate_context!())

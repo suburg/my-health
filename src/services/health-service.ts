@@ -114,6 +114,57 @@ export async function getPreviousEntry(
 }
 
 /**
+ * Частично обновить замер по дате (объединить metrics).
+ */
+export async function updateEntry(
+  date: string,
+  metrics: Record<string, MetricValue>,
+): Promise<void> {
+  logger.debug(MODULE_NAME, `Вызов updateEntry для даты: ${date}`);
+
+  try {
+    const result = await invoke<IpcSuccess | IpcError>("update_entry", {
+      request: { date, metrics },
+    });
+
+    if ("error" in result) {
+      logger.error(MODULE_NAME, `updateEntry вернул ошибку: ${result.error}`);
+      throw new Error(result.error);
+    }
+
+    logger.info(MODULE_NAME, `Замер за ${date} обновлён`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    logger.error(MODULE_NAME, `Ошибка при вызове updateEntry: ${message}`);
+    throw new Error(message);
+  }
+}
+
+/**
+ * Удалить замер за указанную дату.
+ */
+export async function deleteEntry(date: string): Promise<void> {
+  logger.debug(MODULE_NAME, `Вызов deleteEntry для даты: ${date}`);
+
+  try {
+    const result = await invoke<IpcSuccess | IpcError>("delete_entry", {
+      request: { date },
+    });
+
+    if ("error" in result) {
+      logger.error(MODULE_NAME, `deleteEntry вернул ошибку: ${result.error}`);
+      throw new Error(result.error);
+    }
+
+    logger.info(MODULE_NAME, `Замер за ${date} удалён`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    logger.error(MODULE_NAME, `Ошибка при вызове deleteEntry: ${message}`);
+    throw new Error(message);
+  }
+}
+
+/**
  * Автозаполнить показатели из предыдущего замера.
  *
  * @param previousEntry — предыдущий замер

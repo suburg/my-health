@@ -90,17 +90,17 @@ Tauri-приложение: бэкенд в `src-tauri/`, фронтенд в `s
 
 #### Backend (Rust/Tauri)
 
-- [ ] T020 [P] [US2] Реализовать IPC-команду `update_entry` в `src-tauri/src/commands/health.rs` (частичное обновление metrics по дате, валидация, атомарная запись)
-- [ ] T021 [P] [US2] Реализовать IPC-команду `delete_entry` в `src-tauri/src/commands/health.rs` (удаление записи по дате, атомарная запись)
-- [ ] T022 [US2] Зарегистрировать IPC-команды в `src-tauri/src/lib.rs` (update_entry, delete_entry)
+- [x] T020 [P] [US2] Реализовать IPC-команду `update_entry` в `src-tauri/src/commands/health.rs` (частичное обновление metrics по дате, валидация, атомарная запись)
+- [x] T021 [P] [US2] Реализовать IPC-команду `delete_entry` в `src-tauri/src/commands/health.rs` (удаление записи по дате, атомарная запись)
+- [x] T022 [US2] Зарегистрировать IPC-команды в `src-tauri/src/lib.rs` (update_entry, delete_entry)
 
 #### Frontend — сервисы
 
-- [ ] T023 [US2] Добавить в health-service методы: updateEntry, deleteEntry (обёртка IPC)
+- [x] T023 [US2] Добавить в health-service методы: updateEntry, deleteEntry (обёртка IPC)
 
 #### Frontend — компоненты
 
-- [ ] T024 [US2] Добавить в HealthTable: контекстное меню заголовка столбца с пунктом «Удалить замер» → вызов deleteEntry с подтверждением
+- [x] T024 [US2] Добавить в HealthTable: контекстное меню заголовка столбца с пунктом «Удалить замер» → вызов deleteEntry с подтверждением
 - [ ] T025 [US2] Реализовать логику подтверждения при переключении режима/действиях с несохранёнными изменениями (модальное окно «Несохранённые изменения будут потеряны. Продолжить?»)
 
 **Контрольная точка**: Пользовательские истории 1 и 2 работают независимо — таблица поддерживает полный CRUD

@@ -180,11 +180,9 @@ export function HealthTable({ onSwitchToCharts }: HealthTableProps) {
     if (!confirm(`Удалить замер за ${formatDateFull(date)}?`)) return;
 
     try {
-      const updatedEntries = entries.filter((e) => e.date !== date);
-      for (const entry of updatedEntries) {
-        await healthService.addEntry(entry.date, entry.metrics);
-      }
-      await loadData();
+      await healthService.deleteEntry(date);
+      // Оптимистично обновляем локальный стейт
+      setEntries((prev) => prev.filter((e) => e.date !== date));
     } catch (err) {
       console.error("Ошибка удаления замера:", err);
     }
@@ -237,11 +235,12 @@ export function HealthTable({ onSwitchToCharts }: HealthTableProps) {
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border">
-          <table className="w-full border-collapse">
+        <div className="overflow-x-auto rounded-lg">
+          <div className="inline-block min-w-fit rounded-lg border border-border">
+            <table className="border-collapse">
             <thead>
               <tr className="border-b border-border bg-muted/50">
-                <th className="sticky left-0 z-10 min-w-[200px] border-r border-border bg-muted/50 px-3 py-2 text-left text-sm font-medium text-foreground">
+                <th className="sticky left-0 z-10 w-[200px] min-w-[200px] max-w-[200px] border-r border-border bg-muted/50 px-3 py-2 text-left text-sm font-medium text-foreground">
                   Показатель
                 </th>
                 {entries.map((entry) => (
@@ -274,7 +273,7 @@ export function HealthTable({ onSwitchToCharts }: HealthTableProps) {
                       showDivider ? "border-t-2 border-t-border/50" : ""
                     }`}
                   >
-                    <td className="sticky left-0 z-10 border-r border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground">
+                    <td className="sticky left-0 z-10 w-[200px] min-w-[200px] max-w-[200px] border-r border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground">
                       {metric.label}
                       <span className="ml-1 text-xs text-muted-foreground">
                         ({metric.unit})
@@ -309,6 +308,7 @@ export function HealthTable({ onSwitchToCharts }: HealthTableProps) {
               })}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

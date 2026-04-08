@@ -84,6 +84,94 @@ pub fn add_entry(
 }
 
 // ============================================================================
+// update_entry
+// ============================================================================
+
+/// Запрос на частичное обновление замера
+#[derive(Debug, Deserialize)]
+pub struct UpdateEntryRequest {
+    pub date: String,
+    pub metrics: serde_json::Value,
+}
+
+/// Частично обновить замер по дате (объединить metrics).
+#[tauri::command]
+pub fn update_entry(
+    app: tauri::AppHandle,
+    request: UpdateEntryRequest,
+) -> Result<serde_json::Value, String> {
+    let path = storage::health_store::health_path(&app);
+
+    if !is_valid_date(&request.date) {
+        return Err("VALIDATION_ERROR: Некорректная дата. Формат: ГГГГ-ММ-ДД".into());
+    }
+
+    let mut entries = storage::health_store::load_entries(&path)
+        .map_err(|e| format!("Ошибка чтения health.json: {e}"))?;
+
+    // Находим замер
+    let existing_index = entries
+        .iter()
+        .position(|e| e.get("date").and_then(|d| d.as_str()) == Some(&request.date));
+
+    match existing_index {
+        Some(idx) => {
+            // Объединяем metrics
+            let existing_metrics = entries[idx]
+                .get("metrics")
+                .and_then(|m| m.as_object())
+                .cloned()
+                .unwrap_or_default();
+
+            let new_metrics = request.metrics.as_object().cloned().unwrap_or_default();
+
+            let mut merged = existing_metrics;
+            merged.extend(new_metrics);
+
+            entries[idx]["metrics"] = serde_json::Value::Object(merged);
+
+            storage::health_store::save_entries(&path, entries)
+                .map_err(|e| format!("Ошибка записи health.json: {e}"))?;
+
+            Ok(serde_json::json!({ "success": true }))
+        }
+        None => Err("NOT_FOUND".into()),
+    }
+}
+
+// ============================================================================
+// delete_entry
+// ============================================================================
+
+/// Запрос на удаление замера
+#[derive(Debug, Deserialize)]
+pub struct DeleteEntryRequest {
+    pub date: String,
+}
+
+/// Удалить замер за указанную дату.
+#[tauri::command]
+pub fn delete_entry(
+    app: tauri::AppHandle,
+    request: DeleteEntryRequest,
+) -> Result<serde_json::Value, String> {
+    let path = storage::health_store::health_path(&app);
+
+    if !is_valid_date(&request.date) {
+        return Err("VALIDATION_ERROR: Некорректная дата. Формат: ГГГГ-ММ-ДД".into());
+    }
+
+    let deleted = storage::health_store::delete_entry_by_date(&path, &request.date)
+        .map_err(|e| format!("Ошибка удаления замера: {e}"))?;
+
+    if deleted {
+        Ok(serde_json::json!({ "success": true }))
+    } else {
+        Err("NOT_FOUND".into())
+    }
+}
+
+// ============================================================================
 // get_metric_config
 // ============================================================================
 
