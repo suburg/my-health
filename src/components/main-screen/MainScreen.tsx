@@ -8,6 +8,8 @@ import { NavMenu } from "./NavMenu";
 export interface MainScreenProps {
   /** Callback при навигации к профилю */
   onNavigateProfile?: () => void;
+  /** Callback при выходе из приложения */
+  onLogout?: () => void;
 }
 
 /**
@@ -21,11 +23,11 @@ export interface MainScreenProps {
  *
  * @example
  * ```tsx
- * <MainScreen onNavigateProfile={() => setCurrentView('profile')} />
+ * <MainScreen onNavigateProfile={() => setCurrentView('profile')} onLogout={handleLogout} />
  * ```
  */
-export function MainScreen({ onNavigateProfile }: MainScreenProps) {
-  const { firstName, logout } = useAuth();
+export function MainScreen({ onNavigateProfile, onLogout }: MainScreenProps) {
+  const { firstName } = useAuth();
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
 
   const menuItems = [
@@ -62,7 +64,7 @@ export function MainScreen({ onNavigateProfile }: MainScreenProps) {
           />
         </svg>
       ),
-      onClick: () => logout(),
+      onClick: () => onLogout?.(),
       danger: true,
     },
   ];

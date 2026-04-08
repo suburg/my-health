@@ -21,12 +21,23 @@ type Screen = "main" | "profile" | "pinChange";
  * - isAuthenticated → основной экран / профиль / смена пин-кода
  */
 function AppRouter() {
-  const { isLoading, isRegistered, isAuthenticated } = useAuth();
+  const { isLoading, isRegistered, isAuthenticated, logout } = useAuth();
   const [currentScreen, setCurrentScreen] = useState<Screen>("main");
 
   const navigateToMain = useCallback(() => setCurrentScreen("main"), []);
   const navigateToProfile = useCallback(() => setCurrentScreen("profile"), []);
   const navigateToPinChange = useCallback(() => setCurrentScreen("pinChange"), []);
+
+  // Обработчик выхода — сбрасывает экран на главный
+  const handleLogout = useCallback(() => {
+    setCurrentScreen("main");
+    logout();
+  }, [logout]);
+
+  // При выходе сбросить экран на основной (для следующего входа)
+  if (!isAuthenticated) {
+    setCurrentScreen("main");
+  }
 
   if (isLoading) {
     return (
@@ -60,7 +71,12 @@ function AppRouter() {
     case "pinChange":
       return <PinChangeForm onSave={navigateToProfile} onCancel={navigateToProfile} />;
     default:
-      return <MainScreen onNavigateProfile={navigateToProfile} />;
+      return (
+        <MainScreen
+          onNavigateProfile={navigateToProfile}
+          onLogout={handleLogout}
+        />
+      );
   }
 }
 
