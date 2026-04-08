@@ -1,7 +1,15 @@
+import { useState, useCallback } from "react";
 import { AuthProvider, useAuth } from "./hooks/use-auth";
 import { RegistrationForm } from "./components/registration/RegistrationForm";
 import { PinLoginForm } from "./components/pin-login/PinLoginForm";
 import { MainScreen } from "./components/main-screen/MainScreen";
+import { ProfileForm } from "./components/profile/ProfileForm";
+import { PinChangeForm } from "./components/pin-change/PinChangeForm";
+
+/**
+ * Типы экранов для навигации внутри приложения.
+ */
+type Screen = "main" | "profile" | "pinChange";
 
 /**
  * Компонент-маршрутизатор на основе состояния аутентификации.
@@ -10,10 +18,15 @@ import { MainScreen } from "./components/main-screen/MainScreen";
  * - isLoading      → спиннер загрузки
  * - !isRegistered  → форма регистрации
  * - !isAuthenticated → форма входа по пин-коду
- * - isAuthenticated → основной экран
+ * - isAuthenticated → основной экран / профиль / смена пин-кода
  */
 function AppRouter() {
   const { isLoading, isRegistered, isAuthenticated } = useAuth();
+  const [currentScreen, setCurrentScreen] = useState<Screen>("main");
+
+  const navigateToMain = useCallback(() => setCurrentScreen("main"), []);
+  const navigateToProfile = useCallback(() => setCurrentScreen("profile"), []);
+  const navigateToPinChange = useCallback(() => setCurrentScreen("pinChange"), []);
 
   if (isLoading) {
     return (
@@ -34,7 +47,21 @@ function AppRouter() {
     return <PinLoginForm />;
   }
 
-  return <MainScreen />;
+  // После входа — навигация между экранами
+  switch (currentScreen) {
+    case "profile":
+      return (
+        <ProfileForm
+          onSave={navigateToMain}
+          onCancel={navigateToMain}
+          onChangePin={navigateToPinChange}
+        />
+      );
+    case "pinChange":
+      return <PinChangeForm onSave={navigateToProfile} onCancel={navigateToProfile} />;
+    default:
+      return <MainScreen onNavigateProfile={navigateToProfile} />;
+  }
 }
 
 function App() {

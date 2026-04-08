@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useAuth } from "../../hooks/use-auth";
 import type { Sex } from "../../types";
+import { PersonFields, type PersonFieldsValues } from "../shared/PersonFields";
 
 interface RegistrationFormData {
   firstName: string;
@@ -35,6 +36,11 @@ export function RegistrationForm() {
     if (error) {
       clearError();
     }
+  };
+
+  // Обработчик для PersonFields — преобразует в нужный тип
+  const handlePersonChange = (field: keyof PersonFieldsValues, value: string) => {
+    handleChange(field as keyof RegistrationFormData, value);
   };
 
   const validate = (): boolean => {
@@ -102,6 +108,14 @@ export function RegistrationForm() {
     }
   };
 
+  // Значения для PersonFields
+  const personValues: PersonFieldsValues = {
+    firstName: form.firstName,
+    lastName: form.lastName,
+    dateOfBirth: form.dateOfBirth,
+    sex: form.sex,
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
       <div className="w-full max-w-md space-y-6">
@@ -115,104 +129,13 @@ export function RegistrationForm() {
 
         {/* Форма */}
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-          {/* Имя */}
-          <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-foreground">
-              Имя
-            </label>
-            <input
-              id="firstName"
-              type="text"
-              value={form.firstName}
-              onChange={(e) => handleChange("firstName", e.target.value)}
-              className={`mt-1 flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${
-                fieldErrors.firstName ? "border-destructive" : "border-input"
-              }`}
-              placeholder="Иван"
-              maxLength={100}
-              disabled={isLoading}
-            />
-            {fieldErrors.firstName && (
-              <p className="mt-1 text-sm text-destructive">{fieldErrors.firstName}</p>
-            )}
-          </div>
-
-          {/* Фамилия */}
-          <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-foreground">
-              Фамилия
-            </label>
-            <input
-              id="lastName"
-              type="text"
-              value={form.lastName}
-              onChange={(e) => handleChange("lastName", e.target.value)}
-              className={`mt-1 flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${
-                fieldErrors.lastName ? "border-destructive" : "border-input"
-              }`}
-              placeholder="Иванов"
-              maxLength={100}
-              disabled={isLoading}
-            />
-            {fieldErrors.lastName && (
-              <p className="mt-1 text-sm text-destructive">{fieldErrors.lastName}</p>
-            )}
-          </div>
-
-          {/* Дата рождения */}
-          <div>
-            <label htmlFor="dateOfBirth" className="block text-sm font-medium text-foreground">
-              Дата рождения
-            </label>
-            <input
-              id="dateOfBirth"
-              type="text"
-              value={form.dateOfBirth}
-              onChange={(e) => {
-                // Только цифры, максимум 8 штук
-                const digits = e.target.value.replace(/\D/g, "").slice(0, 8);
-                // Расставляем точки: ДД.ММ.ГГГГ
-                let formatted = "";
-                for (let i = 0; i < digits.length; i++) {
-                  if (i === 2 || i === 4) formatted += ".";
-                  formatted += digits[i];
-                }
-                handleChange("dateOfBirth", formatted);
-              }}
-              placeholder="ДД.ММ.ГГГГ"
-              className={`mt-1 flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${
-                fieldErrors.dateOfBirth ? "border-destructive" : "border-input"
-              }`}
-              disabled={isLoading}
-              maxLength={10}
-            />
-            {fieldErrors.dateOfBirth && (
-              <p className="mt-1 text-sm text-destructive">{fieldErrors.dateOfBirth}</p>
-            )}
-          </div>
-
-          {/* Пол */}
-          <div>
-            <label htmlFor="sex" className="block text-sm font-medium text-foreground">
-              Пол
-            </label>
-            <select
-              id="sex"
-              value={form.sex}
-              onChange={(e) => handleChange("sex", e.target.value as Sex)}
-              className={`mt-1 flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${
-                fieldErrors.sex ? "border-destructive" : "border-input"
-              }`}
-              disabled={isLoading}
-            >
-              <option value="" disabled>
-                Выберите пол
-              </option>
-              <option value="male">Мужской</option>
-              <option value="female">Женский</option>
-            </select>
-            {fieldErrors.sex && <p className="mt-1 text-sm text-destructive">{fieldErrors.sex}</p>}
-          </div>
+          {/* Общие поля персоны */}
+          <PersonFields
+            values={personValues}
+            errors={fieldErrors}
+            onChange={handlePersonChange}
+            disabled={isLoading}
+          />
 
           {/* Пин-код */}
           <div>

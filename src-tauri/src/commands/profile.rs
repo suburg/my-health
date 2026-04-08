@@ -9,6 +9,7 @@ use crate::storage;
 
 /// Данные пользователя (без чувствительных полей)
 #[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ProfileResponse {
     pub last_name: String,
     pub first_name: String,
@@ -18,6 +19,7 @@ pub struct ProfileResponse {
 
 /// Запрос на обновление профиля (все поля опциональны)
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct UpdateProfileRequest {
     pub last_name: Option<String>,
     pub first_name: Option<String>,

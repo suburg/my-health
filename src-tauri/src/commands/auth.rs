@@ -237,6 +237,7 @@ pub fn verify_pin(
 
 /// Запрос на смену пин-кода
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ChangePinRequest {
     pub current_pin: String,
     pub new_pin: String,

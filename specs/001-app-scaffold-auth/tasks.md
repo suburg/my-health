@@ -114,19 +114,19 @@ Tauri-приложение: бэкенд в `src-tauri/`, фронтенд в `s
 
 ### Frontend — сервисы
 
-- [ ] T030 [US3] Реализовать profile-сервис в `src/services/profile-service.ts` (обёртка IPC: getProfile, updateProfile)
-- [ ] T031 [US3] Добавить в auth-service метод changePin (обёртка IPC change_pin)
+- [x] T030 [US3] Реализовать profile-сервис в `src/services/profile-service.ts` (обёртка IPC: getProfile, updateProfile)
+- [x] T031 [US3] Добавить в auth-service метод changePin (обёртка IPC change_pin)
 
 ### Frontend — компоненты
 
-- [ ] T032 [P] [US3] Создать компонент ProfileForm в `src/components/profile/ProfileForm.tsx` (4 поля с текущими данными, кнопки «Сохранить», «Отменить», «Сменить пин-код»)
-- [ ] T033 [P] [US3] Создать компонент PinChangeForm в `src/components/pin-change/PinChangeForm.tsx` (3 поля: текущий PIN, новый, подтверждение; кнопки «Сохранить», «Отменить»)
-- [ ] T034 [US3] Связать навигацию: MainScreen → «Профиль» → ProfileForm → «Сменить пин-код» → PinChangeForm
+- [x] T032 [P] [US3] Создать компонент ProfileForm в `src/components/profile/ProfileForm.tsx` (4 поля с текущими данными, кнопки «Сохранить», «Отменить», «Сменить пин-код»)
+- [x] T033 [P] [US3] Создать компонент PinChangeForm в `src/components/pin-change/PinChangeForm.tsx` (3 поля: текущий PIN, новый, подтверждение; кнопки «Сохранить», «Отменить»)
+- [x] T034 [US3] Связать навигацию: MainScreen → «Профиль» → ProfileForm → «Сменить пин-код» → PinChangeForm
 
 #### Интеграция
 
-- [ ] T035 [US3] Связать ProfileForm → profile-service.updateProfile → возврат на MainScreen при успехе
-- [ ] T036 [US3] Связать PinChangeForm → auth-service.changePin → возврат в ProfileForm при успехе, ошибка при неверном текущем PIN
+- [x] T035 [US3] Связать ProfileForm → profile-service.updateProfile → возврат на MainScreen при успехе
+- [x] T036 [US3] Связать PinChangeForm → auth-service.changePin → возврат в ProfileForm при успехе, ошибка при неверном текущем PIN
 
 **Контрольная точка**: Пользовательские истории 1, 2, 3 полностью функциональны и тестируемы независимо
 
