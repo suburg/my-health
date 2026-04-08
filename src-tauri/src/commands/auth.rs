@@ -1,5 +1,5 @@
 use argon2::password_hash::rand_core::OsRng;
-use argon2::{Argon2, PasswordHasher};
+use argon2::{Argon2, PasswordHasher, PasswordVerifier};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -172,4 +172,60 @@ fn is_valid_date(date_str: &str) -> bool {
     };
 
     date <= Utc::now().date_naive()
+}
+
+// ============================================================================
+// verify_pin
+// ============================================================================
+
+/// Входные данные для входа по пин-коду
+#[derive(Debug, Deserialize)]
+pub struct VerifyPinRequest {
+    pub pin: String,
+}
+
+/// Ответ при успешном входе
+#[derive(Debug, Serialize)]
+pub struct VerifyPinSuccess {
+    pub success: bool,
+    pub first_name: String,
+}
+
+/// Проверить пин-код при входе
+#[tauri::command]
+pub fn verify_pin(
+    app: tauri::AppHandle,
+    request: VerifyPinRequest,
+) -> Result<VerifyPinSuccess, String> {
+    let path = profile_path(&app);
+
+    // Проверяем что профиль существует
+    if !path.exists() {
+        return Err("NOT_REGISTERED".into());
+    }
+
+    // Загружаем профиль
+    let profile_file: ProfileFile =
+        storage::read_json(&path)
+            .map_err(|e| e.to_string())?
+            .ok_or("NOT_REGISTERED".to_string())?;
+
+    // Парсим хэш
+    let parsed_hash = argon2::password_hash::PasswordHash::new(&profile_file.pin_hash)
+        .map_err(|_| "Ошибка парсинга хэша PIN".to_string())?;
+
+    // Верифицируем
+    let argon2 = Argon2::default();
+    let valid = argon2
+        .verify_password(request.pin.as_bytes(), &parsed_hash)
+        .is_ok();
+
+    if !valid {
+        return Err("INVALID_PIN".into());
+    }
+
+    Ok(VerifyPinSuccess {
+        success: true,
+        first_name: profile_file.profile.first_name,
+    })
 }

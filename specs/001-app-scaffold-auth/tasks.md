@@ -61,7 +61,7 @@ Tauri-приложение: бэкенд в `src-tauri/`, фронтенд в `s
 
 - [x] T013 [P] [US1] Реализовать IPC-команду `check_registration` в `src-tauri/src/commands/auth.rs` (проверка existence profile.json)
 - [x] T014 [P] [US1] Реализовать IPC-команду `register_user` в `src-tauri/src/commands/auth.rs` (валидация, хэширование argon2id, атомарная запись profile.json)
-- [ ] T015 [P] [US1] Реализовать IPC-команду `verify_pin` в `src-tauri/src/commands/auth.rs` (загрузка profile.json, argon2id.verify, возврат firstName)
+- [x] T015 [P] [US1] Реализовать IPC-команду `verify_pin` в `src-tauri/src/commands/auth.rs` (загрузка profile.json, argon2id.verify, возврат firstName)
 - [ ] T016 [US1] Зарегистрировать IPC-команды в `src-tauri/src/main.rs` (tauri::generate_handler)
 
 #### Frontend — сервисы и состояние

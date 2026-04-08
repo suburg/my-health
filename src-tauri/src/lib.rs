@@ -11,6 +11,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::auth::check_registration,
             commands::auth::register_user,
+            commands::auth::verify_pin,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
