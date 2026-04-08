@@ -72,7 +72,7 @@ Tauri-приложение: бэкенд в `src-tauri/`, фронтенд в `s
 #### Frontend — компоненты
 
 - [x] T019 [P] [US1] Создать компонент RegistrationForm в `src/components/registration/RegistrationForm.tsx` (5 полей + подтверждение пин-кода, валидация zod, кнопка «Зарегистрироваться»)
-- [ ] T020 [P] [US1] Создать компонент PinLoginForm в `src/components/pin-login/PinLoginForm.tsx` (поле пин-кода + кнопка «Войти», обработка ошибок)
+- [x] T020 [P] [US1] Создать компонент PinLoginForm в `src/components/pin-login/PinLoginForm.tsx` (поле пин-кода + кнопка «Войти», обработка ошибок)
 - [ ] T021 [US1] Реализовать роутинг/условный рендеринг в `src/App.tsx` (если не зарегистрирован → RegistrationForm, если зарегистрирован → PinLoginForm или MainScreen)
 
 #### Интеграция
