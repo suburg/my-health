@@ -15,7 +15,8 @@ export function PinLoginForm() {
     try {
       await login(pin);
     } catch {
-      // Ошибка уже обработана через useAuth.error
+      // Ошибка уже обработана через useAuth.error — очищаем поле
+      setPin("");
     }
   };
 
