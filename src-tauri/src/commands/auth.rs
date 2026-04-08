@@ -1,6 +1,11 @@
+use argon2::password_hash::rand_core::OsRng;
+use argon2::{Argon2, PasswordHasher};
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use tauri::Manager;
+
+use crate::storage;
 
 /// Данные пользователя (вложенный объект profile в profile.json)
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -42,4 +47,129 @@ pub fn check_registration(app: tauri::AppHandle) -> Result<RegistrationStatus, S
     let path = profile_path(&app);
     let registered = path.exists();
     Ok(RegistrationStatus { registered })
+}
+
+// ============================================================================
+// register_user
+// ============================================================================
+
+/// Входные данные для регистрации
+#[derive(Debug, Deserialize)]
+pub struct RegisterUserRequest {
+    pub last_name: String,
+    pub first_name: String,
+    pub date_of_birth: String,
+    pub sex: String,
+    pub pin: String,
+}
+
+/// Хэшировать пин-код через argon2id
+fn hash_pin(pin: &str) -> Result<String, String> {
+    let salt = argon2::password_hash::SaltString::generate(&mut OsRng);
+    let argon2 = Argon2::default();
+    let hash = argon2
+        .hash_password(pin.as_bytes(), &salt)
+        .map_err(|e| format!("Ошибка хэширования PIN: {e}"))?;
+    Ok(hash.to_string())
+}
+
+/// Зарегистрировать нового пользователя
+#[tauri::command]
+pub fn register_user(
+    app: tauri::AppHandle,
+    request: RegisterUserRequest,
+) -> Result<serde_json::Value, String> {
+    // Проверка: не зарегистрирован ли уже
+    let path = profile_path(&app);
+    if path.exists() {
+        return Err("ALREADY_REGISTERED".into());
+    }
+
+    // Валидация
+    validate_profile(&request.last_name, &request.first_name, &request.date_of_birth, &request.sex)?;
+    validate_pin(&request.pin)?;
+
+    // Хэширование PIN
+    let pin_hash = hash_pin(&request.pin)?;
+
+    let now = Utc::now().to_rfc3339();
+
+    let profile_file = ProfileFile {
+        schema_version: 1,
+        pin_hash,
+        pin_algorithm: "argon2id".into(),
+        created_at: now.clone(),
+        updated_at: now,
+        profile: UserProfile {
+            last_name: request.last_name,
+            first_name: request.first_name,
+            date_of_birth: request.date_of_birth,
+            sex: request.sex,
+        },
+    };
+
+    storage::write_json(&path, &profile_file).map_err(|e| e.to_string())?;
+
+    Ok(serde_json::json!({ "success": true }))
+}
+
+// ============================================================================
+// Валидация
+// ============================================================================
+
+fn validate_profile(
+    last_name: &str,
+    first_name: &str,
+    date_of_birth: &str,
+    sex: &str,
+) -> Result<(), String> {
+    if last_name.trim().is_empty() || last_name.len() > 100 {
+        return Err("VALIDATION_ERROR: Фамилия должна быть от 1 до 100 символов".into());
+    }
+    if first_name.trim().is_empty() || first_name.len() > 100 {
+        return Err("VALIDATION_ERROR: Имя должно быть от 1 до 100 символов".into());
+    }
+    if !is_valid_date(date_of_birth) {
+        return Err("VALIDATION_ERROR: Некорректная дата рождения".into());
+    }
+    if sex != "male" && sex != "female" {
+        return Err("VALIDATION_ERROR: Пол должен быть 'male' или 'female'".into());
+    }
+    Ok(())
+}
+
+fn validate_pin(pin: &str) -> Result<(), String> {
+    if !pin.chars().all(|c| c.is_ascii_digit()) || pin.len() < 4 || pin.len() > 6 {
+        return Err("VALIDATION_ERROR: Пин-код должен содержать от 4 до 6 цифр".into());
+    }
+    Ok(())
+}
+
+/// Проверка корректности даты в формате YYYY-MM-DD
+fn is_valid_date(date_str: &str) -> bool {
+    if !date_str.chars().all(|c| c.is_ascii_digit() || c == '-') {
+        return false;
+    }
+    let parts: Vec<&str> = date_str.split('-').collect();
+    if parts.len() != 3 {
+        return false;
+    }
+    let year: i32 = match parts[0].parse() {
+        Ok(v) => v,
+        Err(_) => return false,
+    };
+    let month: u32 = match parts[1].parse() {
+        Ok(v) => v,
+        Err(_) => return false,
+    };
+    let day: u32 = match parts[2].parse() {
+        Ok(v) => v,
+        Err(_) => return false,
+    };
+
+    let Some(date) = chrono::NaiveDate::from_ymd_opt(year, month, day) else {
+        return false;
+    };
+
+    date <= Utc::now().date_naive()
 }

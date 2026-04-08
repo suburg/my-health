@@ -8,7 +8,10 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_fs::init())
-        .invoke_handler(tauri::generate_handler![commands::auth::check_registration])
+        .invoke_handler(tauri::generate_handler![
+            commands::auth::check_registration,
+            commands::auth::register_user,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
