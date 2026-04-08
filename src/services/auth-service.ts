@@ -5,6 +5,7 @@ import type {
   VerifyPinResponse,
   ChangePinRequest,
   CheckRegistrationResponse,
+  GetProfileResponse,
   IpcError,
   IpcSuccess,
 } from "../types";
@@ -16,7 +17,7 @@ const MODULE_NAME = "auth-service";
 
 /**
  * Проверка, зарегистрирован ли пользователь.
- * @returns true, если профиль существует
+ * @returns true, если профиль существует и валиден
  */
 export async function checkRegistration(): Promise<boolean> {
   logger.debug(MODULE_NAME, "Вызов checkRegistration");
@@ -33,6 +34,47 @@ export async function checkRegistration(): Promise<boolean> {
   } catch (error) {
     logger.error(MODULE_NAME, `Ошибка при вызове checkRegistration: ${error}`);
     return false;
+  }
+}
+
+/**
+ * Проверить целостность профиля.
+ * Если файл существует но повреждён — удалить для повторной регистрации.
+ * @returns true, если профиль валиден
+ */
+export async function validateProfileIntegrity(): Promise<boolean> {
+  logger.debug(MODULE_NAME, "Проверка целостности профиля");
+  try {
+    // Попытка загрузить профиль — если повреждён, бэкенд вернёт ошибку
+    const result = await invoke<GetProfileResponse | IpcError>("get_profile");
+    if ("error" in result) {
+      // Профиль повреждён — нужно удалить
+      logger.error(MODULE_NAME, `Профиль повреждён: ${result.error}`);
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Сбросить повреждённый профиль (удалить profile.json).
+ * Используется при обнаружении повреждённого файла для повторной регистрации.
+ */
+export async function resetProfile(): Promise<void> {
+  logger.debug(MODULE_NAME, "Сброс повреждённого профиля");
+  try {
+    const result = await invoke<IpcSuccess | IpcError>("reset_profile");
+    if ("error" in result) {
+      logger.error(MODULE_NAME, `resetProfile вернул ошибку: ${result.error}`);
+      throw new Error(result.error);
+    }
+    logger.info(MODULE_NAME, "Повреждённый профиль удалён");
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    logger.error(MODULE_NAME, `Ошибка при сбросе профиля: ${message}`);
+    throw new Error(message);
   }
 }
 

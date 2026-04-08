@@ -13,6 +13,7 @@ pub fn run() {
             commands::auth::register_user,
             commands::auth::verify_pin,
             commands::auth::change_pin,
+            commands::auth::reset_profile,
             commands::profile::get_profile,
             commands::profile::update_profile,
         ])

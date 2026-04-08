@@ -49,6 +49,16 @@ pub fn check_registration(app: tauri::AppHandle) -> Result<RegistrationStatus, S
     Ok(RegistrationStatus { registered })
 }
 
+/// Удалить повреждённый профиль для повторной регистрации
+#[tauri::command]
+pub fn reset_profile(app: tauri::AppHandle) -> Result<serde_json::Value, String> {
+    let path = profile_path(&app);
+    if path.exists() {
+        std::fs::remove_file(&path).map_err(|e| format!("Не удалось удалить профиль: {e}"))?;
+    }
+    Ok(serde_json::json!({ "success": true }))
+}
+
 // ============================================================================
 // register_user
 // ============================================================================

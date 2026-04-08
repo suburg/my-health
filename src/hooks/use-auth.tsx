@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import * as authService from "../services/auth-service";
+import { resetProfile } from "../services/auth-service";
 import { logger } from "../lib/logger";
 
 const MODULE_NAME = "use-auth";
@@ -153,6 +154,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
     dispatch({ type: "AUTH_INIT_START" });
     try {
       const isRegistered = await authService.checkRegistration();
+
+      // Если профиль существует — проверить целостность
+      if (isRegistered) {
+        const isValid = await authService.validateProfileIntegrity();
+        if (!isValid) {
+          logger.warn(MODULE_NAME, "Профиль повреждён — сброс для повторной регистрации");
+          await resetProfile();
+          dispatch({ type: "AUTH_INIT_SUCCESS", payload: { isRegistered: false } });
+          return;
+        }
+      }
+
       dispatch({ type: "AUTH_INIT_SUCCESS", payload: { isRegistered } });
       logger.debug(MODULE_NAME, `Инициализация: регистрация = ${isRegistered}`);
     } catch (error) {

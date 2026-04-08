@@ -1,10 +1,12 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { AuthProvider, useAuth } from "./hooks/use-auth";
 import { RegistrationForm } from "./components/registration/RegistrationForm";
 import { PinLoginForm } from "./components/pin-login/PinLoginForm";
 import { MainScreen } from "./components/main-screen/MainScreen";
 import { ProfileForm } from "./components/profile/ProfileForm";
 import { PinChangeForm } from "./components/pin-change/PinChangeForm";
+import { logger } from "./lib/logger";
+import { configManager } from "./config/app-config";
 
 /**
  * Типы экранов для навигации внутри приложения.
@@ -35,9 +37,11 @@ function AppRouter() {
   }, [logout]);
 
   // При выходе сбросить экран на основной (для следующего входа)
-  if (!isAuthenticated) {
-    setCurrentScreen("main");
-  }
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setCurrentScreen("main");
+    }
+  }, [isAuthenticated]);
 
   if (isLoading) {
     return (
@@ -81,6 +85,14 @@ function AppRouter() {
 }
 
 function App() {
+  // Инициализация логгера при старте
+  useEffect(() => {
+    configManager
+      .isDebug()
+      .then((debug) => logger.init(debug))
+      .catch((err) => console.error("Ошибка инициализации конфигурации:", err));
+  }, []);
+
   return (
     <AuthProvider>
       <AppRouter />
