@@ -82,7 +82,7 @@ export interface CheckRegistrationResponse {
 
 // --- Общие ---
 
-export type IpcResponse<T> = T & { error?: never } | IpcError;
+export type IpcResponse<T> = (T & { error?: never }) | IpcError;
 
 export interface IpcError {
   error: string;

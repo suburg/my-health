@@ -13,9 +13,7 @@ function isValidDate(dateStr: string): boolean {
   const date = new Date(Date.UTC(year, month - 1, day));
 
   return (
-    date.getUTCFullYear() === year &&
-    date.getUTCMonth() === month - 1 &&
-    date.getUTCDate() === day
+    date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
   );
 }
 
@@ -23,9 +21,7 @@ function isValidDate(dateStr: string): boolean {
 // Пин-код
 // ============================================================================
 
-export const pinSchema = z
-  .string()
-  .regex(/^\d{4,6}$/, "Пин-код должен содержать от 4 до 6 цифр");
+export const pinSchema = z.string().regex(/^\d{4,6}$/, "Пин-код должен содержать от 4 до 6 цифр");
 
 export const loginSchema = z.object({
   pin: pinSchema,
@@ -48,29 +44,25 @@ export type ChangePinInput = z.infer<typeof changePinSchema>;
 // Регистрация (полная форма)
 // ============================================================================
 
-export const profileSchema = z.object({
-  lastName: z
-    .string()
-    .min(1, "Фамилия обязательна")
-    .max(100, "Фамилия не более 100 символов"),
-  firstName: z
-    .string()
-    .min(1, "Имя обязательное")
-    .max(100, "Имя не более 100 символов"),
-  dateOfBirth: z
-    .string()
-    .refine(isValidDate, "Некорректная дата. Формат: ГГГГ-ММ-ДД")
-    .refine(
-      (date) => new Date(date + "T00:00:00Z") <= new Date(),
-      "Дата рождения не может быть в будущем",
-    ),
-  sex: z.enum(["male", "female"], { message: "Выберите пол" }),
-  pin: pinSchema,
-  pinConfirm: pinSchema,
-}).refine((data) => data.pin === data.pinConfirm, {
-  message: "Пин-коды не совпадают",
-  path: ["pinConfirm"],
-});
+export const profileSchema = z
+  .object({
+    lastName: z.string().min(1, "Фамилия обязательна").max(100, "Фамилия не более 100 символов"),
+    firstName: z.string().min(1, "Имя обязательное").max(100, "Имя не более 100 символов"),
+    dateOfBirth: z
+      .string()
+      .refine(isValidDate, "Некорректная дата. Формат: ГГГГ-ММ-ДД")
+      .refine(
+        (date) => new Date(date + "T00:00:00Z") <= new Date(),
+        "Дата рождения не может быть в будущем",
+      ),
+    sex: z.enum(["male", "female"], { message: "Выберите пол" }),
+    pin: pinSchema,
+    pinConfirm: pinSchema,
+  })
+  .refine((data) => data.pin === data.pinConfirm, {
+    message: "Пин-коды не совпадают",
+    path: ["pinConfirm"],
+  });
 
 export type ProfileInput = z.infer<typeof profileSchema>;
 

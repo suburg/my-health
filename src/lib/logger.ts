@@ -71,9 +71,7 @@ class Logger {
     const line = `[${timestamp}] [${level.toUpperCase()}] [${module}] ${message}`;
 
     // Всегда выводим в консоль
-    console[level === "error" ? "error" : level === "warn" ? "warn" : "log"](
-      line,
-    );
+    console[level === "error" ? "error" : level === "warn" ? "warn" : "log"](line);
 
     // Если включён debug — пишем в файл
     if (this.enabled) {
