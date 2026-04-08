@@ -24,7 +24,7 @@
   firstName: string;   // 1–100 символов
   dateOfBirth: string; // ISO 8601, не в будущем
   sex: "male" | "female";
-  pin: string;         // 4–6 цифр
+  pin: string;         // ровно 4 цифры
 }
 ```
 
@@ -43,7 +43,7 @@
 **Request**:
 ```typescript
 {
-  pin: string; // 4–6 цифр
+  pin: string; // ровно 4 цифры
 }
 ```
 
@@ -63,7 +63,7 @@
 ```typescript
 {
   currentPin: string;  // текущий пин-код
-  newPin: string;      // новый пин-код (4–6 цифр)
+  newPin: string;      // новый пин-код (ровно 4 цифры)
 }
 ```
 

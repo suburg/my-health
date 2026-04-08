@@ -21,7 +21,7 @@ function isValidDate(dateStr: string): boolean {
 // Пин-код
 // ============================================================================
 
-export const pinSchema = z.string().regex(/^\d{4,6}$/, "Пин-код должен содержать от 4 до 6 цифр");
+export const pinSchema = z.string().regex(/^\d{4}$/, "Пин-код должен содержать ровно 4 цифры");
 
 export const loginSchema = z.object({
   pin: pinSchema,

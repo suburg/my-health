@@ -3,8 +3,8 @@ import { useAuth } from "../../hooks/use-auth";
 import type { Sex } from "../../types";
 
 interface RegistrationFormData {
-  lastName: string;
   firstName: string;
+  lastName: string;
   dateOfBirth: string;
   sex: Sex | "";
   pin: string;
@@ -12,8 +12,8 @@ interface RegistrationFormData {
 }
 
 const initialFormData: RegistrationFormData = {
-  lastName: "",
   firstName: "",
+  lastName: "",
   dateOfBirth: "",
   sex: "",
   pin: "",
@@ -29,11 +29,9 @@ export function RegistrationForm() {
 
   const handleChange = (field: keyof RegistrationFormData, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
-    // Очистка ошибки поля при вводе
     if (fieldErrors[field]) {
       setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
     }
-    // Очистка общей ошибки при изменении любого поля
     if (error) {
       clearError();
     }
@@ -42,20 +40,32 @@ export function RegistrationForm() {
   const validate = (): boolean => {
     const errors: Partial<Record<keyof RegistrationFormData, string>> = {};
 
-    if (!form.lastName.trim()) {
-      errors.lastName = "Фамилия обязательна";
-    }
     if (!form.firstName.trim()) {
       errors.firstName = "Имя обязательно";
     }
-    if (!form.dateOfBirth) {
-      errors.dateOfBirth = "Дата рождения обязательна";
+    if (!form.lastName.trim()) {
+      errors.lastName = "Фамилия обязательна";
+    }
+    if (!/^\d{2}\.\d{2}\.\d{4}$/.test(form.dateOfBirth)) {
+      errors.dateOfBirth = "Введите дату в формате ДД.ММ.ГГГГ";
+    } else {
+      // Проверка корректности даты
+      const [dd, mm, yyyy] = form.dateOfBirth.split(".").map(Number);
+      const date = new Date(Date.UTC(yyyy, mm - 1, dd));
+      if (
+        date.getUTCFullYear() !== yyyy ||
+        date.getUTCMonth() !== mm - 1 ||
+        date.getUTCDate() !== dd ||
+        date > new Date()
+      ) {
+        errors.dateOfBirth = "Некорректная дата";
+      }
     }
     if (!form.sex) {
       errors.sex = "Выберите пол";
     }
-    if (!/^\d{4,6}$/.test(form.pin)) {
-      errors.pin = "Пин-код должен содержать от 4 до 6 цифр";
+    if (!/^\d{4}$/.test(form.pin)) {
+      errors.pin = "Пин-код должен содержать ровно 4 цифры";
     }
     if (form.pin !== form.pinConfirm) {
       errors.pinConfirm = "Пин-коды не совпадают";
@@ -72,11 +82,17 @@ export function RegistrationForm() {
       return;
     }
 
+    // Конвертируем ДД.ММ.ГГГГ → YYYY-MM-DD для бэкенда
+    const toIsoDate = (d: string) => {
+      const [dd, mm, yyyy] = d.split(".");
+      return `${yyyy}-${mm}-${dd}`;
+    };
+
     try {
       await register({
         lastName: form.lastName.trim(),
         firstName: form.firstName.trim(),
-        dateOfBirth: form.dateOfBirth,
+        dateOfBirth: toIsoDate(form.dateOfBirth),
         sex: form.sex,
         pin: form.pin,
         pinConfirm: form.pinConfirm,
@@ -87,8 +103,8 @@ export function RegistrationForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <div className="w-full max-w-md space-y-8">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
+      <div className="w-full max-w-md space-y-6">
         {/* Заголовок */}
         <div className="text-center">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Регистрация</h1>
@@ -98,29 +114,7 @@ export function RegistrationForm() {
         </div>
 
         {/* Форма */}
-        <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-          {/* Фамилия */}
-          <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-foreground">
-              Фамилия
-            </label>
-            <input
-              id="lastName"
-              type="text"
-              value={form.lastName}
-              onChange={(e) => handleChange("lastName", e.target.value)}
-              className={`mt-1 flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${
-                fieldErrors.lastName ? "border-destructive" : "border-input"
-              }`}
-              placeholder="Иванов"
-              maxLength={100}
-              disabled={isLoading}
-            />
-            {fieldErrors.lastName && (
-              <p className="mt-1 text-sm text-destructive">{fieldErrors.lastName}</p>
-            )}
-          </div>
-
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           {/* Имя */}
           <div>
             <label htmlFor="firstName" className="block text-sm font-medium text-foreground">
@@ -143,6 +137,28 @@ export function RegistrationForm() {
             )}
           </div>
 
+          {/* Фамилия */}
+          <div>
+            <label htmlFor="lastName" className="block text-sm font-medium text-foreground">
+              Фамилия
+            </label>
+            <input
+              id="lastName"
+              type="text"
+              value={form.lastName}
+              onChange={(e) => handleChange("lastName", e.target.value)}
+              className={`mt-1 flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${
+                fieldErrors.lastName ? "border-destructive" : "border-input"
+              }`}
+              placeholder="Иванов"
+              maxLength={100}
+              disabled={isLoading}
+            />
+            {fieldErrors.lastName && (
+              <p className="mt-1 text-sm text-destructive">{fieldErrors.lastName}</p>
+            )}
+          </div>
+
           {/* Дата рождения */}
           <div>
             <label htmlFor="dateOfBirth" className="block text-sm font-medium text-foreground">
@@ -150,14 +166,25 @@ export function RegistrationForm() {
             </label>
             <input
               id="dateOfBirth"
-              type="date"
+              type="text"
               value={form.dateOfBirth}
-              onChange={(e) => handleChange("dateOfBirth", e.target.value)}
-              max={new Date().toISOString().split("T")[0]}
+              onChange={(e) => {
+                // Только цифры, максимум 8 штук
+                const digits = e.target.value.replace(/\D/g, "").slice(0, 8);
+                // Расставляем точки: ДД.ММ.ГГГГ
+                let formatted = "";
+                for (let i = 0; i < digits.length; i++) {
+                  if (i === 2 || i === 4) formatted += ".";
+                  formatted += digits[i];
+                }
+                handleChange("dateOfBirth", formatted);
+              }}
+              placeholder="ДД.ММ.ГГГГ"
               className={`mt-1 flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${
                 fieldErrors.dateOfBirth ? "border-destructive" : "border-input"
               }`}
               disabled={isLoading}
+              maxLength={10}
             />
             {fieldErrors.dateOfBirth && (
               <p className="mt-1 text-sm text-destructive">{fieldErrors.dateOfBirth}</p>
@@ -201,14 +228,17 @@ export function RegistrationForm() {
                 const digitsOnly = e.target.value.replace(/\D/g, "");
                 handleChange("pin", digitsOnly);
               }}
-              className={`mt-1 flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${
+              className={`mt-1 flex h-14 w-48 mx-auto rounded-md border bg-background px-3 py-2 text-center text-2xl tracking-[0.5em] outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono ${
                 fieldErrors.pin ? "border-destructive" : "border-input"
               }`}
-              placeholder="4–6 цифр"
-              maxLength={6}
+              placeholder="••••"
+              maxLength={4}
               disabled={isLoading}
+              autoComplete="off"
             />
-            {fieldErrors.pin && <p className="mt-1 text-sm text-destructive">{fieldErrors.pin}</p>}
+            {fieldErrors.pin && (
+              <p className="mt-1 text-center text-sm text-destructive">{fieldErrors.pin}</p>
+            )}
           </div>
 
           {/* Подтверждение пин-кода */}
@@ -225,15 +255,18 @@ export function RegistrationForm() {
                 const digitsOnly = e.target.value.replace(/\D/g, "");
                 handleChange("pinConfirm", digitsOnly);
               }}
-              className={`mt-1 flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${
+              className={`mt-1 flex h-14 w-48 mx-auto rounded-md border bg-background px-3 py-2 text-center text-2xl tracking-[0.5em] outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono ${
                 fieldErrors.pinConfirm ? "border-destructive" : "border-input"
               }`}
-              placeholder="Повторите пин-код"
-              maxLength={6}
+              placeholder="••••"
+              maxLength={4}
               disabled={isLoading}
+              autoComplete="off"
             />
             {fieldErrors.pinConfirm && (
-              <p className="mt-1 text-sm text-destructive">{fieldErrors.pinConfirm}</p>
+              <p className="mt-1 text-center text-sm text-destructive">
+                {fieldErrors.pinConfirm}
+              </p>
             )}
           </div>
 

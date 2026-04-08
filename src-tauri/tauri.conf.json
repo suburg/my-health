@@ -12,9 +12,11 @@
   "app": {
     "windows": [
       {
-        "title": "tauri-app",
-        "width": 800,
-        "height": 600
+        "title": "my-health",
+        "width": 480,
+        "height": 720,
+        "resizable": false,
+        "center": true
       }
     ],
     "security": {

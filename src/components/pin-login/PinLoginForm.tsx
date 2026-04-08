@@ -7,44 +7,30 @@ export function PinLoginForm() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
-    if (!/^\d{4,6}$/.test(pin)) {
-      return; // Валидация — покажет ошибку через поле
-    }
-
+    if (!/^\d{4}$/.test(pin)) return;
     try {
       await login(pin);
     } catch {
-      // Ошибка уже обработана через useAuth.error — очищаем поле
       setPin("");
     }
   };
 
   const handlePinChange = (value: string) => {
-    // Только цифры
-    const digitsOnly = value.replace(/\D/g, "");
-    setPin(digitsOnly);
-
-    // Очистка ошибки при вводе
-    if (error) {
-      clearError();
-    }
+    setPin(value);
+    if (error) clearError();
   };
 
-  const isValid = /^\d{4,6}$/.test(pin);
+  const isValid = /^\d{4}$/.test(pin);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-sm space-y-8">
-        {/* Заголовок */}
         <div className="text-center">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Вход</h1>
           <p className="mt-2 text-sm text-muted-foreground">Введите ваш пин-код</p>
         </div>
 
-        {/* Форма */}
         <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-          {/* Пин-код */}
           <div>
             <label htmlFor="pin" className="sr-only">
               Пин-код
@@ -55,26 +41,27 @@ export function PinLoginForm() {
               inputMode="numeric"
               autoComplete="current-password"
               value={pin}
-              onChange={(e) => handlePinChange(e.target.value)}
-              className={`mx-auto flex h-14 w-48 rounded-md border bg-background px-3 py-2 text-center text-2xl tracking-widest outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${
+              onChange={(e) => {
+                const digitsOnly = e.target.value.replace(/\D/g, "");
+                handlePinChange(digitsOnly);
+              }}
+              className={`mt-1 flex h-14 w-48 mx-auto rounded-md border bg-background px-3 py-2 text-center text-2xl tracking-[0.5em] outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono ${
                 error ? "border-destructive" : "border-input"
               }`}
               placeholder="••••"
-              maxLength={6}
+              maxLength={4}
               disabled={isLoading}
               autoFocus
             />
-            <p className="mt-2 text-center text-xs text-muted-foreground">4–6 цифр</p>
+            <p className="mt-2 text-center text-xs text-muted-foreground">4 цифры</p>
           </div>
 
-          {/* Ошибка */}
           {error && (
             <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3">
               <p className="text-sm text-destructive">{error}</p>
             </div>
           )}
 
-          {/* Кнопка */}
           <button
             type="submit"
             disabled={isLoading || !isValid}

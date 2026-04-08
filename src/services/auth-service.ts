@@ -64,7 +64,7 @@ export async function registerUser(data: unknown): Promise<void> {
 
   try {
     const result = await invoke<IpcSuccess | IpcError>("register_user", {
-      requestData,
+      request: requestData,
     });
 
     if ("error" in result) {
@@ -74,8 +74,9 @@ export async function registerUser(data: unknown): Promise<void> {
 
     logger.info(MODULE_NAME, "Пользователь успешно зарегистрирован");
   } catch (error) {
-    logger.error(MODULE_NAME, `Ошибка при вызове registerUser: ${error}`);
-    throw error;
+    const message = error instanceof Error ? error.message : String(error);
+    logger.error(MODULE_NAME, `Ошибка при вызове registerUser: ${message}`);
+    throw new Error(message);
   }
 }
 
@@ -100,7 +101,7 @@ export async function verifyPin(pin: string): Promise<string> {
 
   try {
     const result = await invoke<VerifyPinResponse | IpcError>("verify_pin", {
-      requestData,
+      request: requestData,
     });
 
     if ("error" in result) {
@@ -111,8 +112,9 @@ export async function verifyPin(pin: string): Promise<string> {
     logger.info(MODULE_NAME, `Успешная проверка пин-кода для пользователя: ${result.firstName}`);
     return result.firstName;
   } catch (error) {
-    logger.error(MODULE_NAME, `Ошибка при вызове verifyPin: ${error}`);
-    throw error;
+    const message = error instanceof Error ? error.message : String(error);
+    logger.error(MODULE_NAME, `Ошибка при вызове verifyPin: ${message}`);
+    throw new Error(message);
   }
 }
 
@@ -142,7 +144,7 @@ export async function changePin(currentPin: string, newPin: string): Promise<voi
     }
 
     const result = await invoke<IpcSuccess | IpcError>("change_pin", {
-      requestData,
+      request: requestData,
     });
 
     if ("error" in result) {
@@ -152,7 +154,8 @@ export async function changePin(currentPin: string, newPin: string): Promise<voi
 
     logger.info(MODULE_NAME, "Пин-код успешно изменён");
   } catch (error) {
-    logger.error(MODULE_NAME, `Ошибка при вызове changePin: ${error}`);
-    throw error;
+    const message = error instanceof Error ? error.message : String(error);
+    logger.error(MODULE_NAME, `Ошибка при вызове changePin: ${message}`);
+    throw new Error(message);
   }
 }

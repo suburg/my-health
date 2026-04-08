@@ -55,6 +55,7 @@ pub fn check_registration(app: tauri::AppHandle) -> Result<RegistrationStatus, S
 
 /// Входные данные для регистрации
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RegisterUserRequest {
     pub last_name: String,
     pub first_name: String,
@@ -139,8 +140,8 @@ fn validate_profile(
 }
 
 fn validate_pin(pin: &str) -> Result<(), String> {
-    if !pin.chars().all(|c| c.is_ascii_digit()) || pin.len() < 4 || pin.len() > 6 {
-        return Err("VALIDATION_ERROR: Пин-код должен содержать от 4 до 6 цифр".into());
+    if !pin.chars().all(|c| c.is_ascii_digit()) || pin.len() != 4 {
+        return Err("VALIDATION_ERROR: Пин-код должен содержать ровно 4 цифры".into());
     }
     Ok(())
 }
