@@ -1,26 +1,23 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/use-auth";
 
 export function PinLoginForm() {
   const { login, isLoading, error, clearError } = useAuth();
   const [pin, setPin] = useState("");
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!/^\d{4}$/.test(pin)) return;
-    try {
-      await login(pin);
-    } catch {
-      setPin("");
+  // Авто-вход при вводе 4 цифр
+  useEffect(() => {
+    if (pin.length === 4 && !isLoading) {
+      login(pin).catch(() => {
+        setPin("");
+      });
     }
-  };
+  }, [pin, isLoading, login]);
 
   const handlePinChange = (value: string) => {
     setPin(value);
     if (error) clearError();
   };
-
-  const isValid = /^\d{4}$/.test(pin);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
@@ -30,7 +27,7 @@ export function PinLoginForm() {
           <p className="mt-2 text-sm text-muted-foreground">Введите ваш пин-код</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+        <form onSubmit={(e) => e.preventDefault()} className="space-y-6" noValidate>
           <div>
             <label htmlFor="pin" className="sr-only">
               Пин-код
@@ -53,7 +50,9 @@ export function PinLoginForm() {
               disabled={isLoading}
               autoFocus
             />
-            <p className="mt-2 text-center text-xs text-muted-foreground">4 цифры</p>
+            {isLoading && (
+              <p className="mt-2 text-center text-xs text-muted-foreground">Вход...</p>
+            )}
           </div>
 
           {error && (
@@ -61,14 +60,6 @@ export function PinLoginForm() {
               <p className="text-sm text-destructive">{error}</p>
             </div>
           )}
-
-          <button
-            type="submit"
-            disabled={isLoading || !isValid}
-            className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-          >
-            {isLoading ? "Вход..." : "Войти"}
-          </button>
         </form>
       </div>
     </div>

@@ -72,17 +72,13 @@ export function PinChangeForm({ onSave, onCancel }: PinChangeFormProps) {
     }
   };
 
-  return (
-    <div className="mx-auto max-w-md space-y-6 p-6">
-      {/* Заголовок */}
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight text-foreground">Смена пин-кода</h2>
-        <p className="text-sm text-muted-foreground">Введите текущий и новый пин-код</p>
-      </div>
+  const isFormValid = currentPin.length === 4 && newPin.length >= 4 && newPin.length <= 6 && newPin === confirmPin;
 
-      {/* Общая ошибка */}
+  return (
+    <div className="mx-auto max-w-lg">
+      {/* Ошибка */}
       {error && (
-        <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3">
+        <div className="mb-4 rounded-md border border-destructive/50 bg-destructive/10 p-3">
           <p className="text-sm text-destructive">{error}</p>
         </div>
       )}
@@ -101,14 +97,14 @@ export function PinChangeForm({ onSave, onCancel }: PinChangeFormProps) {
             maxLength={4}
             value={currentPin}
             onChange={handleChange(setCurrentPin)}
-            className={`mt-1 flex h-14 w-48 mx-auto rounded-md border bg-background px-3 py-2 text-center text-2xl tracking-[0.5em] outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono ${
+            className={`mt-1 flex h-14 w-48 rounded-md border bg-background px-3 py-2 text-center text-2xl tracking-[0.5em] outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono ${
               currentPinError ? "border-destructive" : "border-input"
             }`}
             placeholder="••••"
             autoComplete="off"
           />
           {currentPinError && (
-            <p className="mt-1 text-center text-sm text-destructive">{currentPinError}</p>
+            <p className="mt-1 text-sm text-destructive">{currentPinError}</p>
           )}
         </div>
 
@@ -124,14 +120,14 @@ export function PinChangeForm({ onSave, onCancel }: PinChangeFormProps) {
             maxLength={6}
             value={newPin}
             onChange={handleChange(setNewPin)}
-            className={`mt-1 flex h-14 w-48 mx-auto rounded-md border bg-background px-3 py-2 text-center text-2xl tracking-[0.5em] outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono ${
+            className={`mt-1 flex h-14 w-48 rounded-md border bg-background px-3 py-2 text-center text-2xl tracking-[0.5em] outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono ${
               newPinError ? "border-destructive" : "border-input"
             }`}
             placeholder="••••"
             autoComplete="off"
           />
           {newPinError && (
-            <p className="mt-1 text-center text-sm text-destructive">{newPinError}</p>
+            <p className="mt-1 text-sm text-destructive">{newPinError}</p>
           )}
         </div>
 
@@ -147,20 +143,20 @@ export function PinChangeForm({ onSave, onCancel }: PinChangeFormProps) {
             maxLength={6}
             value={confirmPin}
             onChange={handleChange(setConfirmPin)}
-            className={`mt-1 flex h-14 w-48 mx-auto rounded-md border bg-background px-3 py-2 text-center text-2xl tracking-[0.5em] outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono ${
+            className={`mt-1 flex h-14 w-48 rounded-md border bg-background px-3 py-2 text-center text-2xl tracking-[0.5em] outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono ${
               confirmPinError ? "border-destructive" : "border-input"
             }`}
             placeholder="••••"
             autoComplete="off"
           />
           {confirmPinError && (
-            <p className="mt-1 text-center text-sm text-destructive">{confirmPinError}</p>
+            <p className="mt-1 text-sm text-destructive">{confirmPinError}</p>
           )}
         </div>
       </div>
 
       {/* Кнопки действий */}
-      <div className="flex justify-end gap-3 pt-4">
+      <div className="flex gap-3 pt-4">
         <button
           onClick={onCancel}
           className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium ring-offset-background transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -169,7 +165,7 @@ export function PinChangeForm({ onSave, onCancel }: PinChangeFormProps) {
         </button>
         <button
           onClick={handleSave}
-          disabled={isSaving}
+          disabled={isSaving || !isFormValid}
           className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
         >
           {isSaving ? "Сохранение..." : "Сохранить"}

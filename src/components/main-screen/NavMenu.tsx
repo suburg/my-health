@@ -34,12 +34,25 @@ export function NavMenu({ items, isCollapsed, onToggle }: NavMenuProps) {
         isCollapsed ? "w-16" : "w-64"
       }`}
     >
-      {/* Кнопка сворачивания/разворачивания */}
+      {/* Заголовок и кнопка сворачивания */}
       <div className="flex items-center justify-between px-3 py-4">
         {!isCollapsed && (
-          <h2 className="text-sm font-semibold text-card-foreground">
-            Навигация
-          </h2>
+          <div className="flex items-center gap-2">
+            {/* Placeholder для логотипа */}
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-muted">
+              <svg
+                className="h-4 w-4 text-muted-foreground"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+              </svg>
+            </div>
+            <h2 className="text-sm font-semibold text-card-foreground">
+              Моё Здоровье
+            </h2>
+          </div>
         )}
         <button
           onClick={onToggle}
@@ -82,11 +95,9 @@ export function NavMenu({ items, isCollapsed, onToggle }: NavMenuProps) {
           <button
             key={index}
             onClick={item.onClick}
-            className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors ${
-              item.danger
-                ? "text-destructive hover:bg-destructive/10"
-                : "text-card-foreground hover:bg-accent"
-            } ${isCollapsed ? "justify-center" : ""}`}
+            className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm text-card-foreground transition-colors hover:bg-accent ${
+              isCollapsed ? "justify-center" : ""
+            }`}
             title={isCollapsed ? item.label : undefined}
           >
             <span className="h-5 w-5 shrink-0">{item.icon}</span>

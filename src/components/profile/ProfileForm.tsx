@@ -167,16 +167,10 @@ export function ProfileForm({ onSave, onCancel, onChangePin }: ProfileFormProps)
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-6 p-6">
-      {/* Заголовок */}
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight text-foreground">Профиль</h2>
-        <p className="text-sm text-muted-foreground">Просмотр и редактирование данных</p>
-      </div>
-
+    <div className="mx-auto max-w-lg">
       {/* Ошибка */}
       {error && (
-        <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+        <div className="mb-4 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
           {error}
         </div>
       )}

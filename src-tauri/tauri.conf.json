@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "my-health",
+  "productName": "Моё Здоровье",
   "version": "0.1.0",
   "identifier": "com.myhealth.app",
   "build": {
@@ -13,7 +13,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "my-health",
+        "title": "Моё Здоровье",
         "width": 1280,
         "height": 720,
         "minWidth": 800,
