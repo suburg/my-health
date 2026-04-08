@@ -1,2 +1,1 @@
-// Пользовательские хуки
-// use-auth и другие
+export { useAuth, AuthProvider } from "./use-auth";

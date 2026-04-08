@@ -67,7 +67,7 @@ Tauri-приложение: бэкенд в `src-tauri/`, фронтенд в `s
 #### Frontend — сервисы и состояние
 
 - [x] T017 [P] [US1] Реализовать auth-сервис в `src/services/auth-service.ts` (обёртка IPC-вызовов: checkRegistration, registerUser, verifyPin)
-- [ ] T018 [US1] Реализовать хук `src/hooks/use-auth.ts` (React Context + useReducer: isAuthenticated, isLoading, login, logout)
+- [x] T018 [US1] Реализовать хук `src/hooks/use-auth.ts` (React Context + useReducer: isAuthenticated, isLoading, login, logout)
 
 #### Frontend — компоненты
 
