@@ -23,8 +23,8 @@ Tauri-приложение: бэкенд в `src-tauri/`, фронтенд в `s
 
 **Цель**: Зависимости и базовая структура модуля
 
-- [ ] T001 Установить зависимость `recharts` через `npm install recharts`
-- [ ] T002 [P] Создать структуру каталогов: `src/components/health/`, `src-tauri/src/storage/health_store.rs`
+- [x] T001 Установить зависимость `recharts` через `npm install recharts`
+- [x] T002 [P] Создать структуру каталогов: `src/components/health/`, `src-tauri/src/storage/health_store.rs`
 
 ---
 
@@ -34,12 +34,12 @@ Tauri-приложение: бэкенд в `src-tauri/`, фронтенд в `s
 
 **⚠️ КРИТИЧНО**: Ни одна пользовательская история не может начаться, пока эта фаза не завершена
 
-- [ ] T003 [P] Определить TypeScript-типы в `src/types/index.ts`: HealthEntry, MetricValue, MetricDefinition, HealthEntryFile, MetricConfigFile, IPC-ответы
-- [ ] T004 [P] Создать zod-схемы валидации в `src/lib/validations.ts`: healthEntrySchema, metricDefinitionSchema, compoundValueSchema, durationValueSchema
-- [ ] T005 [P] Реализовать Rust-модуль хранилища `src-tauri/src/storage/health_store.rs` (чтение/запись health.json, атомарная запись, получение по дате)
-- [ ] T006 [P] Реализовать Rust-модуль `src-tauri/src/storage/mod.rs` (экспорт health_store)
-- [ ] T007 [P] Реализовать загрузчик конфигурации показателей `src/services/metric-config.ts` (загрузка metric-config.json, кэширование, доступ по key/order/category)
-- [ ] T008 [P] Создать дефолтную конфигурацию показателей — массив MetricDefinition из 9 показателей в `src/services/metric-config.ts` (рост, вес, пульс, давление, шаги, сон, ккал, этажи, отжимания)
+- [x] T003 [P] Определить TypeScript-типы в `src/types/index.ts`: HealthEntry, MetricValue, MetricDefinition, HealthEntryFile, MetricConfigFile, IPC-ответы
+- [x] T004 [P] Создать zod-схемы валидации в `src/lib/validations.ts`: healthEntrySchema, metricDefinitionSchema, compoundValueSchema, durationValueSchema
+- [x] T005 [P] Реализовать Rust-модуль хранилища `src-tauri/src/storage/health_store.rs` (чтение/запись health.json, атомарная запись, получение по дате)
+- [x] T006 [P] Реализовать Rust-модуль `src-tauri/src/storage/mod.rs` (экспорт health_store)
+- [x] T007 [P] Реализовать загрузчик конфигурации показателей `src/services/metric-config.ts` (загрузка metric-config.json, кэширование, доступ по key/order/category)
+- [x] T008 [P] Создать дефолтную конфигурацию показателей — массив MetricDefinition из 9 показателей в `src/services/metric-config.ts` (рост, вес, пульс, давление, шаги, сон, ккал, этажи, отжимания)
 
 **Контрольная точка**: Фундамент готов — можно начинать реализацию пользовательских историй параллельно
 

@@ -102,3 +102,97 @@ export const updateProfileSchema = z
   );
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+
+// ============================================================================
+// Health Data (002-health-data-entry)
+// ============================================================================
+
+// --- Значения показателей ---
+
+export const numberValueSchema = z.object({
+  value: z.number().nullable(),
+});
+
+export const compoundValueSchema = z.object({
+  systolic: z.number().nullable(),
+  diastolic: z.number().nullable(),
+});
+
+export const durationValueSchema = z.object({
+  minutes: z.number().nullable(),
+});
+
+export const metricValueSchema = z.union([
+  numberValueSchema,
+  compoundValueSchema,
+  durationValueSchema,
+]);
+
+// --- Дата замера ---
+
+export const metricDateSchema = z
+  .string()
+  .refine(isValidDate, "Некорректная дата. Формат: ГГГГ-ММ-ДД");
+
+// --- Замер здоровья ---
+
+export const healthEntrySchema = z.object({
+  date: metricDateSchema,
+  metrics: z.record(z.string(), metricValueSchema),
+});
+
+export type HealthEntryInput = z.infer<typeof healthEntrySchema>;
+
+// --- Определение показателя ---
+
+export const metricRangeSchema = z.object({
+  min: z.number(),
+  max: z.number(),
+});
+
+export const metricDefinitionSchema = z.object({
+  key: z.string().regex(/^[a-z_]+$/, "Ключ показателя: латиница и подчёркивание"),
+  label: z.string().min(1, "Название показателя обязательно"),
+  unit: z.string().min(1, "Единица измерения обязательна"),
+  type: z.enum(["number", "compound", "duration"]),
+  range: z.record(z.string(), metricRangeSchema),
+  autofill: z.boolean(),
+  order: z.number().int().nonnegative(),
+  category: z.string().min(1),
+  compoundFields: z.array(z.string()).optional(),
+  compoundLabels: z.array(z.string()).optional(),
+});
+
+export type MetricDefinitionInput = z.infer<typeof metricDefinitionSchema>;
+
+// --- Конфигурация показателей ---
+
+export const metricConfigSchema = z.object({
+  schemaVersion: z.number().int().positive(),
+  metrics: z.array(metricDefinitionSchema),
+});
+
+// --- Валидация单个 значения (для inline-редактирования) ---
+
+export function validateMetricValue(
+  value: unknown,
+  def: { range: Record<string, { min: number; max: number }> },
+): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+
+  if (value === null || value === undefined) {
+    return { valid: true, errors: [] };
+  }
+
+  for (const [field, range] of Object.entries(def.range)) {
+    const val = (value as Record<string, unknown>)[field] as number | null | undefined;
+    if (val === null || val === undefined) continue;
+    if (typeof val !== "number" || isNaN(val)) {
+      errors.push(`${field}: ожидается число`);
+    } else if (val < range.min || val > range.max) {
+      errors.push(`${field}: значение ${val} вне диапазона [${range.min}–${range.max}]`);
+    }
+  }
+
+  return { valid: errors.length === 0, errors };
+}
