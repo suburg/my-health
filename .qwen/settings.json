@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cargo check)",
+      "Bash(git rev-parse *)",
+      "Bash(npx *)",
+      "Bash(npm run *)",
+      "Bash(dir *)"
+    ]
+  },
+  "$version": 3
+}
