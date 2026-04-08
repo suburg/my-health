@@ -77,7 +77,7 @@ Tauri-приложение: бэкенд в `src-tauri/`, фронтенд в `s
 
 #### Интеграция
 
-- [ ] T022 [US1] Связать RegistrationForm → auth-service.registerUser → переход на MainScreen при успехе
+- [x] T022 [US1] Связать RegistrationForm → auth-service.registerUser → переход на MainScreen при успехе
 - [ ] T023 [US1] Связать PinLoginForm → auth-service.verifyPin → переход на MainScreen при успехе, очистка поля при ошибке
 
 **Контрольная точка**: Пользовательская история 1 полностью функциональна и тестируема независимо
