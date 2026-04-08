@@ -13,9 +13,11 @@
     "windows": [
       {
         "title": "my-health",
-        "width": 480,
+        "width": 1280,
         "height": 720,
-        "resizable": false,
+        "minWidth": 800,
+        "minHeight": 600,
+        "resizable": true,
         "center": true
       }
     ],
