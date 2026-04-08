@@ -94,7 +94,7 @@ Tauri-приложение: бэкенд в `src-tauri/`, фронтенд в `s
 
 - [x] T024 [P] [US2] Создать компонент MainScreen в `src/components/main-screen/MainScreen.tsx` (контейнер контента, меню навигации)
 - [x] T025 [P] [US2] Реализовать компонент меню (выпадающее или боковая панель) с пунктами «Профиль» и «Выход»
-- [ ] T026 [US2] Подключить MainScreen к use-auth — отображение только при isAuthenticated = true
+- [x] T026 [US2] Подключить MainScreen к use-auth — отображение только при isAuthenticated = true
 - [ ] T027 [US2] Реализовать IPC-команду `get_profile` в `src-tauri/src/commands/profile.rs` (чтение profile.json, возврат данных без pinHash)
 
 **Контрольная точка**: Пользовательские истории 1 и 2 работают независимо — после входа виден основной экран с меню
