@@ -113,7 +113,7 @@ export function calculateDeviation(
 
   // Процентное отклонение
   const pct = prevNum !== 0 ? ((diff / prevNum) * 100).toFixed(1) : "—";
-  const pctFormatted = pct !== "—" ? `${sign}${pct}%` : "—";
+  const pctFormatted = pct !== "—" ? `${sign}${Math.abs(parseFloat(pct))}%` : "—";
 
   return {
     previous: previousStr,
