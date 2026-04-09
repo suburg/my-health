@@ -215,6 +215,37 @@ struct MetricConfigFile {
     pub metrics: Vec<serde_json::Value>,
 }
 
+// ============================================================================
+// save_metric_config
+// ============================================================================
+
+/// Сохранить конфигурацию показателей.
+///
+/// Атомарно записывает metric-config.json. При следующем вызове
+/// `get_metric_config` будет возвращена эта конфигурация.
+#[tauri::command]
+pub fn save_metric_config(
+    app: tauri::AppHandle,
+    metrics: Vec<serde_json::Value>,
+) -> Result<GetMetricConfigSuccess, String> {
+    let path = metric_config_path(&app);
+
+    let config = MetricConfigFile {
+        schema_version: 1,
+        metrics,
+    };
+
+    storage::write_json(&path, &config)
+        .map_err(|e| format!("Ошибка записи metric-config.json: {e}"))?;
+
+    Ok(GetMetricConfigSuccess { success: true })
+}
+
+#[derive(Debug, Serialize)]
+pub struct GetMetricConfigSuccess {
+    pub success: bool,
+}
+
 #[derive(Debug, Serialize)]
 pub struct GetMetricConfigResponse {
     pub metrics: Vec<serde_json::Value>,

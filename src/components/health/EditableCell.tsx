@@ -176,7 +176,8 @@ function formatDisplay(
     return `${hours}ч ${minutes}м`;
   }
 
-  return "—";
+  // Неизвестный тип — fallback
+  return String(value);
 }
 
 function formatForEdit(
@@ -205,7 +206,8 @@ function formatForEdit(
     return `${hours}ч ${minutes}м`;
   }
 
-  return "";
+  // Неизвестный тип — fallback
+  return String(value ?? "");
 }
 
 function parseInput(
@@ -245,6 +247,7 @@ function parseInput(
     return null;
   }
 
+  // Неизвестный тип — не парсим
   return null;
 }
 
@@ -257,6 +260,6 @@ function getFormatHint(def: MetricDefinition): string {
     case "duration":
       return "8ч 30м";
     default:
-      return "";
+      return "Введите значение";
   }
 }

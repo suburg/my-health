@@ -21,6 +21,7 @@ pub fn run() {
             commands::health::update_entry,
             commands::health::delete_entry,
             commands::health::get_metric_config,
+            commands::health::save_metric_config,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

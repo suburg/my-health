@@ -138,10 +138,10 @@ Tauri-приложение: бэкенд в `src-tauri/`, фронтенд в `s
 
 ### Реализация для пользовательской истории 4
 
-- [ ] T031 [US4] Реализовать IPC-команду `save_metric_config` в `src-tauri/src/commands/health.rs` (запись metric-config.json, атомарная запись)
-- [ ] T032 [US4] Зарегистрировать IPC-команду в `src-tauri/src/lib.rs` (save_metric_config)
-- [ ] T033 [US4] Реализовать загрузку конфигурации с бэкенда в `src/services/metric-config.ts` (IPC get_metric_config вместо захардкоженного массива; относится к FR-013)
-- [ ] T034 [US4] Добавить валидацию и обработку неизвестных типов показателей в EditableCell (graceful fallback для будущих типов)
+- [x] T031 [US4] Реализовать IPC-команду `save_metric_config` в `src-tauri/src/commands/health.rs` (запись metric-config.json, атомарная запись)
+- [x] T032 [US4] Зарегистрировать IPC-команду в `src-tauri/src/lib.rs` (save_metric_config)
+- [x] T033 [US4] Реализовать загрузку конфигурации с бэкенда в `src/services/metric-config.ts` (IPC get_metric_config вместо захардкоженного массива; относится к FR-013)
+- [x] T034 [US4] Добавить валидацию и обработку неизвестных типов показателей в EditableCell (graceful fallback для будущих типов)
 
 **Контрольная точка**: Все 4 пользовательские истории полностью функциональны
 
