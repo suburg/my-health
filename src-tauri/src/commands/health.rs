@@ -176,28 +176,41 @@ pub fn delete_entry(
 // ============================================================================
 
 /// Получить конфигурацию показателей.
+///
+/// Если файл metric-config.json отсутствует — создаётся и заполняется
+/// значениями по умолчанию. Далее единственным источником является файл.
 #[tauri::command]
 pub fn get_metric_config(app: tauri::AppHandle) -> Result<GetMetricConfigResponse, String> {
     let path = metric_config_path(&app);
 
-    // Пробуем загрузить из файла
-    if path.exists() {
-        let config: MetricConfigData = storage::read_json(&path)
-            .map_err(|e| format!("Ошибка чтения metric-config.json: {e}"))?
-            .ok_or("metric-config.json не найден")?;
-
-        Ok(GetMetricConfigResponse { metrics: config.metrics })
-    } else {
-        // Возвращаем дефолтную конфигурацию
-        Ok(GetMetricConfigResponse {
+    // Если файла нет — создаём с дефолтными метриками
+    if !path.exists() {
+        let config = MetricConfigFile {
+            schema_version: 1,
             metrics: default_metrics(),
-        })
+        };
+        storage::write_json(&path, &config)
+            .map_err(|e| format!("Ошибка создания metric-config.json: {e}"))?;
     }
+
+    // Читаем из файла (теперь он точно существует)
+    let config: MetricConfigData = storage::read_json(&path)
+        .map_err(|e| format!("Ошибка чтения metric-config.json: {e}"))?
+        .ok_or("metric-config.json не найден после создания")?;
+
+    Ok(GetMetricConfigResponse { metrics: config.metrics })
 }
 
 #[derive(Debug, Deserialize)]
 struct MetricConfigData {
     #[allow(dead_code)]
+    pub schema_version: u32,
+    pub metrics: Vec<serde_json::Value>,
+}
+
+/// Структура для записи конфигурации в файл.
+#[derive(Debug, Serialize)]
+struct MetricConfigFile {
     pub schema_version: u32,
     pub metrics: Vec<serde_json::Value>,
 }
@@ -218,7 +231,8 @@ fn default_metrics() -> Vec<serde_json::Value> {
             "range": { "value": { "min": 100, "max": 250 } },
             "autofill": true,
             "order": 1,
-            "category": "anthropometry"
+            "category": "anthropometry",
+            "isPrimary": false
         }),
         serde_json::json!({
             "key": "weight",
@@ -228,7 +242,8 @@ fn default_metrics() -> Vec<serde_json::Value> {
             "range": { "value": { "min": 30, "max": 300 } },
             "autofill": false,
             "order": 2,
-            "category": "anthropometry"
+            "category": "anthropometry",
+            "isPrimary": true
         }),
         serde_json::json!({
             "key": "pulse",
@@ -238,7 +253,8 @@ fn default_metrics() -> Vec<serde_json::Value> {
             "range": { "value": { "min": 30, "max": 200 } },
             "autofill": false,
             "order": 3,
-            "category": "cardio"
+            "category": "cardio",
+            "isPrimary": true
         }),
         serde_json::json!({
             "key": "bloodPressure",
@@ -253,7 +269,8 @@ fn default_metrics() -> Vec<serde_json::Value> {
             },
             "autofill": false,
             "order": 4,
-            "category": "cardio"
+            "category": "cardio",
+            "isPrimary": true
         }),
         serde_json::json!({
             "key": "steps",
@@ -263,7 +280,8 @@ fn default_metrics() -> Vec<serde_json::Value> {
             "range": { "value": { "min": 0, "max": 100000 } },
             "autofill": false,
             "order": 5,
-            "category": "activity"
+            "category": "activity",
+            "isPrimary": false
         }),
         serde_json::json!({
             "key": "sleep",
@@ -273,7 +291,8 @@ fn default_metrics() -> Vec<serde_json::Value> {
             "range": { "minutes": { "min": 60, "max": 900 } },
             "autofill": false,
             "order": 6,
-            "category": "sleep"
+            "category": "sleep",
+            "isPrimary": false
         }),
         serde_json::json!({
             "key": "calories",
@@ -283,7 +302,8 @@ fn default_metrics() -> Vec<serde_json::Value> {
             "range": { "value": { "min": 500, "max": 10000 } },
             "autofill": false,
             "order": 7,
-            "category": "activity"
+            "category": "activity",
+            "isPrimary": false
         }),
         serde_json::json!({
             "key": "floors",
@@ -293,7 +313,8 @@ fn default_metrics() -> Vec<serde_json::Value> {
             "range": { "value": { "min": 0, "max": 100 } },
             "autofill": false,
             "order": 8,
-            "category": "stress"
+            "category": "stress",
+            "isPrimary": false
         }),
         serde_json::json!({
             "key": "pushups",
@@ -303,7 +324,8 @@ fn default_metrics() -> Vec<serde_json::Value> {
             "range": { "value": { "min": 0, "max": 200 } },
             "autofill": false,
             "order": 9,
-            "category": "stress"
+            "category": "stress",
+            "isPrimary": false
         }),
     ]
 }

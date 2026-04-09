@@ -1,13 +1,13 @@
-import { useState, useCallback, useEffect } from "react";
 import { AuthProvider, useAuth } from "./hooks/use-auth";
 import { RegistrationForm } from "./components/registration/RegistrationForm";
 import { PinLoginForm } from "./components/pin-login/PinLoginForm";
 import { NavMenu } from "./components/main-screen/NavMenu";
 import { ProfileForm } from "./components/profile/ProfileForm";
 import { PinChangeForm } from "./components/pin-change/PinChangeForm";
-import { HealthTable } from "./components/health/HealthTable";
+import { HealthView, type HealthViewMode } from "./components/health/HealthView";
 import { logger } from "./lib/logger";
 import { configManager } from "./config/app-config";
+import { useState, useEffect, useCallback } from "react";
 
 /**
  * Типы экранов для навигации внутри приложения.
@@ -22,10 +22,15 @@ function AppRouter() {
   const [currentScreen, setCurrentScreen] = useState<Screen>("main");
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
 
+  // Режим просмотра здоровья
+  const [healthViewMode, setHealthViewMode] = useState<HealthViewMode>("table");
+
   const navigateToMain = useCallback(() => setCurrentScreen("main"), []);
   const navigateToProfile = useCallback(() => setCurrentScreen("profile"), []);
   const navigateToPinChange = useCallback(() => setCurrentScreen("pinChange"), []);
-  const navigateToHealth = useCallback(() => setCurrentScreen("health"), []);
+  const navigateToHealth = useCallback(() => {
+    setCurrentScreen("health");
+  }, []);
 
   // Обработчик выхода
   const handleLogout = useCallback(() => {
@@ -123,19 +128,46 @@ function AppRouter() {
         <div className="flex flex-1 flex-col overflow-hidden">
           {/* Верхняя панель */}
           <header className="sticky top-0 z-10 border-b border-border bg-background/95 px-6 py-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                {currentScreen === "main" && "Главная"}
-                {currentScreen === "health" && "Показатели"}
-                {currentScreen === "profile" && "Профиль"}
-                {currentScreen === "pinChange" && "Смена пин-кода"}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {currentScreen === "main" && "Основной экран приложения"}
-                {currentScreen === "health" && "Журнал здоровья"}
-                {currentScreen === "profile" && "Просмотр и редактирование данных"}
-                {currentScreen === "pinChange" && "Введите текущий и новый пин-код"}
-              </p>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                  {currentScreen === "main" && "Главная"}
+                  {currentScreen === "health" && "Показатели"}
+                  {currentScreen === "profile" && "Профиль"}
+                  {currentScreen === "pinChange" && "Смена пин-кода"}
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {currentScreen === "main" && "Основной экран приложения"}
+                  {currentScreen === "health" && "Журнал здоровья"}
+                  {currentScreen === "profile" && "Просмотр и редактирование данных"}
+                  {currentScreen === "pinChange" && "Введите текущий и новый пин-код"}
+                </p>
+              </div>
+              {/* Переключатель таблица/графики — справа, только на экране здоровья */}
+              {currentScreen === "health" && (
+                <div className="flex shrink-0 items-center gap-1 rounded-lg border border-border bg-muted/30 p-1">
+                  <button
+                    onClick={() => setHealthViewMode("table")}
+                    className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                      healthViewMode === "table"
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    📋 Таблица
+                  </button>
+                  <button
+                    onClick={() => setHealthViewMode("charts")}
+                    className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                      healthViewMode === "charts"
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    📊 Графики
+                  </button>
+                </div>
+              )}
             </div>
           </header>
 
@@ -177,8 +209,11 @@ function AppRouter() {
             )}
 
             {currentScreen === "health" && (
-              <div className="mx-auto max-w-6xl">
-                <HealthTable />
+              <div className="mx-auto max-w-6xl w-full">
+                <HealthView
+                  mode={healthViewMode}
+                  onModeChange={setHealthViewMode}
+                />
               </div>
             )}
 

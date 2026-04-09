@@ -148,6 +148,7 @@ export interface MetricDefinition {
   category: string;
   compoundFields?: string[];
   compoundLabels?: string[];
+  isPrimary?: boolean;
 }
 
 export interface MetricConfigFile {

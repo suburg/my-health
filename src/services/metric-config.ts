@@ -16,6 +16,7 @@ export const DEFAULT_METRICS: MetricDefinition[] = [
     autofill: true,
     order: 1,
     category: "anthropometry",
+    isPrimary: false,
   },
   {
     key: "weight",
@@ -26,6 +27,7 @@ export const DEFAULT_METRICS: MetricDefinition[] = [
     autofill: false,
     order: 2,
     category: "anthropometry",
+    isPrimary: true,
   },
   {
     key: "pulse",
@@ -36,6 +38,7 @@ export const DEFAULT_METRICS: MetricDefinition[] = [
     autofill: false,
     order: 3,
     category: "cardio",
+    isPrimary: true,
   },
   {
     key: "bloodPressure",
@@ -51,6 +54,7 @@ export const DEFAULT_METRICS: MetricDefinition[] = [
     autofill: false,
     order: 4,
     category: "cardio",
+    isPrimary: true,
   },
   {
     key: "steps",
@@ -61,6 +65,7 @@ export const DEFAULT_METRICS: MetricDefinition[] = [
     autofill: false,
     order: 5,
     category: "activity",
+    isPrimary: false,
   },
   {
     key: "sleep",
@@ -71,6 +76,7 @@ export const DEFAULT_METRICS: MetricDefinition[] = [
     autofill: false,
     order: 6,
     category: "sleep",
+    isPrimary: false,
   },
   {
     key: "calories",
@@ -81,6 +87,7 @@ export const DEFAULT_METRICS: MetricDefinition[] = [
     autofill: false,
     order: 7,
     category: "activity",
+    isPrimary: false,
   },
   {
     key: "floors",
@@ -91,6 +98,7 @@ export const DEFAULT_METRICS: MetricDefinition[] = [
     autofill: false,
     order: 8,
     category: "stress",
+    isPrimary: false,
   },
   {
     key: "pushups",
@@ -101,6 +109,7 @@ export const DEFAULT_METRICS: MetricDefinition[] = [
     autofill: false,
     order: 9,
     category: "stress",
+    isPrimary: false,
   },
 ];
 
@@ -112,8 +121,8 @@ let cachedMetrics: MetricDefinition[] | null = null;
 /**
  * Получить конфигурацию показателей.
  *
- * При первом вызове загружает из metric-config.json (через IPC get_metric_config).
- * Если файл отсутствует — возвращает дефолтную конфигурацию.
+ * Загружает из metric-config.json через IPC `get_metric_config`.
+ * Бэкенд создаёт файл автоматически при первом запуске.
  * Кэширует результат для последующих вызовов.
  */
 export async function getMetrics(): Promise<MetricDefinition[]> {
@@ -126,8 +135,7 @@ export async function getMetrics(): Promise<MetricDefinition[]> {
     );
 
     if ("error" in result) {
-      // Файл metric-config.json отсутствует — используем дефолт
-      console.warn(`${MODULE_NAME}: metric-config.json не найден, используется дефолтная конфигурация`);
+      console.warn(`${MODULE_NAME}: ошибка загрузки конфигурации: ${result.error}`);
       cachedMetrics = [...DEFAULT_METRICS];
     } else {
       cachedMetrics = result.metrics;

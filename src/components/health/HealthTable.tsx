@@ -16,8 +16,8 @@ interface CellKey {
  * Свойства компон HealthTable.
  */
 export interface HealthTableProps {
-  /** Callback при нажатии "Графики" */
-  onSwitchToCharts?: () => void;
+  /** Callback при добавлении замера для обновления данных */
+  onEntryAdded?: () => void;
 }
 
 /**
@@ -27,7 +27,7 @@ export interface HealthTableProps {
  * Первый столбец зафиксирован (sticky). Все ячейки редактируемые сразу.
  * Замеры отсортированы от новых к старым.
  */
-export function HealthTable({ onSwitchToCharts }: HealthTableProps) {
+export function HealthTable({}: HealthTableProps) {
   const [entries, setEntries] = useState<HealthEntry[]>([]);
   const [metrics, setMetrics] = useState<MetricDefinition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -218,14 +218,6 @@ export function HealthTable({ onSwitchToCharts }: HealthTableProps) {
         >
           Добавить
         </button>
-        {onSwitchToCharts && (
-          <button
-            onClick={onSwitchToCharts}
-            className="ml-auto inline-flex h-9 items-center rounded-md border border-input bg-background px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-accent"
-          >
-            📊 Графики
-          </button>
-        )}
       </div>
 
       {entries.length === 0 ? (

@@ -101,7 +101,7 @@ Tauri-приложение: бэкенд в `src-tauri/`, фронтенд в `s
 #### Frontend — компоненты
 
 - [x] T024 [US2] Добавить в HealthTable: контекстное меню заголовка столбца с пунктом «Удалить замер» → вызов deleteEntry с подтверждением
-- [ ] T025 [US2] Реализовать логику подтверждения при переключении режима/действиях с несохранёнными изменениями (модальное окно «Несохранённые изменения будут потеряны. Продолжить?»)
+- [x] T025 [US2] Реализовать логику подтверждения при переключении режима/действиях с несохранёнными изменениями (модальное окно «Несохранённые изменения будут потеряны. Продолжить?»)
 
 **Контрольная точка**: Пользовательские истории 1 и 2 работают независимо — таблица поддерживает полный CRUD
 
@@ -117,14 +117,14 @@ Tauri-приложение: бэкенд в `src-tauri/`, фронтенд в `s
 
 #### Frontend — компоненты
 
-- [ ] T026 [P] [US3] Создать компонент MetricSelector в `src/components/health/MetricSelector.tsx` (чекбоксы выбора показателей из metric-config)
-- [ ] T027 [P] [US3] Создать компонент PeriodFilter в `src/components/health/PeriodFilter.tsx` (два ползунка на временной шкале от первого до последнего замера — Recharts Brush или кастомный слайдер)
-- [ ] T028 [US3] Создать компонент HealthCharts в `src/components/health/HealthCharts.tsx` (Recharts LineChart с multi-Y-axis, подключение MetricSelector + PeriodFilter, сообщение «Минимум 2 замера» при < 2)
-- [ ] T029 [US3] Создать компонент HealthView в `src/components/health/HealthView.tsx` (контейнер с табами «Таблица» / «Графики», внутри HealthTable или HealthCharts)
+- [x] T026 [P] [US3] Создать компонент MetricSelector в `src/components/health/MetricSelector.tsx` (чекбоксы выбора показателей из metric-config)
+- [x] T027 [P] [US3] Создать компонент PeriodFilter в `src/components/health/PeriodFilter.tsx` (два ползунка на временной шкале от первого до последнего замера — Recharts Brush или кастомный слайдер)
+- [x] T028 [US3] Создать компонент HealthCharts в `src/components/health/HealthCharts.tsx` (Recharts LineChart с multi-Y-axis, подключение MetricSelector + PeriodFilter, сообщение «Минимум 2 замера» при < 2)
+- [x] T029 [US3] Создать компонент HealthView в `src/components/health/HealthView.tsx` (контейнер с табами «Таблица» / «Графики», внутри HealthTable или HealthCharts)
 
 #### Интеграция
 
-- [ ] T030 [US3] Связать HealthCharts → health-service.getEntries → фильтрация по периоду → расчёт отклонений для каждой оси
+- [x] T030 [US3] Связать HealthCharts → health-service.getEntries → фильтрация по периоду → расчёт отклонений для каждой оси
 
 **Контрольная точка**: Пользовательские истории 1, 2, 3 полностью функциональны и тестируемы независимо
 
