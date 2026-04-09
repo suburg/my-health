@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import type { HealthEntry, MetricDefinition } from "../../types";
-import { MetricToggles, METRIC_COLORS } from "./MetricToggles";
+import { MetricToggles, getSubKeys, getMetricColor, lightenColor } from "./MetricToggles";
 import { PeriodFilter } from "./PeriodFilter";
 import * as healthService from "../../services/health-service";
 import { getOrderedMetrics } from "../../services/metric-config";
@@ -17,14 +17,14 @@ import { getOrderedMetrics } from "../../services/metric-config";
 /**
  * Графики динамики показателей.
  *
- * Данные загружаются самостоятельно (аналогично HealthTable).
+ * Compound-метрики (давление) рисуются как две линии на общей оси Y.
+ * Одна кнопка «Давление» управляет обеими линиями.
  */
 export function HealthCharts() {
   const [entries, setEntries] = useState<HealthEntry[]>([]);
   const [metrics, setMetrics] = useState<MetricDefinition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Загрузка данных при монтировании
   useEffect(() => {
     Promise.all([healthService.getEntries(), getOrderedMetrics()])
       .then(([loadedEntries, loadedMetrics]) => {
@@ -55,10 +55,11 @@ export function HealthCharts() {
   // Отображение осей Y
   const [showAxes, setShowAxes] = useState(false);
 
-  // Фильтрация по периоду + подготовка данных для Recharts.
-  // Данные агрегируются по месяцам. Пропущенные месяцы заполняются null.
-  // Для пунктирных линий пропусков добавляются отдельные колонки {key}_gap.
-  const { chartData } = useMemo(() => {
+  // Hovered линия (dataKey)
+  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+
+  // Подготовка данных
+  const { chartData, renderLines } = useMemo(() => {
     const filtered = period
       ? entries.filter((e) => {
           const m = e.date.slice(0, 7);
@@ -66,22 +67,18 @@ export function HealthCharts() {
         })
       : entries;
 
-    // Группировка по месяцу (YYYY-MM), последняя запись в группе
     const byMonth = new Map<string, HealthEntry>();
     for (const entry of filtered) {
-      const month = entry.date.slice(0, 7);
-      byMonth.set(month, entry);
+      byMonth.set(entry.date.slice(0, 7), entry);
     }
 
-    // Определяем диапазон месяцев
     const allMonths = [...byMonth.keys()].sort();
-    if (allMonths.length === 0) return { chartData: [], gapKeys: [] };
+    if (allMonths.length === 0) return { chartData: [], renderLines: [] };
 
     const [startMonth, endMonth] = period
       ? [period[0], period[1]]
       : [allMonths[0], allMonths[allMonths.length - 1]];
 
-    // Генерируем полный ряд месяцев от startMonth до endMonth
     const fullMonths: string[] = [];
     let cur = startMonth;
     while (cur <= endMonth) {
@@ -91,57 +88,92 @@ export function HealthCharts() {
       cur = `${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, "0")}`;
     }
 
-    // Строим данные + колонки пропусков
+    // Собируем активные метрики
+    const activeMetrics = selected
+      .map((key) => metrics.find((m) => m.key === key))
+      .filter(Boolean) as MetricDefinition[];
+
     const rows: Record<string, unknown>[] = fullMonths.map((month) => {
       const point: Record<string, unknown> = { date: month };
       const entry = byMonth.get(month);
 
-      for (const metricKey of selected) {
-        const metricDef = metrics.find((m) => m.key === metricKey);
-        if (!metricDef) continue;
+      for (const metric of activeMetrics) {
+        const subKeys = getSubKeys(metric);
 
-        if (entry) {
-          const rawValue = entry.metrics[metricKey];
-          point[metricKey] = extractNumeric(rawValue, metricDef);
+        if (metric.type === "compound") {
+          // systolic и diastolic в отдельные колонки
+          if (entry) {
+            const raw = entry.metrics[metric.key] as { systolic: number | null; diastolic: number | null } | null;
+            point[`${metric.key}_sys`] = raw?.systolic ?? null;
+            point[`${metric.key}_dia`] = raw?.diastolic ?? null;
+          } else {
+            point[`${metric.key}_sys`] = null;
+            point[`${metric.key}_dia`] = null;
+          }
         } else {
-          point[metricKey] = null;
+          point[subKeys[0]] = entry
+            ? extractNumeric(entry.metrics[metric.key], metric)
+            : null;
         }
       }
 
       return point;
     });
 
-    // Вычисляем колонки пропусков: значения только на границах пропусков
-    const gapKeys: string[] = [];
-    for (const metricKey of selected) {
-      const gapKey = `${metricKey}_gap`;
-      gapKeys.push(gapKey);
-
-      // Найти индексы ненулевых точек
-      const valueIndices: number[] = [];
-      rows.forEach((row, i) => {
-        if (row[metricKey] !== null && row[metricKey] !== undefined) {
-          valueIndices.push(i);
-        }
-      });
-
-      // Для каждого разрыва — заполнить gapKey на границах
-      rows.forEach((row) => {
-        row[gapKey] = null;
-      });
-
-      for (let i = 1; i < valueIndices.length; i++) {
-        const prev = valueIndices[i - 1];
-        const curr = valueIndices[i];
-        if (curr - prev > 1) {
-          // Разрыв между prev и curr
-          rows[prev][gapKey] = rows[prev][metricKey];
-          rows[curr][gapKey] = rows[curr][metricKey];
+    // Колонки пропусков
+    for (const metric of activeMetrics) {
+      const subKeys = getSubKeys(metric);
+      for (const sk of subKeys) {
+        const gapKey = `${sk}_gap`;
+        const valueIndices: number[] = [];
+        rows.forEach((row, i) => {
+          if (row[sk] !== null && row[sk] !== undefined) valueIndices.push(i);
+        });
+        rows.forEach((row) => { row[gapKey] = null; });
+        for (let i = 1; i < valueIndices.length; i++) {
+          const prev = valueIndices[i - 1];
+          const curr = valueIndices[i];
+          if (curr - prev > 1) {
+            rows[prev][gapKey] = rows[prev][sk];
+            rows[curr][gapKey] = rows[curr][sk];
+          }
         }
       }
     }
 
-    return { chartData: rows };
+    // Генерируем описания линий для рендера
+    const renderLines: Array<{
+      dataKey: string;
+      label: string;
+      color: string;
+      yAxisId: string;
+      axisIndex: number;
+      dashed?: boolean;
+    }> = [];
+
+    for (const metric of activeMetrics) {
+      // Цвет по индексу в полном списке metrics (не в activeMetrics!)
+      const metricIdx = metrics.findIndex((m) => m.key === metric.key);
+      const color = getMetricColor(metricIdx);
+
+      if (metric.type === "compound") {
+        const lighterColor = lightenColor(color, 0.35);
+        renderLines.push(
+          { dataKey: `${metric.key}_sys`, label: `${metric.label} верхнее`, color, yAxisId: `y-${metric.key}`, axisIndex: metricIdx, dashed: false },
+          { dataKey: `${metric.key}_dia`, label: `${metric.label} нижнее`, color: lighterColor, yAxisId: `y-${metric.key}`, axisIndex: metricIdx, dashed: true },
+        );
+      } else {
+        renderLines.push({
+          dataKey: getSubKeys(metric)[0],
+          label: metric.label,
+          color,
+          yAxisId: `y-${metric.key}`,
+          axisIndex: metricIdx,
+        });
+      }
+    }
+
+    return { chartData: rows, renderLines };
   }, [entries, metrics, selected, period]);
 
   if (isLoading) {
@@ -165,15 +197,31 @@ export function HealthCharts() {
     );
   }
 
-  const selectedMetrics = selected
+  const activeMetrics = selected
     .map((key) => metrics.find((m) => m.key === key))
     .filter(Boolean) as MetricDefinition[];
 
   return (
     <div className="flex gap-4">
-      {/* Левая панель — выбор показателей */}
+      {/* Левая панель */}
       <div className="w-36 shrink-0 space-y-3">
-        <MetricToggles metrics={metrics} selected={selected} onChange={setSelected} />
+        <MetricToggles
+          metrics={metrics}
+          selected={selected}
+          onChange={setSelected}
+          onHover={(key) => {
+            if (key) {
+              const metric = metrics.find((m) => m.key === key);
+              if (metric?.type === "compound") {
+                setHoveredKey(key); // HealthCharts будет подсвечивать обе sub-линии
+              } else {
+                setHoveredKey(key);
+              }
+            } else {
+              setHoveredKey(null);
+            }
+          }}
+        />
         <label className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground">
           <input
             type="checkbox"
@@ -185,17 +233,11 @@ export function HealthCharts() {
         </label>
       </div>
 
-      {/* Правая часть — период + график */}
+      {/* Правая часть */}
       <div className="min-w-0 flex-1 space-y-3">
-        {/* Фильтр периода */}
-        <PeriodFilter
-          entries={entries}
-          period={period}
-          onChange={setPeriod}
-        />
+        <PeriodFilter entries={entries} period={period} onChange={setPeriod} />
 
-        {/* График */}
-        {selectedMetrics.length === 0 ? (
+        {activeMetrics.length === 0 ? (
           <div className="rounded-lg border border-border bg-card p-8 text-center">
             <p className="text-muted-foreground">
               Выберите хотя бы один показатель для отображения
@@ -213,12 +255,14 @@ export function HealthCharts() {
                   interval="preserveStartEnd"
                   tick={{ fontSize: 11 }}
                 />
-                {/* Оси Y для каждого показателя — отображаются только при включённом чекбоксе */}
-                {showAxes && selectedMetrics.map((metric, idx) => (
-                  <YAxis
-                    key={metric.key}
-                    yAxisId={`y-${metric.key}`}
-                    orientation={idx % 2 === 0 ? "left" : "right"}
+                {/* Оси Y */}
+                {showAxes && activeMetrics.map((metric) => {
+                  const metricIdx = metrics.findIndex((m) => m.key === metric.key);
+                  return (
+                    <YAxis
+                      key={metric.key}
+                      yAxisId={`y-${metric.key}`}
+                      orientation={metricIdx % 2 === 0 ? "left" : "right"}
                     label={{
                       value: metric.unit,
                       angle: -90,
@@ -228,13 +272,16 @@ export function HealthCharts() {
                     className="text-xs"
                     tick={{ fontSize: 11 }}
                   />
-                ))}
+                  );
+                })}
                 <Tooltip
                   content={({ payload, label, active }) => {
                     if (!active || !payload) return null;
-                    // Фильтруем пунктирные записи (name="_")
                     const items = payload.filter(
-                      (entry) => entry.dataKey && !String(entry.dataKey).endsWith("_gap"),
+                      (entry) =>
+                        entry.dataKey &&
+                        !String(entry.dataKey).endsWith("_gap") &&
+                        entry.name !== "_",
                     );
                     if (items.length === 0) return null;
 
@@ -244,23 +291,21 @@ export function HealthCharts() {
                           {formatDateShort(label as string)}
                         </p>
                         {items.map((entry, i) => {
-                          const metric = selectedMetrics.find(
-                            (m) => m.key === entry.dataKey,
-                          );
-                          const unit = metric ? ` ${metric.unit}` : "";
-                          const value =
-                            entry.value === null || entry.value === undefined
-                              ? "нет данных"
-                              : `${entry.value}${unit}`;
+                          const nameStr = String(entry.name ?? "");
+                          const unit = nameStr.includes("верхнее") || nameStr.includes("нижнее")
+                            ? ""
+                            : ` ${activeMetrics.find((m) => m.label === nameStr)?.unit ?? ""}`;
                           return (
                             <p key={i} className="flex items-center gap-1.5">
                               <span
                                 className="h-2 w-2 shrink-0 rounded-full"
-                                style={{ backgroundColor: entry.stroke }}
+                                style={{ backgroundColor: (entry as { stroke?: string }).stroke }}
                               />
                               <span>{entry.name}</span>
                               <span className="font-mono tabular-nums text-muted-foreground">
-                                {value}
+                                {entry.value === null || entry.value === undefined
+                                  ? "нет данных"
+                                  : `${entry.value}${unit}`}
                               </span>
                             </p>
                           );
@@ -269,37 +314,54 @@ export function HealthCharts() {
                     );
                   }}
                 />
-                {/* Линии для каждого показателя */}
-                {selectedMetrics.map((metric, idx) => {
-                  const color = METRIC_COLORS[idx % METRIC_COLORS.length];
-                  const gapKey = `${metric.key}_gap`;
+                {/* Линии */}
+                {renderLines.map((line) => {
+                  const gapKey = `${line.dataKey}_gap`;
+                  // Для compound: hoveredKey = "bloodPressure", line.dataKey = "bloodPressure_sys"
+                  const isHovered = hoveredKey !== null && line.dataKey.startsWith(hoveredKey);
+                  const anyHovered = hoveredKey !== null;
+
+                  const mainStrokeWidth = anyHovered
+                    ? (isHovered ? 4 : 1.5)
+                    : 2;
+                  const mainDotR = anyHovered
+                    ? (isHovered ? 6 : 2)
+                    : 4;
+                  const mainActiveDotR = anyHovered
+                    ? (isHovered ? 9 : 3)
+                    : 6;
+                  const mainOpacity = anyHovered
+                    ? (isHovered ? 1 : 0.3)
+                    : 1;
+
                   return [
-                    /* Сплошная линия + точки */
                     <Line
-                      key={`s-${metric.key}`}
+                      key={`s-${line.dataKey}`}
                       type="monotone"
-                      dataKey={metric.key}
-                      yAxisId={`y-${metric.key}`}
-                      stroke={color}
-                      strokeWidth={2}
-                      dot={{ r: 4 }}
-                      activeDot={{ r: 6 }}
-                      name={metric.label}
+                      dataKey={line.dataKey}
+                      yAxisId={line.yAxisId}
+                      stroke={line.color}
+                      strokeWidth={mainStrokeWidth}
+                      dot={{ r: mainDotR }}
+                      activeDot={{ r: mainActiveDotR }}
+                      name={line.label}
                       connectNulls={false}
+                      strokeOpacity={mainOpacity}
+                      style={{ transition: "all 0.15s ease" }}
                     />,
-                    /* Пунктирная линия через пропуски (только границы разрывов) */
                     <Line
-                      key={`g-${metric.key}`}
+                      key={`g-${line.dataKey}`}
                       type="monotone"
                       dataKey={gapKey}
-                      yAxisId={`y-${metric.key}`}
-                      stroke={color}
+                      yAxisId={line.yAxisId}
+                      stroke={line.color}
                       strokeWidth={1.5}
-                      strokeDasharray="5 5"
+                      strokeDasharray={line.dashed ? "5 5" : undefined}
                       dot={false}
                       activeDot={false}
                       name="_"
                       connectNulls={true}
+                      strokeOpacity={mainOpacity * 0.6}
                     />,
                   ];
                 })}
@@ -321,19 +383,9 @@ function extractNumeric(
   def: MetricDefinition,
 ): number | null {
   if (!value) return null;
-
-  if (def.type === "number") {
-    return (value as { value: number | null }).value ?? null;
-  }
-
-  if (def.type === "compound") {
-    return (value as { systolic: number | null }).systolic ?? null;
-  }
-
-  if (def.type === "duration") {
-    return (value as { minutes: number | null }).minutes ?? null;
-  }
-
+  if (def.type === "number") return (value as { value: number | null }).value ?? null;
+  if (def.type === "compound") return (value as { systolic: number | null }).systolic ?? null;
+  if (def.type === "duration") return (value as { minutes: number | null }).minutes ?? null;
   return null;
 }
 
