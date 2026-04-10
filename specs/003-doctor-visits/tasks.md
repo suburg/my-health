@@ -18,9 +18,9 @@
 
 **Цель**: Добавить Rust-зависимости и обновить конфигурацию Tauri для поддержки doctor visits.
 
-- [ ] T001 Добавить зависимость `pdfium-render` и `uuid` в `src-tauri/Cargo.toml`
-- [ ] T002 Добавить `tauri_plugin_fs` разрешение на чтение директории `scans/` в `src-tauri/capabilities/default.json`
-- [ ] T003 [P] Создать дефолтный `llm-prompt.json` в `.specify/assets/` (будет копироваться при первом запуске или лежит рядом с данными)
+- [x] T001 Добавить зависимость `pdfium-render` и `uuid` в `src-tauri/Cargo.toml`
+- [x] T002 Добавить `tauri_plugin_fs` разрешение на чтение директории `scans/` в `src-tauri/capabilities/default.json`
+- [x] T003 [P] Создать дефолтный `llm-prompt.json` в `.specify/assets/`
 
 ---
 
@@ -32,19 +32,19 @@
 
 ### Backend (Rust)
 
-- [ ] T004 [P] Создать `src-tauri/src/storage/doctor_visit_store.rs` — модуль работы с `doctor-visits.json`: загрузка/сохранение по паттерну `json_store.rs` (функции `load_visits`, `save_visits`), inline-тесты
-- [ ] T005 [P] Создать `src-tauri/src/storage/llm_prompt.rs` — модуль загрузки `llm-prompt.json` из AppData с кэшированием, функция `load_prompt() -> LlmPromptConfig`, inline-тесты
-- [ ] T006 [P] Создать `src-tauri/src/commands/doctor_visits.rs` — каркас с 7 Tauri-командами (`get_doctor_visits`, `add_doctor_visit`, `update_doctor_visit`, `delete_doctor_visit`, `recognize_scan`, `upload_scan`, `delete_scan`), пока с заглушками `todo!()`
-- [ ] T007 Зарегистрировать новые команды в `src-tauri/src/lib.rs` — добавить `commands::doctor_visits::*` в `invoke_handler`
+- [x] T004 [P] Создать `src-tauri/src/storage/doctor_visit_store.rs`
+- [x] T005 [P] Создать `src-tauri/src/storage/llm_prompt.rs`
+- [x] T006 [P] Создать `src-tauri/src/commands/doctor_visits.rs` — каркас с 7 Tauri-командами
+- [x] T007 Зарегистрировать новые команды в `src-tauri/src/lib.rs`
 
 ### Frontend (TypeScript)
 
-- [ ] T008 [P] Добавить TypeScript-типы `DoctorVisit`, `DoctorVisitsFile`, `LLMRecognitionResult`, `LlmPromptConfig`, IPC-типы в `src/types/index.ts`
-- [ ] T009 [P] Добавить Zod-схему `doctorVisitSchema` и типы в `src/lib/validations.ts`
-- [ ] T010 [P] Создать `src/lib/doctor-visit-utils.ts` — утилиты: `generateScanFileName(date, specialty)`, `sanitizeSpecialty(s)`, `findPrevVisit(visits, currentId)`, `findNextVisit(visits, currentId)`, `getUniqueSpecialties(visits)`, `filterVisitsByPeriod(visits, from, to)`, `filterVisitsBySpecialty(visits, specialty)`
-- [ ] T011 Создать `src/lib/doctor-visit-utils.test.ts` — unit-тесты всех утилит из T010
-- [ ] T012 Создать `src/services/doctor-visit-service.ts` — сервис IPC-вызовов: `getVisits()`, `addVisit(visit)`, `updateVisit(id, visit)`, `deleteVisit(id)`, `recognizeScan(images)`, `uploadScan(file, date, specialty)`, `deleteScan(scanPath)` — по паттерну `health-service.ts`
-- [ ] T013 Добавить экран `doctorVisits` в `src/App.tsx`: новый `Screen` type, пункт меню «Приёмы» с иконкой `Stethoscope` (lucide-react), заголовок/описание в header
+- [x] T008 [P] Добавить TypeScript-типы в `src/types/index.ts`
+- [x] T009 [P] Добавить Zod-схему `doctorVisitSchema` в `src/lib/validations.ts`
+- [x] T010 [P] Создать `src/lib/doctor-visit-utils.ts`
+- [x] T011 Создать `src/lib/doctor-visit-utils.test.ts`
+- [x] T012 Создать `src/services/doctor-visit-service.ts`
+- [x] T013 Добавить экран `doctorVisits` в `src/App.tsx`
 
 **Контрольная точка**: Фундамент готов — типы, сервис, утилиты, Rust storage и команды зарегистрированы. Можно начинать реализацию пользовательских историй.
 
@@ -58,16 +58,16 @@
 
 ### Реализация для пользовательской истории 1
 
-- [ ] T014 [US1] Реализовать `src-tauri/src/storage/doctor_visit_store.rs`: функции `load_visits()`, `save_visits()` — чтение/запись `doctor-visits.json` через `json_store.rs`. Формирование бизнес-имени файла скана: `YYYY_MM_DD_Specialty_uuid.ext`
-- [ ] T015 [US1] Реализовать `src-tauri/src/commands/doctor_visits.rs`: `get_doctor_visits()` — загрузка всех записей из `doctor-visits.json`
-- [ ] T016 [US1] Реализовать `src-tauri/src/commands/doctor_visits.rs`: `add_doctor_visit()` — создание записи с валидацией обязательных полей, атомарная запись через `save_visits`, автогенерация `id`, `createdAt`, `updatedAt`
-- [ ] T017 [US1] Создать `src/components/doctor-visits/StarRating.tsx` — компонент рейтинга 1–5 звёзд (lucide-react `Star`), props: `value`, `onChange`, `readOnly`
-- [ ] T018 [US1] Создать `src/components/doctor-visits/ScanUploader.tsx` — компонент загрузки файла скана: drag-and-drop + кнопка выбора, превью для изображений, валидация формата/размера, props: `onFileSelect`, `scanPath`
-- [ ] T019 [US1] Создать `src/components/doctor-visits/VisitModal.tsx` — модальное окно создания: поля (дата, ФИО врача, специальность, клиника, результаты, препараты, процедуры, скан, рейтинг), валидация через `doctorVisitSchema`, кнопки «Сохранить»/«Отмена», спиннер при сохранении. Без LLM-кнопки — она добавляется в US3
-- [ ] T020 [US1] Создать `src/components/doctor-visits/VisitRegistry.tsx` — компонент реестра: загрузка записей через `getVisits()`, пустое состояние, кнопка «Добавить приём» (открывает VisitModal), CSS Grid контейнер для плиток
-- [ ] T021 [US1] Создать `src/components/doctor-visits/VisitTile.tsx` — плитка приёма: дата, ФИО врача, специальность, клиника, звёзды рейтинга, стиль карточки shadcn/ui
-- [ ] T022 [US1] Создать `src/components/doctor-visits/VisitView.tsx` — контейнер-экран «Приёмы»: заголовок, VisitRegistry, управление состоянием модального окна, обновление списка после сохранения
-- [ ] T023 [US1] Интегрировать `VisitView` в `src/App.tsx`: рендеринг при `currentScreen === "doctorVisits"`
+- [x] T014 [US1] Реализовать `src-tauri/src/storage/doctor_visit_store.rs` (выполнено в T004)
+- [x] T015 [US1] Реализовать `get_doctor_visits()` и `add_doctor_visit()`
+- [x] T016 [US1] Валидация и создание записи (в T015)
+- [x] T017 [US1] Создать `src/components/doctor-visits/StarRating.tsx`
+- [x] T018 [US1] Создать `src/components/doctor-visits/ScanUploader.tsx`
+- [x] T019 [US1] Создать `src/components/doctor-visits/VisitModal.tsx`
+- [x] T020 [US1] Создать `src/components/doctor-visits/VisitRegistry.tsx`
+- [x] T021 [US1] Создать `src/components/doctor-visits/VisitTile.tsx`
+- [x] T022 [US1] Создать `src/components/doctor-visits/VisitView.tsx`
+- [x] T023 [US1] Интегрировать `VisitView` в `src/App.tsx` (выполнено в T013)
 
 **Контрольная точка**: US1 полностью функциональна — можно создать запись вручную, она появляется в реестре плиткой. Валидация обязательных полей работает.
 

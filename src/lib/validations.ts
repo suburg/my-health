@@ -196,3 +196,35 @@ export function validateMetricValue(
 
   return { valid: errors.length === 0, errors };
 }
+
+// ============================================================================
+// Doctor Visits (003-doctor-visits)
+// ============================================================================
+
+export const doctorVisitSchema = z.object({
+  date: z
+    .string()
+    .refine(isValidDate, "Некорректная дата. Формат: ГГГГ-ММ-ДД"),
+  doctorName: z
+    .string()
+    .min(1, "ФИО врача обязательно")
+    .max(200, "ФИО врача не более 200 символов"),
+  specialty: z
+    .string()
+    .min(1, "Специальность обязательна")
+    .max(100, "Специальность не более 100 символов"),
+  clinic: z.string().max(200, "Название клиники не более 200 символов").nullable().optional(),
+  results: z.string().nullable().optional(),
+  medications: z.string().nullable().optional(),
+  procedures: z.string().nullable().optional(),
+  scanPath: z.string().nullable().optional(),
+  rating: z
+    .number()
+    .int()
+    .min(1, "Оценка минимум 1")
+    .max(5, "Оценка максимум 5")
+    .nullable()
+    .optional(),
+});
+
+export type DoctorVisitInput = z.infer<typeof doctorVisitSchema>;
