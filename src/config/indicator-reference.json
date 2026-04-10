@@ -1,0 +1,772 @@
+[
+  {
+    "canonicalName": "Гемоглобин",
+    "synonyms": ["HGB", "Hemoglobin", "Hb", "Гемоглобин (Hb)"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "г/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 120, "max": 160 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Эритроциты",
+    "synonyms": ["RBC", "Red Blood Cells", "Красные кровяные тельца"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "×10¹²/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 3.9, "max": 5.0 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Гематокрит",
+    "synonyms": ["HCT", "Hematocrit", "Гематокритное число"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "%",
+    "referenceType": "interval",
+    "typicalReference": { "min": 36, "max": 48 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Средний объём эритроцита",
+    "synonyms": ["MCV", "Mean Corpuscular Volume"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "фл",
+    "referenceType": "interval",
+    "typicalReference": { "min": 80, "max": 100 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Среднее содержание гемоглобина в эритроците",
+    "synonyms": ["MCH", "Mean Corpuscular Hemoglobin"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "пг",
+    "referenceType": "interval",
+    "typicalReference": { "min": 27, "max": 31 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Средняя концентрация гемоглобина в эритроците",
+    "synonyms": ["MCHC", "Mean Corpuscular Hemoglobin Concentration"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "г/дл",
+    "referenceType": "interval",
+    "typicalReference": { "min": 30, "max": 38 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Ширина распределения эритроцитов по объёму",
+    "synonyms": ["RDW", "RDW-CV", "Red Cell Distribution Width"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "%",
+    "referenceType": "interval",
+    "typicalReference": { "min": 11.5, "max": 14.5 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Ретикулоциты",
+    "synonyms": ["RET", "Reticulocytes", "Ретикулоциты %"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "‰",
+    "referenceType": "interval",
+    "typicalReference": { "min": 2, "max": 12 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Лейкоциты",
+    "synonyms": ["WBC", "White Blood Cells", "Лейкоциты (WBC)"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "×10⁹/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 4.0, "max": 9.0 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Нейтрофилы палочкоядерные",
+    "synonyms": ["NEUT#", "Палочкоядерные", "Band neutrophils", "Нейтрофилы п/я"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "%",
+    "referenceType": "interval",
+    "typicalReference": { "min": 1, "max": 6 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Нейтрофилы сегментоядерные",
+    "synonyms": ["NEUT%", "Сегментоядерные", "Segmented neutrophils", "Нейтрофилы с/я"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "%",
+    "referenceType": "interval",
+    "typicalReference": { "min": 47, "max": 72 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Эозинофилы",
+    "synonyms": ["EOS", "Eosinophils", "Эозинофилы %"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "%",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0.5, "max": 5 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Базофилы",
+    "synonyms": ["BASO", "Basophils", "Базофилы %"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "%",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0, "max": 1 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Лимфоциты",
+    "synonyms": ["LYM", "Lymphocytes", "Лимфоциты %"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "%",
+    "referenceType": "interval",
+    "typicalReference": { "min": 19, "max": 37 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Моноциты",
+    "synonyms": ["MON", "Monocytes", "Моноциты %"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "%",
+    "referenceType": "interval",
+    "typicalReference": { "min": 3, "max": 11 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Тромбоциты",
+    "synonyms": ["PLT", "Platelets", "Тромбоциты (PLT)"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "×10⁹/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 180, "max": 320 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Средний объём тромбоцита",
+    "synonyms": ["MPV", "Mean Platelet Volume"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "фл",
+    "referenceType": "interval",
+    "typicalReference": { "min": 7.4, "max": 10.4 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Ширина распределения тромбоцитов по объёму",
+    "synonyms": ["PDW", "Platelet Distribution Width"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "%",
+    "referenceType": "interval",
+    "typicalReference": { "min": 10, "max": 20 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Тромбокрит",
+    "synonyms": ["PCT", "Plateletcrit"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "%",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0.15, "max": 0.4 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "СОЭ",
+    "synonyms": ["ESR", "Erythrocyte Sedimentation Rate", "Скорость оседания эритроцитов"],
+    "valueType": "numeric",
+    "testTypes": ["blood"],
+    "unit": "мм/ч",
+    "referenceType": "interval",
+    "typicalReference": { "min": 2, "max": 15 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Цвет мочи",
+    "synonyms": ["Color", "Цвет мочи", "Окраска мочи"],
+    "valueType": "textual",
+    "testTypes": ["urine"],
+    "unit": null,
+    "referenceType": "list",
+    "typicalReference": null,
+    "allowedValues": ["соломенно-жёлтый", "жёлтый", "янтарный", "бесцветный", "бурый", "красноватый"]
+  },
+  {
+    "canonicalName": "Прозрачность мочи",
+    "synonyms": ["Clarity", "Прозрачность", "Мутность"],
+    "valueType": "textual",
+    "testTypes": ["urine"],
+    "unit": null,
+    "referenceType": "list",
+    "typicalReference": null,
+    "allowedValues": ["полная", "неполная", "мутная", "слегка мутная"]
+  },
+  {
+    "canonicalName": "Относительная плотность мочи",
+    "synonyms": ["SG", "Specific Gravity", "Удельный вес", "Плотность мочи", "S.G."],
+    "valueType": "numeric",
+    "testTypes": ["urine"],
+    "unit": "",
+    "referenceType": "interval",
+    "typicalReference": { "min": 1010, "max": 1025 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "pH мочи",
+    "synonyms": ["pH", "Кислотность мочи", "Реакция мочи"],
+    "valueType": "numeric",
+    "testTypes": ["urine"],
+    "unit": "",
+    "referenceType": "interval",
+    "typicalReference": { "min": 5.0, "max": 7.0 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Белок в моче",
+    "synonyms": ["PRO", "Protein", "Proteinuria", "Общий белок (моча)"],
+    "valueType": "numeric",
+    "testTypes": ["urine"],
+    "unit": "г/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0, "max": 0.033 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Глюкоза в моче",
+    "synonyms": ["GLU", "Glucose (urine)", "Сахар в моче"],
+    "valueType": "numeric",
+    "testTypes": ["urine"],
+    "unit": "ммоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0, "max": 1.0 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Билирубин в моче",
+    "synonyms": ["BIL", "Bilirubin (urine)"],
+    "valueType": "numeric",
+    "testTypes": ["urine"],
+    "unit": "мкмоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0, "max": 8.5 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Уробилиноген",
+    "synonyms": ["URO", "UBG", "Urobilinogen"],
+    "valueType": "numeric",
+    "testTypes": ["urine"],
+    "unit": "мкмоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0, "max": 17 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Кетоновые тела в моче",
+    "synonyms": ["KET", "Ketones", "Кетоны"],
+    "valueType": "numeric",
+    "testTypes": ["urine"],
+    "unit": "ммоль/л",
+    "referenceType": "value",
+    "typicalReference": { "value": 0 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Лейкоциты в моче",
+    "synonyms": ["LEU", "Leukocytes (urine)", "Лейкоциты (моча)"],
+    "valueType": "textual",
+    "testTypes": ["urine"],
+    "unit": null,
+    "referenceType": "list",
+    "typicalReference": null,
+    "allowedValues": ["отрицательно", "neg", "neg.", "-", "не обнаружены"]
+  },
+  {
+    "canonicalName": "Кровь в моче",
+    "synonyms": ["BLD", "Blood (urine)", "Эритроциты в моче", "Скрытая кровь (моча)"],
+    "valueType": "textual",
+    "testTypes": ["urine"],
+    "unit": null,
+    "referenceType": "list",
+    "typicalReference": null,
+    "allowedValues": ["отрицательно", "neg", "neg.", "-", "не обнаружены"]
+  },
+  {
+    "canonicalName": "Нитриты в моче",
+    "synonyms": ["NIT", "Nitrite", "Нитриты"],
+    "valueType": "textual",
+    "testTypes": ["urine"],
+    "unit": null,
+    "referenceType": "list",
+    "typicalReference": null,
+    "allowedValues": ["отрицательно", "neg", "neg.", "-", "не обнаружены"]
+  },
+  {
+    "canonicalName": "Эпителий плоский в моче",
+    "synonyms": ["Плоский эпителий", "Squamous epithelium", "Эпителиальные клетки"],
+    "valueType": "numeric",
+    "testTypes": ["urine"],
+    "unit": "в п/зр",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0, "max": 5 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Эритроциты в моче",
+    "synonyms": ["RBC (urine)", "Эритроциты (моча)", "Красные кровяные тельца (моча)"],
+    "valueType": "numeric",
+    "testTypes": ["urine"],
+    "unit": "в п/зр",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0, "max": 2 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Лейкоциты в осадке мочи",
+    "synonyms": ["WBC (urine)", "Лейкоциты (моча, осадок)", "Лейкоциты в п/зр"],
+    "valueType": "numeric",
+    "testTypes": ["urine"],
+    "unit": "в п/зр",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0, "max": 3 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Цилиндры в моче",
+    "synonyms": ["Casts", "Гиалиновые цилиндры", "Цилиндры"],
+    "valueType": "textual",
+    "testTypes": ["urine"],
+    "unit": null,
+    "referenceType": "list",
+    "typicalReference": null,
+    "allowedValues": ["не обнаружены", "отсутствуют", "-", "0"]
+  },
+  {
+    "canonicalName": "Бактерии в моче",
+    "synonyms": ["BACT", "Bacteria", "Бактериурия"],
+    "valueType": "textual",
+    "testTypes": ["urine"],
+    "unit": null,
+    "referenceType": "list",
+    "typicalReference": null,
+    "allowedValues": ["отсутствуют", "не обнаружены", "-", "neg", "neg."]
+  },
+  {
+    "canonicalName": "Глюкоза в крови",
+    "synonyms": ["GLU", "Glucose", "Сахар крови", "Blood glucose", "Глюкоза натощак"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry", "blood"],
+    "unit": "ммоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 3.5, "max": 6.0 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Холестерин общий",
+    "synonyms": ["CHOL", "Total Cholesterol", "Общий холестерин"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry"],
+    "unit": "ммоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0, "max": 5.2 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Билирубин общий",
+    "synonyms": ["TBIL", "Total Bilirubin", "Общий билирубин"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry"],
+    "unit": "мкмоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 5, "max": 21 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Билирубин прямой",
+    "synonyms": ["DBIL", "Direct Bilirubin", "Конъюгированный билирубин", "Билирубин связанный"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry"],
+    "unit": "мкмоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0, "max": 5 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "АЛТ",
+    "synonyms": ["ALT", "АлАТ", "Alanine aminotransferase", "Аланинаминотрансфераза"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry"],
+    "unit": "Ед/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0, "max": 41 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "АСТ",
+    "synonyms": ["AST", "АсАТ", "Aspartate aminotransferase", "Аспартатаминотрансфераза"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry"],
+    "unit": "Ед/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0, "max": 31 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Общий белок",
+    "synonyms": ["TP", "Total Protein", "Общий белок сыворотки"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry"],
+    "unit": "г/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 65, "max": 85 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Мочевина",
+    "synonyms": ["Urea", "Ure", "Мочевина в крови"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry"],
+    "unit": "ммоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 2.2, "max": 7.3 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Креатинин",
+    "synonyms": ["CREA", "Creatinine", "Креатинин сыворотки"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry"],
+    "unit": "мкмоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 53, "max": 115 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Мочевая кислота",
+    "synonyms": ["UA", "Uric Acid", "Мочевая кислота в крови"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry"],
+    "unit": "мкмоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0, "max": 428 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Щелочная фосфатаза",
+    "synonyms": ["ALP", "Alkaline phosphatase", "ЩФ"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry"],
+    "unit": "Ед/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 30, "max": 120 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "С-реактивный белок",
+    "synonyms": ["CRP", "C-reactive protein", "СРБ"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry"],
+    "unit": "мг/л",
+    "referenceType": "value",
+    "typicalReference": { "value": 0 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Триглицериды",
+    "synonyms": ["TG", "Triglycerides", "Триглицериды крови"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry"],
+    "unit": "ммоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0, "max": 1.7 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Амилаза",
+    "synonyms": ["Amylase", "Альфа-амилаза", "Диастаза"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry"],
+    "unit": "Ед/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 28, "max": 100 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Железо в сыворотке",
+    "synonyms": ["Fe", "Iron", "Сывороточное железо", "Serum Iron"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry", "microelements"],
+    "unit": "мкмоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 9, "max": 30 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Ферритин",
+    "synonyms": ["Ferritin", "Ферритин сыворотки"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry", "microelements"],
+    "unit": "мкг/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 22, "max": 322 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Кальций общий",
+    "synonyms": ["Ca", "Calcium", "Кальций крови"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry", "microelements"],
+    "unit": "ммоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 2.15, "max": 2.55 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Калий",
+    "synonyms": ["K", "Potassium", "Калий крови"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry", "microelements"],
+    "unit": "ммоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 3.5, "max": 5.1 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Натрий",
+    "synonyms": ["Na", "Sodium", "Натрий крови"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry", "microelements"],
+    "unit": "ммоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 136, "max": 145 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Хлор",
+    "synonyms": ["Cl", "Chloride", "Хлориды крови"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry", "microelements"],
+    "unit": "ммоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 98, "max": 107 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Магний",
+    "synonyms": ["Mg", "Magnesium", "Магний крови"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry", "microelements"],
+    "unit": "ммоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0.66, "max": 1.07 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Фосфор неорганический",
+    "synonyms": ["P", "Phosphorus", "Inorganic phosphorus", "Фосфор крови"],
+    "valueType": "numeric",
+    "testTypes": ["biochemistry", "microelements"],
+    "unit": "ммоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0.81, "max": 1.45 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Цинк",
+    "synonyms": ["Zn", "Zinc", "Цинк крови"],
+    "valueType": "numeric",
+    "testTypes": ["microelements"],
+    "unit": "мкг/дл",
+    "referenceType": "interval",
+    "typicalReference": { "min": 60, "max": 120 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Медь",
+    "synonyms": ["Cu", "Copper", "Медь крови"],
+    "valueType": "numeric",
+    "testTypes": ["microelements"],
+    "unit": "мкг/дл",
+    "referenceType": "interval",
+    "typicalReference": { "min": 60, "max": 160 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Йод",
+    "synonyms": ["I", "Iodine", "Йод крови"],
+    "valueType": "numeric",
+    "testTypes": ["microelements"],
+    "unit": "мкг/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 40, "max": 92 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Селен",
+    "synonyms": ["Se", "Selenium", "Селен крови"],
+    "valueType": "numeric",
+    "testTypes": ["microelements"],
+    "unit": "мкг/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 70, "max": 150 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Витамин D",
+    "synonyms": ["Vitamin D", "25-OH", "25-гидроксикальциферол", "25(OH)D", "Кальциферол"],
+    "valueType": "numeric",
+    "testTypes": ["vitamins"],
+    "unit": "нг/мл",
+    "referenceType": "interval",
+    "typicalReference": { "min": 30, "max": 100 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Витамин B12",
+    "synonyms": ["Vitamin B12", "Cobalamin", "Цианокобаламин"],
+    "valueType": "numeric",
+    "testTypes": ["vitamins"],
+    "unit": "пг/мл",
+    "referenceType": "interval",
+    "typicalReference": { "min": 200, "max": 900 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Фолиевая кислота",
+    "synonyms": ["Vitamin B9", "Folic Acid", "Folate", "B9"],
+    "valueType": "numeric",
+    "testTypes": ["vitamins"],
+    "unit": "нг/мл",
+    "referenceType": "interval",
+    "typicalReference": { "min": 3.0, "max": 17 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Витамин A",
+    "synonyms": ["Vitamin A", "Retinol", "Ретинол"],
+    "valueType": "numeric",
+    "testTypes": ["vitamins"],
+    "unit": "мкг/дл",
+    "referenceType": "interval",
+    "typicalReference": { "min": 20, "max": 60 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Витамин E",
+    "synonyms": ["Vitamin E", "Tocopherol", "Токоферол"],
+    "valueType": "numeric",
+    "testTypes": ["vitamins"],
+    "unit": "мг/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 5.5, "max": 17 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Витамин C",
+    "synonyms": ["Vitamin C", "Ascorbic Acid", "Аскорбиновая кислота"],
+    "valueType": "numeric",
+    "testTypes": ["vitamins"],
+    "unit": "мг/дл",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0.4, "max": 2.0 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Витамин K",
+    "synonyms": ["Vitamin K", "Phylloquinone", "Филлохинон"],
+    "valueType": "numeric",
+    "testTypes": ["vitamins"],
+    "unit": "нг/мл",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0.2, "max": 3.2 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "ТТГ",
+    "synonyms": ["TSH", "Тиреотропный гормон", "Thyroid stimulating hormone"],
+    "valueType": "numeric",
+    "testTypes": ["hormones"],
+    "unit": "мМЕ/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0.17, "max": 4.05 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Т3 общий",
+    "synonyms": ["Total T3", "Трийодтиронин общий", "Triiodothyronine total"],
+    "valueType": "numeric",
+    "testTypes": ["hormones"],
+    "unit": "нмоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 1.2, "max": 2.8 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Т4 общий",
+    "synonyms": ["Total T4", "Тетрайодтиронин общий", "Thyroxine total"],
+    "valueType": "numeric",
+    "testTypes": ["hormones"],
+    "unit": "нмоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 60, "max": 160 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Т3 свободный",
+    "synonyms": ["FT3", "Трийодтиронин свободный", "Free T3"],
+    "valueType": "numeric",
+    "testTypes": ["hormones"],
+    "unit": "пмоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 2.5, "max": 5.8 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Т4 свободный",
+    "synonyms": ["FT4", "Тетрайодтиронин свободный", "Free T4"],
+    "valueType": "numeric",
+    "testTypes": ["hormones"],
+    "unit": "пмоль/л",
+    "referenceType": "interval",
+    "typicalReference": { "min": 11.5, "max": 23.0 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Антитела к тиреоидной пероксидазе",
+    "synonyms": ["Anti-TPO", "АТ-ТПО", "Антитела к ТПО"],
+    "valueType": "numeric",
+    "testTypes": ["hormones"],
+    "unit": "Ед/мл",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0, "max": 5.6 },
+    "allowedValues": null
+  },
+  {
+    "canonicalName": "Антитела к тиреоглобулину",
+    "synonyms": ["Anti-TG", "АТ-ТГ", "Антитела к ТГ"],
+    "valueType": "numeric",
+    "testTypes": ["hormones"],
+    "unit": "МЕ/мл",
+    "referenceType": "interval",
+    "typicalReference": { "min": 0, "max": 4 },
+    "allowedValues": null
+  }
+]
