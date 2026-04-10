@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import type { DoctorVisit, LLMRecognitionResult } from "../../types";
 import { doctorVisitSchema } from "../../lib/validations";
 import { handleDateInput, toIsoDate, toDisplayDate } from "../../lib/date-utils";
@@ -15,15 +15,18 @@ export interface VisitModalProps {
   onSave: (visit: Omit<DoctorVisit, "createdAt" | "updatedAt">) => void;
   /** Все записи — для автокомплита полей */
   previousVisits?: DoctorVisit[];
+  /** Запись для редактирования (если null — режим создания) */
+  editVisit?: DoctorVisit | null;
 }
 
 type FormErrors = Partial<Record<keyof DoctorVisit, string>>;
 
 /**
- * Модальное окно создания записи о приёме.
- * Без LLM-кнопки — добавляется в US3.
+ * Модальное окно создания/редактирования записи о приёме.
  */
-export function VisitModal({ open, onClose, onSave, previousVisits = [] }: VisitModalProps) {
+export function VisitModal({ open, onClose, onSave, previousVisits = [], editVisit }: VisitModalProps) {
+  // Инициализация формы: из editVisit или пустая
+  const [initialized, setInitialized] = useState(false);
   const [date, setDate] = useState(""); // ДД.ММ.ГГГГ (визуальный)
   const [doctorName, setDoctorName] = useState("");
   const [specialty, setSpecialty] = useState("");
@@ -36,6 +39,37 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [] }: Visit
   const [saving, setSaving] = useState(false);
   const [recognizing, setRecognizing] = useState(false);
   const [llmError, setLlmError] = useState<string | null>(null);
+
+  // При открытии модалки — инициализируем поля
+  useEffect(() => {
+    if (open && !initialized) {
+      if (editVisit) {
+        setDate(toDisplayDate(editVisit.date));
+        setDoctorName(editVisit.doctorName);
+        setSpecialty(editVisit.specialty);
+        setClinic(editVisit.clinic || "");
+        setResults(editVisit.results || "");
+        setMedications(editVisit.medications || "");
+        setProcedures(editVisit.procedures || "");
+        setRating(editVisit.rating);
+      }
+      setInitialized(true);
+    }
+    if (!open) {
+      // Сброс при закрытии
+      setDate("");
+      setDoctorName("");
+      setSpecialty("");
+      setClinic("");
+      setResults("");
+      setMedications("");
+      setProcedures("");
+      setRating(null);
+      setErrors({});
+      setLlmError(null);
+      setInitialized(false);
+    }
+  }, [open, initialized, editVisit]);
 
   // Уникальные значения из предыдущих приёмов для автокомплита
   const autocompleteOptions = useMemo(() => {
@@ -120,7 +154,7 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [] }: Visit
     setSaving(true);
     try {
       onSave({
-        id: crypto.randomUUID(),
+        id: editVisit?.id || crypto.randomUUID(),
         ...data,
       });
     } finally {
@@ -140,7 +174,9 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [] }: Visit
       <div className="w-full max-w-2xl rounded-xl border border-border bg-background shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
-          <h2 className="text-lg font-semibold text-foreground">Новый приём</h2>
+          <h2 className="text-lg font-semibold text-foreground">
+            {editVisit ? "Редактирование приёма" : "Новый приём"}
+          </h2>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Закрыть">
             <X size={20} />
           </button>

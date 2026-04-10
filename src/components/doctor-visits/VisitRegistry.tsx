@@ -8,15 +8,20 @@ import { Plus, Loader2 } from "lucide-react";
 export interface VisitRegistryProps {
   onAddVisit: () => void;
   onOpenVisit: (visit: DoctorVisit) => void;
-  /** Callback при загрузке/обновлении списка */
   onLoad?: (visits: DoctorVisit[]) => void;
+  onVisitDeleted?: (id: string) => void;
+  onVisitChanged?: (visit: DoctorVisit) => void;
 }
 
 /**
  * Реестр приёмов — плитки с загрузкой данных, фильтрацией и кнопкой добавления.
  * Самостоятельно загружает данные через IPC.
  */
-export function VisitRegistry({ onAddVisit, onOpenVisit, onLoad }: VisitRegistryProps) {
+export function VisitRegistry({
+  onAddVisit,
+  onOpenVisit,
+  onLoad,
+}: VisitRegistryProps) {
   const [visits, setVisits] = useState<DoctorVisit[]>([]);
   const [filteredVisits, setFilteredVisits] = useState<DoctorVisit[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +41,7 @@ export function VisitRegistry({ onAddVisit, onOpenVisit, onLoad }: VisitRegistry
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [onLoad]);
 
   useEffect(() => {
     loadVisits();

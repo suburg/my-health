@@ -1,52 +1,70 @@
 import { useState, useCallback } from "react";
 import type { DoctorVisit } from "../../types";
-import { addVisit as addVisitService } from "../../services/doctor-visit-service";
+import { addVisit as addVisitService, updateVisit } from "../../services/doctor-visit-service";
 import { VisitRegistry } from "./VisitRegistry";
 import { VisitModal } from "./VisitModal";
 import { Loader2 } from "lucide-react";
 
+export interface VisitViewProps {
+  onOpenVisit: (visit: DoctorVisit) => void;
+}
+
 /**
- * Контейнер-экран «Приёмы».
- * Реестр + модальное окно создания записи.
+ * Экран «Приёмы» — реестр плитками + модальное окно создания/редактирования.
+ * Открытие карточки → навигация на отдельную страницу (onOpenVisit).
  */
-export function VisitView() {
+export function VisitView({ onOpenVisit }: VisitViewProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalKey, setModalKey] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
   const [saving, setSaving] = useState(false);
   const [allVisits, setAllVisits] = useState<DoctorVisit[]>([]);
+  const [editVisit, setEditVisit] = useState<DoctorVisit | null>(null);
 
   const handleAddVisit = useCallback(() => {
+    setEditVisit(null);
     setModalKey((k) => k + 1);
     setModalOpen(true);
   }, []);
 
   const handleCloseModal = useCallback(() => {
     setModalOpen(false);
+    setEditVisit(null);
   }, []);
 
   const handleSave = useCallback(
     async (visitData: Omit<DoctorVisit, "createdAt" | "updatedAt">) => {
       setSaving(true);
       try {
-        const saved = await addVisitService(visitData);
-        setRefreshKey((k) => k + 1);
-        setAllVisits((prev) => {
-          const existing = prev.filter((v) => v.id !== saved.id);
-          return [saved, ...existing];
-        });
+        let saved: DoctorVisit;
+        if (editVisit) {
+          saved = await updateVisit(editVisit.id, visitData);
+          setAllVisits((prev) =>
+            prev.map((v) => (v.id === saved.id ? saved : v)),
+          );
+        } else {
+          saved = await addVisitService(visitData);
+          setRefreshKey((k) => k + 1);
+          setAllVisits((prev) => {
+            const existing = prev.filter((v) => v.id !== saved.id);
+            return [saved, ...existing];
+          });
+        }
         setModalOpen(false);
+        setEditVisit(null);
       } finally {
         setSaving(false);
       }
     },
-    [],
+    [editVisit],
   );
 
-  const handleOpenVisit = useCallback((_visit: DoctorVisit) => {
-    // Пока просто заглушка — в US4 откроем карточку
-    console.log("Open visit:", _visit.id);
-  }, []);
+  const handleOpenVisit = useCallback(
+    (visit: DoctorVisit) => {
+      onOpenVisit(visit);
+    },
+    [onOpenVisit],
+  );
 
   return (
     <div className="space-y-6">
@@ -54,15 +72,16 @@ export function VisitView() {
         key={refreshKey}
         onAddVisit={handleAddVisit}
         onOpenVisit={handleOpenVisit}
-        onLoad={setAllVisits}
       />
 
+      {/* Модальное окно создания/редактирования */}
       <VisitModal
         key={modalKey}
         open={modalOpen}
         onClose={handleCloseModal}
         onSave={handleSave}
         previousVisits={allVisits}
+        editVisit={editVisit}
       />
 
       {saving && (

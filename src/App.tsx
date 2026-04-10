@@ -6,6 +6,7 @@ import { ProfileForm } from "./components/profile/ProfileForm";
 import { PinChangeForm } from "./components/pin-change/PinChangeForm";
 import { HealthView, type HealthViewMode } from "./components/health/HealthView";
 import { VisitView } from "./components/doctor-visits/VisitView";
+import { VisitDetailPage } from "./components/doctor-visits/VisitDetailPage";
 import { logger } from "./lib/logger";
 import { configManager } from "./config/app-config";
 import { useState, useEffect, useCallback } from "react";
@@ -13,7 +14,7 @@ import { useState, useEffect, useCallback } from "react";
 /**
  * Типы экранов для навигации внутри приложения.
  */
-type Screen = "main" | "profile" | "pinChange" | "health" | "doctorVisits";
+type Screen = "main" | "profile" | "pinChange" | "health" | "doctorVisits" | "doctorVisitDetail";
 
 /**
  * Компонент-маршрутизатор на основе состояния аутентификации.
@@ -22,6 +23,7 @@ function AppRouter() {
   const { isLoading, isRegistered, isAuthenticated, logout } = useAuth();
   const [currentScreen, setCurrentScreen] = useState<Screen>("main");
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
+  const [selectedVisitId, setSelectedVisitId] = useState<string | null>(null);
 
   // Режим просмотра здоровья
   const [healthViewMode, setHealthViewMode] = useState<HealthViewMode>("table");
@@ -33,8 +35,31 @@ function AppRouter() {
     setCurrentScreen("health");
   }, []);
   const navigateToDoctorVisits = useCallback(() => {
+    setSelectedVisitId(null);
     setCurrentScreen("doctorVisits");
   }, []);
+  const navigateToVisitDetail = useCallback((visitId: string) => {
+    setSelectedVisitId(visitId);
+    setCurrentScreen("doctorVisitDetail");
+  }, []);
+  const navigateBackToRegistry = useCallback(() => {
+    setSelectedVisitId(null);
+    setCurrentScreen("doctorVisits");
+  }, []);
+
+  const handleOpenVisit = useCallback((visit: { id: string }) => {
+    navigateToVisitDetail(visit.id);
+  }, [navigateToVisitDetail]);
+
+  const handleVisitChanged = useCallback((visit: { id: string }) => {
+    setSelectedVisitId(visit.id);
+  }, []);
+
+  const handleVisitDeleted = useCallback((id: string) => {
+    if (selectedVisitId === id) {
+      navigateBackToRegistry();
+    }
+  }, [selectedVisitId, navigateBackToRegistry]);
 
   // Обработчик выхода
   const handleLogout = useCallback(() => {
@@ -147,6 +172,7 @@ function AppRouter() {
                   {currentScreen === "main" && "Главная"}
                   {currentScreen === "health" && "Показатели"}
                   {currentScreen === "doctorVisits" && "Приёмы"}
+                  {currentScreen === "doctorVisitDetail" && "Карточка приёма"}
                   {currentScreen === "profile" && "Профиль"}
                   {currentScreen === "pinChange" && "Смена пин-кода"}
                 </h1>
@@ -154,6 +180,7 @@ function AppRouter() {
                   {currentScreen === "main" && "Основной экран приложения"}
                   {currentScreen === "health" && "Журнал здоровья"}
                   {currentScreen === "doctorVisits" && "История приёмов врача"}
+                  {currentScreen === "doctorVisitDetail" && "Подробная информация о приёме"}
                   {currentScreen === "profile" && "Просмотр и редактирование данных"}
                   {currentScreen === "pinChange" && "Введите текущий и новый пин-код"}
                 </p>
@@ -234,7 +261,18 @@ function AppRouter() {
 
             {currentScreen === "doctorVisits" && (
               <div className="mx-auto max-w-6xl w-full">
-                <VisitView />
+                <VisitView onOpenVisit={handleOpenVisit} />
+              </div>
+            )}
+
+            {currentScreen === "doctorVisitDetail" && selectedVisitId && (
+              <div className="mx-auto max-w-6xl w-full">
+                <VisitDetailPage
+                  visitId={selectedVisitId}
+                  onBack={navigateBackToRegistry}
+                  onVisitChanged={handleVisitChanged}
+                  onVisitDeleted={handleVisitDeleted}
+                />
               </div>
             )}
 
