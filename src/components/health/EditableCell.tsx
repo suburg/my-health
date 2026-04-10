@@ -224,7 +224,7 @@ function parseInput(
   }
 
   if (def.type === "compound") {
-    const parts = trimmed.split(/[\/–—]/);
+    const parts = trimmed.split(/[/–—]/);
     if (parts.length !== 2) return null;
     const sys = parseInt(parts[0].trim(), 10);
     const dia = parseInt(parts[1].trim(), 10);

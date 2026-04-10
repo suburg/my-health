@@ -27,7 +27,7 @@ export interface HealthTableProps {
  * Первый столбец зафиксирован (sticky). Все ячейки редактируемые сразу.
  * Замеры отсортированы от новых к старым.
  */
-export function HealthTable({}: HealthTableProps) {
+export function HealthTable(_props: HealthTableProps) {
   const [entries, setEntries] = useState<HealthEntry[]>([]);
   const [metrics, setMetrics] = useState<MetricDefinition[]>([]);
   const [isLoading, setIsLoading] = useState(true);

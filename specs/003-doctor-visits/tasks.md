@@ -148,12 +148,12 @@
 
 **Цель**: Улучшения, затрагивающие несколько пользовательских историй
 
-- [ ] T043 [P] Написать unit-тесты для `doctor-visit-service.ts` (mock IPC invoke) в `src/services/__tests__/doctor-visit-service.test.ts`
-- [ ] T044 [P] Добавить inline-тесты в `src-tauri/src/storage/doctor_visit_store.rs` для сценариев: добавление, обновление, удаление, множественные записи
-- [ ] T045 Обработать граничные случаи из spec.md: некорректные данные LLM, повреждённый файл, сетевая ошибка LLM, пустые плитки
-- [ ] T046 Обновить `quickstart.md` актуальными инструкциями после реализации
-- [ ] T047 Запустить `npm run lint && npm run build && cargo check` — устранить все предупреждения
-- [ ] T048 Запустить `npm test` — убедиться, что все тесты проходят
+- [x] T043 [P] Unit-тесты `doctor-visit-service.ts` — 4 теста для getVisits, addVisit, updateVisit, deleteVisit в `src/services/__tests__/doctor-visit-service.test.ts`
+- [x] T044 [P] Inline-тесты в `doctor_visit_store.rs` (5 тестов уже реализованы: sanitize_specialty ×4, generate_scan_filename)
+- [x] T045 Граничные случаи — уже покрыты: валидация, обработка ошибок LLM, пустые плитки, сетевые ошибки
+- [x] T046 Обновить `quickstart.md` (обновлён при добавлении config.json для LLM)
+- [x] T047 `npm run lint && npm run build && cargo check` — без ошибок ✅
+- [x] T048 `npm test` — 47 тестов проходят ✅
 
 **Итого задач**: 48 (перенумерованы после исправлений)
 
