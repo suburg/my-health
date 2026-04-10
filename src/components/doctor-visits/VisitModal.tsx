@@ -6,6 +6,7 @@ import { fileToBase64 } from "../../lib/file-utils";
 import { recognizeScan } from "../../services/doctor-visit-service";
 import { StarRating } from "./StarRating";
 import { ScanUploader } from "./ScanUploader";
+import { AttachmentUploader } from "./AttachmentUploader";
 import { VisitAutocomplete } from "./VisitAutocomplete";
 import { X, Loader2 } from "lucide-react";
 
@@ -33,6 +34,7 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
   const [clinic, setClinic] = useState("");
   const [diagnosis, setDiagnosis] = useState("");
   const [summary, setSummary] = useState("");
+  const [attachments, setAttachments] = useState<string[]>([]);
   const [medications, setMedications] = useState("");
   const [procedures, setProcedures] = useState("");
   const [rating, setRating] = useState<number | null>(null);
@@ -51,6 +53,7 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
         setClinic(editVisit.clinic || "");
         setDiagnosis(editVisit.diagnosis || "");
         setSummary(editVisit.summary || "");
+        setAttachments(editVisit.attachments || []);
         setMedications(editVisit.medications || "");
         setProcedures(editVisit.procedures || "");
         setRating(editVisit.rating);
@@ -65,6 +68,7 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
       setClinic("");
       setDiagnosis("");
       setSummary("");
+      setAttachments([]);
       setMedications("");
       setProcedures("");
       setRating(null);
@@ -138,6 +142,7 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
       clinic: clinic || null,
       diagnosis: diagnosis || null,
       summary: summary || null,
+      attachments,
       medications: medications || null,
       procedures: procedures || null,
       scanPath: null,
@@ -320,6 +325,13 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
             recognizing={recognizing}
             llmError={llmError}
             showRecognizeButton
+          />
+
+          {/* Приложения (снимки, памятки — не распознаются) */}
+          <AttachmentUploader
+            attachments={attachments}
+            onChange={setAttachments}
+            disabled={saving}
           />
 
           {/* Buttons */}

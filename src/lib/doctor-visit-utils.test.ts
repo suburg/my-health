@@ -18,6 +18,7 @@ const makeVisit = (overrides: Partial<DoctorVisit> = {}): DoctorVisit => ({
   clinic: overrides.clinic ?? null,
   diagnosis: overrides.diagnosis ?? null,
   summary: overrides.summary ?? null,
+  attachments: overrides.attachments ?? [],
   medications: overrides.medications ?? null,
   procedures: overrides.procedures ?? null,
   scanPath: overrides.scanPath ?? null,

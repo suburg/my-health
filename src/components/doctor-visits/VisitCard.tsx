@@ -1,6 +1,6 @@
 import type { DoctorVisit } from "../../types";
 import { StarRating } from "./StarRating";
-import { Calendar, Stethoscope, Building2, FileText, Pill, ClipboardList } from "lucide-react";
+import { Calendar, Stethoscope, Building2, FileText, Pill, ClipboardList, Paperclip } from "lucide-react";
 
 export interface VisitCardProps {
   visit: DoctorVisit;
@@ -136,6 +136,33 @@ export function VisitCard({
               className="max-h-80 rounded-lg border border-border object-contain"
             />
           )}
+        </div>
+      )}
+
+      {/* Приложения */}
+      {visit.attachments && visit.attachments.length > 0 && (
+        <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
+          <h4 className="mb-3 text-sm font-medium text-foreground">Приложения</h4>
+          <div className="space-y-2">
+            {visit.attachments.map((path) => {
+              const name = path.split("/").pop() || path;
+              const isImage = /\.(jpe?g|png|webp|gif|bmp)$/i.test(name);
+              const isPdf = name.toLowerCase().endsWith(".pdf");
+
+              return (
+                <div key={path} className="flex items-center gap-3 rounded-md border border-border bg-muted/30 px-4 py-3">
+                  <Paperclip size={16} className="shrink-0 text-muted-foreground" />
+                  {isImage ? (
+                    <img src={path} alt={name} className="max-h-32 rounded object-contain" />
+                  ) : isPdf ? (
+                    <span className="text-sm text-muted-foreground">{name}</span>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">{name}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

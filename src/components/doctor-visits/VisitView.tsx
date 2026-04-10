@@ -72,6 +72,7 @@ export function VisitView({ onOpenVisit }: VisitViewProps) {
         key={refreshKey}
         onAddVisit={handleAddVisit}
         onOpenVisit={handleOpenVisit}
+        onLoad={setAllVisits}
       />
 
       {/* Модальное окно создания/редактирования */}

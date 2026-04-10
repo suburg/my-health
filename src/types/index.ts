@@ -206,7 +206,8 @@ export interface DoctorVisit {
   summary: string | null; // Итоги — ручное заполнение пользователем
   medications: string | null;
   procedures: string | null;
-  scanPath: string | null;
+  scanPath: string | null; // Путь к скану документа (распознаётся через LLM)
+  attachments: string[]; // Пути к доп. файлам (снимки, памятки — не распознаются)
   rating: number | null;
   createdAt: string;
   updatedAt: string;

@@ -220,3 +220,61 @@ export async function deleteScanFile(scanPath: string): Promise<void> {
     throw new Error(message);
   }
 }
+
+/**
+ * Загрузить файл-приложение (снимок, памятка) в хранилище.
+ * Файл НЕ передаётся в LLM.
+ *
+ * @param file — File объект
+ */
+export async function uploadAttachment(file: File): Promise<string> {
+  logger.debug(MODULE_NAME, `Вызов uploadAttachment: ${file.name}`);
+
+  const data = await file.arrayBuffer();
+  const uint8Array = new Uint8Array(data);
+
+  try {
+    const result = await invoke<{ attachmentPath: string } | IpcError>("upload_attachment", {
+      fileName: file.name,
+      data: Array.from(uint8Array),
+    });
+
+    if ("error" in result) {
+      logger.error(MODULE_NAME, `uploadAttachment вернул ошибку: ${result.error}`);
+      throw new Error(result.error);
+    }
+
+    logger.info(MODULE_NAME, `Приложение ${file.name} сохранено`);
+    return (result as { attachmentPath: string }).attachmentPath;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    logger.error(MODULE_NAME, `Ошибка при вызове uploadAttachment: ${message}`);
+    throw new Error(message);
+  }
+}
+
+/**
+ * Удалить файл-приложение из хранилища.
+ *
+ * @param attachmentPath — относительный путь к файлу
+ */
+export async function deleteAttachment(attachmentPath: string): Promise<void> {
+  logger.debug(MODULE_NAME, `Вызов deleteAttachment: ${attachmentPath}`);
+
+  try {
+    const result = await invoke<IpcSuccess | IpcError>("delete_attachment", {
+      attachmentPath,
+    });
+
+    if ("error" in result) {
+      logger.error(MODULE_NAME, `deleteAttachment вернул ошибку: ${result.error}`);
+      throw new Error(result.error);
+    }
+
+    logger.info(MODULE_NAME, `Приложение ${attachmentPath} удалено`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    logger.error(MODULE_NAME, `Ошибка при вызове deleteAttachment: ${message}`);
+    throw new Error(message);
+  }
+}

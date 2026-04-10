@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::fs;
 use std::time::Duration;
 use tauri::Manager;
 
@@ -27,6 +28,7 @@ pub struct VisitInput {
     pub medications: Option<String>,
     pub procedures: Option<String>,
     pub scan_path: Option<String>,
+    pub attachments: Vec<String>,
     pub rating: Option<u8>,
 }
 
@@ -48,6 +50,7 @@ pub struct VisitUpdate {
     pub medications: Option<String>,
     pub procedures: Option<String>,
     pub scan_path: Option<String>,
+    pub attachments: Option<Vec<String>>,
     pub rating: Option<u8>,
 }
 
@@ -118,6 +121,19 @@ pub struct DeleteScanResponse {
     pub success: bool,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UploadAttachmentRequest {
+    pub file_name: String,
+    pub data: Vec<u8>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UploadAttachmentResponse {
+    pub attachment_path: String,
+}
+
 // ============================================================================
 // Tauri Commands
 // ============================================================================
@@ -159,6 +175,7 @@ pub fn add_doctor_visit(
         medications: visit.medications,
         procedures: visit.procedures,
         scan_path: visit.scan_path,
+        attachments: visit.attachments,
         rating: visit.rating,
         created_at: now.clone(),
         updated_at: now,
@@ -222,6 +239,9 @@ pub fn update_doctor_visit(
     visits[pos].medications.clone_from(&visit.medications);
     visits[pos].procedures.clone_from(&visit.procedures);
     visits[pos].scan_path.clone_from(&visit.scan_path);
+    if let Some(v) = &visit.attachments {
+        visits[pos].attachments = v.clone();
+    }
     if let Some(v) = visit.rating {
         visits[pos].rating = Some(v);
     }
@@ -391,6 +411,46 @@ pub fn delete_scan(
 ) -> Result<DeleteScanResponse, String> {
     storage::doctor_visit_store::delete_scan(&app, &scan_path)
         .map_err(|e| format!("Ошибка удаления скана: {e}"))?;
+
+    Ok(DeleteScanResponse { success: true })
+}
+
+/// Загрузить файл-приложение (снимок, памятка) в `scans/`.
+/// Файл сохраняется с уникальным именем, НЕ передаётся в LLM.
+#[tauri::command]
+pub fn upload_attachment(
+    app: tauri::AppHandle,
+    file_name: String,
+    data: Vec<u8>,
+) -> Result<UploadAttachmentResponse, String> {
+    let dir = storage::doctor_visit_store::scans_dir(&app);
+    fs::create_dir_all(&dir).map_err(|e| format!("Ошибка создания директории: {e}"))?;
+
+    let uuid_part = uuid::Uuid::new_v4().simple().to_string()[..8].to_string();
+    let ext = std::path::Path::new(&file_name)
+        .extension()
+        .and_then(|e| e.to_str())
+        .unwrap_or("dat")
+        .to_lowercase();
+    let safe_name = file_name.replace(|c: char| !c.is_alphanumeric() && c != '.' && c != '-' && c != '_', "_");
+    let attachment_name = format!("{}_{}.{}", safe_name, uuid_part, ext);
+    let attachment_path = dir.join(&attachment_name);
+
+    fs::write(&attachment_path, &data).map_err(|e| format!("Ошибка записи файла: {e}"))?;
+
+    Ok(UploadAttachmentResponse {
+        attachment_path: format!("scans/{}", attachment_name),
+    })
+}
+
+/// Удалить файл-приложение.
+#[tauri::command]
+pub fn delete_attachment(
+    app: tauri::AppHandle,
+    attachment_path: String,
+) -> Result<DeleteScanResponse, String> {
+    storage::doctor_visit_store::delete_scan(&app, &attachment_path)
+        .map_err(|e| format!("Ошибка удаления файла: {e}"))?;
 
     Ok(DeleteScanResponse { success: true })
 }

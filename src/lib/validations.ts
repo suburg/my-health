@@ -219,6 +219,7 @@ export const doctorVisitSchema = z.object({
   medications: z.string().nullable().optional(),
   procedures: z.string().nullable().optional(),
   scanPath: z.string().nullable().optional(),
+  attachments: z.array(z.string()).optional(),
   rating: z
     .number()
     .int()

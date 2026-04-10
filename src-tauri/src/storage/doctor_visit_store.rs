@@ -33,6 +33,8 @@ pub struct DoctorVisit {
     pub medications: Option<String>,
     pub procedures: Option<String>,
     pub scan_path: Option<String>,
+    #[serde(default)]
+    pub attachments: Vec<String>,
     pub rating: Option<u8>,
     pub created_at: String,
     pub updated_at: String,
