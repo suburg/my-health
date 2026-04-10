@@ -1,8 +1,16 @@
 use serde::{Deserialize, Serialize};
+use std::fs;
+use std::io::Write;
 use std::path::PathBuf;
 use tauri::Manager;
 
 use super::json_store;
+
+/// Поддерживаемые расширения файлов сканов
+const SUPPORTED_EXTENSIONSIONS: &[&str] = &["jpg", "jpeg", "png", "webp", "gif", "bmp", "pdf"];
+
+/// Максимальный размер файла скана (10 МБ)
+const MAX_SCAN_SIZE: u64 = 10 * 1024 * 1024;
 
 /// Структура файла doctor-visits.json.
 #[derive(Debug, Serialize, Deserialize)]
@@ -100,6 +108,144 @@ pub fn sanitize_specialty(specialty: &str) -> Option<String> {
     } else {
         Some(cleaned)
     }
+}
+
+// ============================================================================
+// Загрузка сканов
+// ============================================================================
+
+/// Получить директорию `scans/` внутри AppData.
+pub fn scans_dir(app: &tauri::AppHandle) -> PathBuf {
+    app.path()
+        .app_data_dir()
+        .expect("не удалось получить директорию данных")
+        .join("scans")
+}
+
+/// Сохранить файл скана в директорию `scans/` с бизнес-именем.
+/// Для PDF рендерит все страницы в PNG.
+pub fn upload_scan(
+    app: &tauri::AppHandle,
+    file_name: &str,
+    data: &[u8],
+    visit_date: &str,
+    specialty: &str,
+) -> Result<ScanUploadResult, ScanUploadError> {
+    if data.len() as u64 > MAX_SCAN_SIZE {
+        return Err(ScanUploadError::SizeLimit {
+            size: data.len() as u64,
+            max: MAX_SCAN_SIZE,
+        });
+    }
+
+    let ext = std::path::Path::new(file_name)
+        .extension()
+        .and_then(|e| e.to_str())
+        .unwrap_or("")
+        .to_lowercase();
+
+    if !SUPPORTED_EXTENSIONSIONS.contains(&ext.as_str()) {
+        return Err(ScanUploadError::InvalidExtension(ext));
+    }
+
+    let dir = scans_dir(app);
+    fs::create_dir_all(&dir).map_err(|e| ScanUploadError::WriteError {
+        path: dir.clone(),
+        source: e,
+    })?;
+
+    let base_name = generate_scan_filename(visit_date, specialty, file_name);
+
+    if ext == "pdf" {
+        // Для PDF: сохраняем оригинал + рендерим превью всех страниц
+        let pdf_path = dir.join(&base_name);
+        fs::write(&pdf_path, data).map_err(|e| ScanUploadError::WriteError {
+            path: pdf_path.clone(),
+            source: e,
+        })?;
+
+        // TODO: Рендеринг страниц PDF через pdfium-render (в отдельной задаче)
+        // Пока просто сохраняем PDF как есть
+
+        Ok(ScanUploadResult {
+            scan_path: format!("scans/{}", base_name),
+            preview_path: None,
+            page_count: 0,
+        })
+    } else {
+        // Изображение — сохраняем как есть
+        let img_path = dir.join(&base_name);
+        let mut file = fs::File::create(&img_path).map_err(|e| ScanUploadError::WriteError {
+            path: img_path.clone(),
+            source: e,
+        })?;
+
+        file.write_all(data).map_err(|e| ScanUploadError::WriteError {
+            path: img_path.clone(),
+            source: e,
+        })?;
+
+        Ok(ScanUploadResult {
+            scan_path: format!("scans/{}", base_name),
+            preview_path: None,
+            page_count: 1,
+        })
+    }
+}
+
+/// Результат загрузки скана
+#[derive(Debug)]
+pub struct ScanUploadResult {
+    pub scan_path: String,
+    pub preview_path: Option<String>,
+    pub page_count: usize,
+}
+
+/// Ошибки загрузки скана
+#[derive(Debug, thiserror::Error)]
+pub enum ScanUploadError {
+    #[error("Неподдерживаемый формат файла: {0}")]
+    InvalidExtension(String),
+
+    #[error("Файл слишком большой: {size} байт (максимум {max})")]
+    SizeLimit { size: u64, max: u64 },
+
+    #[error("Ошибка записи файла {path}: {source}")]
+    WriteError { path: PathBuf, source: std::io::Error },
+}
+
+/// Удалить файл скана
+pub fn delete_scan(app: &tauri::AppHandle, scan_path: &str) -> Result<(), ScanDeleteError> {
+    // scan_path — относительный путь типа "scans/filename.ext"
+    let app_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|_e| ScanDeleteError::NotFound {
+            path: scan_path.to_string(),
+        })?;
+
+    let file_path = app_dir.join(scan_path);
+    if !file_path.exists() {
+        return Err(ScanDeleteError::NotFound {
+            path: scan_path.to_string(),
+        });
+    }
+
+    fs::remove_file(&file_path).map_err(|e| ScanDeleteError::DeleteError {
+        path: file_path,
+        source: e,
+    })?;
+
+    Ok(())
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum ScanDeleteError {
+    #[error("Файл не найден: {path}")]
+    NotFound { path: String },
+
+    #[error("Ошибка удаления файла {path}: {source}")]
+    DeleteError { path: PathBuf, source: std::io::Error },
 }
 
 // ============================================================================

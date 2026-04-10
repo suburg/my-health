@@ -38,8 +38,25 @@ fn llm_prompt_path(app: &tauri::AppHandle) -> PathBuf {
         .join(LLM_PROMPT_FILENAME)
 }
 
+/// Дефолтный промпт (встроенный, если файл отсутствует).
+fn default_prompt() -> LlmPromptConfig {
+    LlmPromptConfig {
+        schema_version: 1,
+        system_prompt: "Ты — ассистент для распознавания медицинских документов. Проанализируй изображение(я) медицинского документа (заключение врача, рецепт, направление, выписка и т.п.) и извлеки информацию в формате JSON.\n\nВНИМАНИЕ: Тебе может быть передано несколько изображений — это страницы одного документа. Анализируй все страницы совместно, извлекая полную информацию из всего документа.\n\nОжидаемые поля:\n- doctorName: ФИО врача (строка, если не распознано — null)\n- specialty: Специальность врача (строка, если не распознано — null)\n- clinic: Название клиники/учреждения (строка, если не распознано — null)\n- date: Дата приёма в формате YYYY-MM-DD (строка, если не распознано — null)\n- results: Основные результаты/заключение врача (строка, если не распознано — null)\n- medications: Назначенные препараты/лекарства (строка, если не распознано — null)\n- procedures: Назначенные процедуры и исследования (строка, если не распознано — null)\n\nВот пример корректного ответа для ориентира:\n{exampleResponse}\n\nОтветь ТОЛЬКО валидным JSON объектом без дополнительного текста, markdown-обрамления или комментариев. Если поле не удалось распознать — укажи null.".to_string(),
+        example_response: LlmExampleResponse {
+            doctor_name: Some("Иванов Иван Иванович".to_string()),
+            specialty: Some("Кардиолог".to_string()),
+            clinic: Some("Городская поликлиника №1".to_string()),
+            date: Some("2026-04-01".to_string()),
+            results: Some("Жалобы на повышение АД до 150/95. Объективно: ЧСС 78 уд/мин. Рекомендовано: ЭКГ, общий анализ крови, консультация нефролога.".to_string()),
+            medications: Some("Эналаприл 5мг — 1 раз в день утром\nАмлодипин 5мг — 1 раз в день вечером".to_string()),
+            procedures: Some("ЭКГ — через 2 недели\nОбщий анализ крови — натощак\nХолтеровское мониторирование — запись на 24ч".to_string()),
+        },
+    }
+}
+
 /// Загрузить конфигурацию промпта из AppData.
-/// При первом вызове читает файл и кэширует результат.
+/// Если файл отсутствует — создаётся дефолтный промпт.
 pub fn load_prompt(app: &tauri::AppHandle) -> Result<LlmPromptConfig, LlmPromptError> {
     // Проверяем кэш
     {
@@ -53,12 +70,19 @@ pub fn load_prompt(app: &tauri::AppHandle) -> Result<LlmPromptConfig, LlmPromptE
     let path = llm_prompt_path(app);
     match json_store::read_json::<LlmPromptConfig>(&path)? {
         Some(config) => {
-            // Сохраняем в кэш
             let mut cache = PROMPT_CACHE.lock().map_err(|_| LlmPromptError::CacheLock)?;
             *cache = Some(config.clone());
             Ok(config)
         }
-        None => Err(LlmPromptError::NotFound),
+        None => {
+            // Файл не найден — создаём дефолтный
+            let default = default_prompt();
+            json_store::write_json(&path, &default)
+                .map_err(|e| LlmPromptError::WriteDefault { source: e })?;
+            let mut cache = PROMPT_CACHE.lock().map_err(|_| LlmPromptError::CacheLock)?;
+            *cache = Some(default.clone());
+            Ok(default)
+        }
     }
 }
 
@@ -83,8 +107,8 @@ pub fn build_system_prompt(config: &LlmPromptConfig) -> String {
 
 #[derive(Debug, thiserror::Error)]
 pub enum LlmPromptError {
-    #[error("Файл llm-prompt.json не найден в директории данных приложения")]
-    NotFound,
+    #[error("Ошибка записи дефолтного промпта: {source}")]
+    WriteDefault { source: json_store::StoreError },
 
     #[error("Ошибка чтения файла промпта: {0}")]
     Read(#[from] json_store::StoreError),
@@ -129,7 +153,6 @@ mod tests {
 
         reset_prompt_cache();
 
-        // Читаем напрямую без tauri::AppHandle
         let loaded: LlmPromptConfig = json_store::read_json(&path)
             .expect("чтение")
             .expect("файл существует");
@@ -138,19 +161,18 @@ mod tests {
     }
 
     #[test]
-    fn load_prompt_not_found() {
-        let dir = TempDir::with_prefix("llm_prompt_").expect("создать временную директорию");
-        reset_prompt_cache();
-
-        let result: Option<LlmPromptConfig> = json_store::read_json(&dir.path().join(LLM_PROMPT_FILENAME)).expect("не должно паниковать");
-        assert!(result.is_none());
-    }
-
-    #[test]
     fn build_system_prompt_replaces_placeholder() {
         let config = sample_config();
         let prompt = build_system_prompt(&config);
         assert!(prompt.contains("\"doctor_name\": \"Иванов И.И.\""));
         assert!(!prompt.contains("{exampleResponse}"));
+    }
+
+    #[test]
+    fn default_prompt_is_valid() {
+        let default = default_prompt();
+        assert!(default.system_prompt.contains("{exampleResponse}"));
+        assert!(default.example_response.doctor_name.is_some());
+        assert!(default.example_response.specialty.is_some());
     }
 }

@@ -28,6 +28,14 @@ export interface AppConfig {
   schemaVersion: number;
   debug: boolean;
   dataDir: string;
+  llm?: LlmConfig;
+}
+
+export interface LlmConfig {
+  apiUrl: string;
+  apiKey: string;
+  model: string;
+  timeout?: number;
 }
 
 // ============================================================================

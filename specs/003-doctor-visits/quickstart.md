@@ -12,9 +12,33 @@ npm run tauri dev
 
 ## Конфигурация LLM-провайдера (опционально)
 
-Для работы распознавания сканов настройте переменные окружения **перед запуском**:
+Для работы распознавания сканов настройте LLM. Есть два способа:
 
-### Вариант 1: OpenAI (удалённый)
+### Способ 1: Через config.json (рекомендуется)
+
+Отредактируйте `%APPDATA%\com.myhealth.app\config.json`:
+
+```json
+{
+  "schemaVersion": 1,
+  "debug": false,
+  "dataDir": "",
+  "llm": {
+    "apiUrl": "https://polza.ai/api/v1",
+    "apiKey": "ваш_ключ",
+    "model": "qwen/qwen3.5-flash",
+    "timeout": 60
+  }
+}
+```
+
+Поля:
+- **apiUrl** — URL LLM API (OpenAI-совместимый)
+- **apiKey** — ключ авторизации
+- **model** — имя модели
+- **timeout** — таймаут в секундах (по умолчанию 60)
+
+### Способ 2: Переменные окружения (fallback)
 
 ```powershell
 $env:LLM_API_URL = "https://api.openai.com/v1"
@@ -67,7 +91,8 @@ npm run tauri dev
 
 - **JSON-файл**: `%APPDATA%\com.myhealth.app\doctor-visits.json`
 - **Сканы**: `%APPDATA%\com.myhealth.app\scans\` (имена с бизнес-данными: `2026_04_09_Кардиолог_a1b2c3d4.pdf`)
-- **Промпт LLM**: `%APPDATA%\com.myhealth.app\llm-prompt.json` — можно редактировать без пересборки. Изменения вступают в силу при следующем вызове распознавания
+- **Промпт LLM**: `%APPDATA%\com.myhealth.app\llm-prompt.json` — меняется без пересборки, содержит системный промпт и пример ответа
+- **Конфиг приложения**: `%APPDATA%\com.myhealth.app\config.json` — здесь же настраивается LLM (секция `llm`)
 
 ## Тесты
 

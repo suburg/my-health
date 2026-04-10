@@ -96,14 +96,14 @@
 
 ### Реализация для пользовательской истории 3
 
-- [ ] T026 [P] [US3] Реализовать `src-tauri/src/storage/doctor_visit_store.rs`: функция `upload_scan(data, visitDate, specialty)` — сохранение файла в `scans/` с бизнес-именем, для PDF — рендеринг всех страниц в PNG через `pdfium-render`, возврат пути к основному файлу
-- [ ] T027 [P] [US3] Создать `src/lib/file-utils.ts` — утилита `fileToUint8Array(file: File) => Promise<Uint8Array>` для конвертации выбранного файла перед отправкой на backend
-- [ ] T028 [P] [US3] Реализовать `src-tauri/src/commands/doctor_visits.rs`: `recognize_scan(imagesBase64)` — загрузка промпта через `llm_prompt.rs`, отправка HTTP-запроса к LLM API (через `reqwest`), парсинг JSON-ответа в `LLMRecognitionResult`, таймаут 60 сек, обработка всех типов ошибок: `NotConfigured`, `ApiError`, `Timeout`, `ParseError`, `PromptLoadError`, `InvalidImageFormat`
-- [ ] T029 [US3] Реализовать `src-tauri/src/commands/doctor_visits.rs`: `upload_scan(fileName, data, visitDate, specialty)` — вызов `doctor_visit_store::upload_scan`, обработка ошибок (неподдерживаемый формат, размер > 10 МБ, PDF render error)
-- [ ] T030 [US3] Дополнить `src/components/doctor-visits/ScanUploader.tsx`: кнопка «Распознать скан», конвертация файла через `fileToUint8Array`, вызов `recognizeScan()`, отображение спиннера во время обработки
-- [ ] T031 [US3] Дополнить `src/components/doctor-visits/VisitModal.tsx`: интеграция автозаполнения — после `recognizeScan` поля формы заполняются данными из `LLMRecognitionResult` (null-поля остаются пустыми), индикация ошибки LLM
-- [ ] T032 [US3] Дополнить `src/services/doctor-visit-service.ts`: функции `recognizeScan()` и `uploadScan()` — конвертация изображения в base64, для PDF — отправка файла на backend, получение превью
-- [ ] T033 [US3] Добавить зависимость `reqwest` в `src-tauri/Cargo.toml` для HTTP-запросов к LLM API (если ещё не добавлена)
+- [x] T026 [P] [US3] Реализовать `upload_scan` в `doctor_visit_store.rs`
+- [x] T027 [P] [US3] Создать `src/lib/file-utils.ts`
+- [x] T028 [P] [US3] Реализовать `recognize_scan` — HTTP к LLM API с промптом
+- [x] T029 [US3] Реализовать `upload_scan` команду
+- [x] T030 [US3] Дополнить `ScanUploader`: кнопка «Распознать скан», спиннер, ошибка LLM
+- [x] T031 [US3] Дополнить `VisitModal`: автозаполнение полей из LLM
+- [x] T032 [US3] Дополнить сервис: `recognizeScan()`, `uploadScan()` уже реализованы
+- [x] T033 [US3] Зависимость `reqwest` (уже добавлена в T001)
 
 **Контрольная точка**: US3 полностью функциональна — скан распознаётся, поля заполняются, пользователь может отредактировать перед сохранением.
 

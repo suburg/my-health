@@ -1,4 +1,6 @@
 use serde::{Deserialize, Serialize};
+use std::time::Duration;
+use tauri::Manager;
 
 use crate::storage;
 use crate::storage::doctor_visit_store::DoctorVisit;
@@ -253,31 +255,138 @@ pub fn delete_doctor_visit(
 }
 
 /// T028: Распознавание скана через LLM.
+/// Читает конфигурацию из config.json (секция llm), fallback на env-переменные.
 #[tauri::command]
 pub async fn recognize_scan(
-    _app: tauri::AppHandle,
-    _images_base64: Vec<ImagePayload>,
+    app: tauri::AppHandle,
+    images_base64: Vec<ImagePayload>,
 ) -> Result<RecognizeScanResponse, String> {
-    todo!("Реализовать: HTTP-запрос к LLM API с промптом из llm_prompt.rs")
+    if images_base64.is_empty() {
+        return Err("Нет изображений для распознавания".into());
+    }
+
+    // Читаем конфигурацию: config.json → env vars
+    let app_data_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| format!("Не удалось получить AppData: {e}"))?;
+
+    let llm_cfg = storage::llm_config::load_llm_config(&app_data_dir);
+
+    let (api_url, api_key, model, timeout_secs) = if let Some(cfg) = llm_cfg {
+        (cfg.api_url, cfg.api_key, cfg.model, cfg.timeout.unwrap_or(60))
+    } else {
+        // Fallback на переменные окружения
+        let api_url = std::env::var("LLM_API_URL").map_err(|_| {
+            "LLM не настроена. Укажите llm в config.json или переменные LLM_API_URL/LLM_API_KEY.".to_string()
+        })?;
+        let api_key = std::env::var("LLM_API_KEY").map_err(|_| {
+            "LLM_API_KEY не задан".to_string()
+        })?;
+        let model = std::env::var("LLM_MODEL").unwrap_or_else(|_| "gpt-4o".to_string());
+        (api_url, api_key, model, 60)
+    };
+
+    // Загружаем промпт
+    let prompt_config = storage::llm_prompt::load_prompt(&app)
+        .map_err(|e| format!("Ошибка загрузки промпта: {e}"))?;
+    let system_prompt = storage::llm_prompt::build_system_prompt(&prompt_config);
+
+    // Формируем content с изображениями
+    let mut content_parts: Vec<serde_json::Value> = Vec::new();
+    for img in &images_base64 {
+        content_parts.push(serde_json::json!({
+            "type": "image_url",
+            "image_url": {
+                "url": format!("data:{};base64,{}", img.mime_type, img.data),
+                "detail": "high"
+            }
+        }));
+    }
+
+    let request_body = serde_json::json!({
+        "model": model,
+        "messages": [
+            { "role": "system", "content": system_prompt },
+            { "role": "user", "content": content_parts }
+        ],
+        "max_tokens": 1000,
+        "response_format": { "type": "json_object" }
+    });
+
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(timeout_secs))
+        .build()
+        .map_err(|e| format!("Ошибка создания HTTP-клиента: {e}"))?;
+
+    let response = client
+        .post(format!("{api_url}/chat/completions"))
+        .header("Authorization", format!("Bearer {api_key}"))
+        .header("Content-Type", "application/json")
+        .json(&request_body)
+        .send()
+        .await
+        .map_err(|e| {
+            if e.is_timeout() {
+                format!("Таймаут запроса к LLM (60 сек): {e}")
+            } else if e.is_connect() {
+                format!("Не удалось подключиться к LLM API: {e}")
+            } else {
+                format!("Ошибка запроса к LLM API: {e}")
+            }
+        })?;
+
+    if !response.status().is_success() {
+        let status = response.status();
+        let body = response.text().await.unwrap_or_default();
+        return Err(format!("LLM API вернул ошибку {status}: {body}"));
+    }
+
+    let json: serde_json::Value = response.json().await
+        .map_err(|e| format!("Ошибка парсинга ответа LLM: {e}"))?;
+
+    // Извлекаем content из первого choice
+    let content = json["choices"][0]["message"]["content"]
+        .as_str()
+        .ok_or_else(|| "LLM вернул пустой ответ".to_string())?;
+
+    // Парсим JSON-ответ
+    let recognition: LlmRecognitionResult = serde_json::from_str(content)
+        .map_err(|e| format!("Ошибка парсинга JSON от LLM: {e}\nОтвет: {content}"))?;
+
+    Ok(RecognizeScanResponse { result: recognition })
 }
 
 /// T029: Загрузка скана в хранилище.
 #[tauri::command]
 pub fn upload_scan(
-    _app: tauri::AppHandle,
-    _file_name: String,
-    _data: Vec<u8>,
-    _visit_date: String,
-    _specialty: String,
+    app: tauri::AppHandle,
+    file_name: String,
+    data: Vec<u8>,
+    visit_date: String,
+    specialty: String,
 ) -> Result<UploadScanResponse, String> {
-    todo!("Реализовать: сохранение файла в scans/ с бизнес-именем, рендеринг PDF")
+    let result = storage::doctor_visit_store::upload_scan(
+        &app,
+        &file_name,
+        &data,
+        &visit_date,
+        &specialty,
+    ).map_err(|e| format!("Ошибка загрузки скана: {e}"))?;
+
+    Ok(UploadScanResponse {
+        scan_path: result.scan_path,
+    })
 }
 
 /// T040: Удаление файла скана.
 #[tauri::command]
 pub fn delete_scan(
-    _app: tauri::AppHandle,
-    _scan_path: String,
+    app: tauri::AppHandle,
+    scan_path: String,
 ) -> Result<DeleteScanResponse, String> {
-    todo!("Реализовать: удаление файла из scans/")
+    storage::doctor_visit_store::delete_scan(&app, &scan_path)
+        .map_err(|e| format!("Ошибка удаления скана: {e}"))?;
+
+    Ok(DeleteScanResponse { success: true })
 }

@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { ImageIcon, X } from "lucide-react";
+import { ImageIcon, X, Wand2, Loader2 } from "lucide-react";
 import { clsx } from "clsx";
 
 const SUPPORTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/bmp", "application/pdf"];
@@ -8,18 +8,33 @@ const MAX_SIZE = 10 * 1024 * 1024; // 10 МБ
 export interface ScanUploaderProps {
   onFileSelect?: (file: File) => void;
   onClear?: () => void;
+  onRecognize?: (file: File) => void;
   scanPath?: string | null;
   disabled?: boolean;
+  recognizing?: boolean;
+  llmError?: string | null;
+  showRecognizeButton?: boolean;
 }
 
 /**
  * Компонент загрузки скана заключения.
  * Поддерживает изображения и PDF. Показывает превью для изображений.
+ * Кнопка «Распознать скан» — для LLM-распознавания (US3).
  */
-export function ScanUploader({ onFileSelect, onClear, scanPath, disabled = false }: ScanUploaderProps) {
+export function ScanUploader({
+  onFileSelect,
+  onClear,
+  onRecognize,
+  scanPath,
+  disabled = false,
+  recognizing = false,
+  llmError,
+  showRecognizeButton = false,
+}: ScanUploaderProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleFile = useCallback(
     (file: File) => {
@@ -36,6 +51,7 @@ export function ScanUploader({ onFileSelect, onClear, scanPath, disabled = false
       }
 
       setFileName(file.name);
+      setSelectedFile(file);
 
       // Превью только для изображений
       if (file.type.startsWith("image/")) {
@@ -69,8 +85,17 @@ export function ScanUploader({ onFileSelect, onClear, scanPath, disabled = false
     setPreview(null);
     setFileName(null);
     setError(null);
+    setSelectedFile(null);
     onClear?.();
   };
+
+  const handleRecognize = () => {
+    if (selectedFile && onRecognize) {
+      onRecognize(selectedFile);
+    }
+  };
+
+  const hasFile = preview || fileName;
 
   return (
     <div className="space-y-2">
@@ -129,6 +154,31 @@ export function ScanUploader({ onFileSelect, onClear, scanPath, disabled = false
         </div>
       )}
 
+      {/* Кнопка распознаания + ошибка LLM */}
+      {hasFile && showRecognizeButton && (
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleRecognize}
+            disabled={disabled || recognizing || !selectedFile}
+            className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {recognizing ? (
+              <>
+                <Loader2 size={14} className="animate-spin" />
+                Распознаю...
+              </>
+            ) : (
+              <>
+                <Wand2 size={14} />
+                Распознать скан
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
+      {llmError && <p className="text-sm text-destructive">{llmError}</p>}
       {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   );

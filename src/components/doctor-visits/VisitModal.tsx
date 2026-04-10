@@ -1,7 +1,9 @@
-import { useState, useMemo } from "react";
-import type { DoctorVisit } from "../../types";
+import { useState, useMemo, useCallback } from "react";
+import type { DoctorVisit, LLMRecognitionResult } from "../../types";
 import { doctorVisitSchema } from "../../lib/validations";
-import { handleDateInput, toIsoDate } from "../../lib/date-utils";
+import { handleDateInput, toIsoDate, toDisplayDate } from "../../lib/date-utils";
+import { fileToBase64 } from "../../lib/file-utils";
+import { recognizeScan } from "../../services/doctor-visit-service";
 import { StarRating } from "./StarRating";
 import { ScanUploader } from "./ScanUploader";
 import { VisitAutocomplete } from "./VisitAutocomplete";
@@ -32,6 +34,8 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [] }: Visit
   const [rating, setRating] = useState<number | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
   const [saving, setSaving] = useState(false);
+  const [recognizing, setRecognizing] = useState(false);
+  const [llmError, setLlmError] = useState<string | null>(null);
 
   // Уникальные значения из предыдущих приёмов для автокомплита
   const autocompleteOptions = useMemo(() => {
@@ -49,6 +53,33 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [] }: Visit
       clinics: Array.from(clinics).sort(),
     };
   }, [previousVisits]);
+
+  /** Распознать скан через LLM и заполнить поля */
+  const handleRecognize = useCallback(async (file: File) => {
+    setLlmError(null);
+    setRecognizing(true);
+    try {
+      const base64 = await fileToBase64(file);
+      const result = await recognizeScan([{ data: base64, mimeType: file.type }]);
+      fillFormFromRecognition(result);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setLlmError(message);
+    } finally {
+      setRecognizing(false);
+    }
+  }, []);
+
+  /** Заполнить поля формы данными из LLM */
+  const fillFormFromRecognition = (result: LLMRecognitionResult) => {
+    if (result.doctorName) setDoctorName(result.doctorName);
+    if (result.specialty) setSpecialty(result.specialty);
+    if (result.clinic) setClinic(result.clinic);
+    if (result.date) setDate(toDisplayDate(result.date));
+    if (result.results) setResults(result.results);
+    if (result.medications) setMedications(result.medications);
+    if (result.procedures) setProcedures(result.procedures);
+  };
 
   if (!open) return null;
 
@@ -228,7 +259,13 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [] }: Visit
           </div>
 
           {/* Скан */}
-          <ScanUploader disabled={saving} />
+          <ScanUploader
+            onRecognize={handleRecognize}
+            disabled={saving}
+            recognizing={recognizing}
+            llmError={llmError}
+            showRecognizeButton
+          />
 
           {/* Buttons */}
           <div className="flex justify-end gap-3 border-t border-border pt-4">

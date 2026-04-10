@@ -1,6 +1,6 @@
 import { readTextFile, writeTextFile, mkdir } from "@tauri-apps/plugin-fs";
 import { appDataDir, join } from "@tauri-apps/api/path";
-import type { AppConfig } from "@/types";
+import type { AppConfig, LlmConfig } from "@/types";
 
 const DEFAULT_CONFIG: AppConfig = {
   schemaVersion: 1,
@@ -81,6 +81,28 @@ class ConfigManager {
   /** Сбросить конфигурацию (например, при повторной инициализации) */
   reset(): void {
     this.config = null;
+  }
+
+  /** Получить конфигурацию LLM */
+  async getLlmConfig(): Promise<LlmConfig | null> {
+    const cfg = await this.load();
+    return cfg.llm ?? null;
+  }
+
+  /** Установить конфигурацию LLM */
+  async setLlmConfig(llm: LlmConfig): Promise<void> {
+    const cfg = await this.load();
+    cfg.llm = llm;
+    this.config = cfg;
+    await this.save();
+  }
+
+  /** Удалить конфигурацию LLM (распознавание будет недоступно) */
+  async clearLlmConfig(): Promise<void> {
+    const cfg = await this.load();
+    cfg.llm = undefined;
+    this.config = cfg;
+    await this.save();
   }
 }
 
