@@ -28,6 +28,14 @@ export interface AppConfig {
   schemaVersion: number;
   debug: boolean;
   dataDir: string;
+  llm?: LlmConfig;
+}
+
+export interface LlmConfig {
+  apiUrl: string;
+  apiKey: string;
+  model: string;
+  timeout?: number;
 }
 
 // ============================================================================
@@ -182,4 +190,85 @@ export interface GetMetricConfigResponse {
 
 export interface SaveMetricConfigRequest {
   metrics: MetricDefinition[];
+}
+
+// ============================================================================
+// Doctor Visits (003-doctor-visits)
+// ============================================================================
+
+export interface DoctorVisit {
+  id: string;
+  date: string;
+  doctorName: string;
+  specialty: string;
+  clinic: string | null;
+  diagnosis: string | null; // Заключение (диагноз) — автозаполнение из LLM
+  summary: string | null; // Итоги — ручное заполнение пользователем
+  medications: string | null;
+  procedures: string | null;
+  scanPath: string | null; // Путь к скану документа (распознаётся через LLM)
+  attachments: string[]; // Пути к доп. файлам (снимки, памятки — не распознаются)
+  rating: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DoctorVisitsFile {
+  schemaVersion: number;
+  visits: DoctorVisit[];
+}
+
+export interface LLMRecognitionResult {
+  doctorName: string | null;
+  specialty: string | null;
+  clinic: string | null;
+  date: string | null;
+  diagnosis: string | null; // Заключение (диагноз) из документа
+  medications: string | null;
+  procedures: string | null;
+}
+
+// --- IPC Request / Response типы для Doctor Visits ---
+
+export interface GetDoctorVisitsResponse {
+  visits: DoctorVisit[];
+}
+
+export interface AddDoctorVisitRequest {
+  visit: Omit<DoctorVisit, "createdAt" | "updatedAt">;
+}
+
+export interface UpdateDoctorVisitRequest {
+  id: string;
+  visit: Partial<Omit<DoctorVisit, "id" | "createdAt">>;
+}
+
+export interface DeleteDoctorVisitRequest {
+  id: string;
+}
+
+export interface RecognizeScanRequest {
+  imagesBase64: Array<{
+    data: string;
+    mimeType: string;
+  }>;
+}
+
+export interface RecognizeScanResponse {
+  result: LLMRecognitionResult;
+}
+
+export interface UploadScanRequest {
+  fileName: string;
+  data: number[];
+  visitDate: string;
+  specialty: string;
+}
+
+export interface UploadScanResponse {
+  scanPath: string;
+}
+
+export interface DeleteScanRequest {
+  scanPath: string;
 }

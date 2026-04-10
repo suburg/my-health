@@ -5,6 +5,8 @@ import { NavMenu } from "./components/main-screen/NavMenu";
 import { ProfileForm } from "./components/profile/ProfileForm";
 import { PinChangeForm } from "./components/pin-change/PinChangeForm";
 import { HealthView, type HealthViewMode } from "./components/health/HealthView";
+import { VisitView } from "./components/doctor-visits/VisitView";
+import { VisitDetailPage } from "./components/doctor-visits/VisitDetailPage";
 import { logger } from "./lib/logger";
 import { configManager } from "./config/app-config";
 import { useState, useEffect, useCallback } from "react";
@@ -12,7 +14,7 @@ import { useState, useEffect, useCallback } from "react";
 /**
  * Типы экранов для навигации внутри приложения.
  */
-type Screen = "main" | "profile" | "pinChange" | "health";
+type Screen = "main" | "profile" | "pinChange" | "health" | "doctorVisits" | "doctorVisitDetail";
 
 /**
  * Компонент-маршрутизатор на основе состояния аутентификации.
@@ -21,6 +23,7 @@ function AppRouter() {
   const { isLoading, isRegistered, isAuthenticated, logout } = useAuth();
   const [currentScreen, setCurrentScreen] = useState<Screen>("main");
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
+  const [selectedVisitId, setSelectedVisitId] = useState<string | null>(null);
 
   // Режим просмотра здоровья
   const [healthViewMode, setHealthViewMode] = useState<HealthViewMode>("table");
@@ -31,6 +34,32 @@ function AppRouter() {
   const navigateToHealth = useCallback(() => {
     setCurrentScreen("health");
   }, []);
+  const navigateToDoctorVisits = useCallback(() => {
+    setSelectedVisitId(null);
+    setCurrentScreen("doctorVisits");
+  }, []);
+  const navigateToVisitDetail = useCallback((visitId: string) => {
+    setSelectedVisitId(visitId);
+    setCurrentScreen("doctorVisitDetail");
+  }, []);
+  const navigateBackToRegistry = useCallback(() => {
+    setSelectedVisitId(null);
+    setCurrentScreen("doctorVisits");
+  }, []);
+
+  const handleOpenVisit = useCallback((visit: { id: string }) => {
+    navigateToVisitDetail(visit.id);
+  }, [navigateToVisitDetail]);
+
+  const handleVisitChanged = useCallback((visit: { id: string }) => {
+    setSelectedVisitId(visit.id);
+  }, []);
+
+  const handleVisitDeleted = useCallback((id: string) => {
+    if (selectedVisitId === id) {
+      navigateBackToRegistry();
+    }
+  }, [selectedVisitId, navigateBackToRegistry]);
 
   // Обработчик выхода
   const handleLogout = useCallback(() => {
@@ -64,6 +93,15 @@ function AppRouter() {
         </svg>
       ),
       onClick: () => navigateToHealth(),
+    },
+    {
+      label: "Приёмы",
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-5">
+          <path fillRule="evenodd" d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" clipRule="evenodd" />
+        </svg>
+      ),
+      onClick: () => navigateToDoctorVisits(),
     },
     {
       label: "Профиль",
@@ -133,12 +171,16 @@ function AppRouter() {
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">
                   {currentScreen === "main" && "Главная"}
                   {currentScreen === "health" && "Показатели"}
+                  {currentScreen === "doctorVisits" && "Приёмы"}
+                  {currentScreen === "doctorVisitDetail" && "Карточка приёма"}
                   {currentScreen === "profile" && "Профиль"}
                   {currentScreen === "pinChange" && "Смена пин-кода"}
                 </h1>
                 <p className="text-sm text-muted-foreground">
                   {currentScreen === "main" && "Основной экран приложения"}
                   {currentScreen === "health" && "Журнал здоровья"}
+                  {currentScreen === "doctorVisits" && "История приёмов врача"}
+                  {currentScreen === "doctorVisitDetail" && "Подробная информация о приёме"}
                   {currentScreen === "profile" && "Просмотр и редактирование данных"}
                   {currentScreen === "pinChange" && "Введите текущий и новый пин-код"}
                 </p>
@@ -209,10 +251,27 @@ function AppRouter() {
             )}
 
             {currentScreen === "health" && (
-              <div className="mx-auto max-w-6xl w-full">
+              <div className="w-full px-4">
                 <HealthView
                   mode={healthViewMode}
                   onModeChange={setHealthViewMode}
+                />
+              </div>
+            )}
+
+            {currentScreen === "doctorVisits" && (
+              <div className="w-full px-4">
+                <VisitView onOpenVisit={handleOpenVisit} />
+              </div>
+            )}
+
+            {currentScreen === "doctorVisitDetail" && selectedVisitId && (
+              <div className="w-full px-4">
+                <VisitDetailPage
+                  visitId={selectedVisitId}
+                  onBack={navigateBackToRegistry}
+                  onVisitChanged={handleVisitChanged}
+                  onVisitDeleted={handleVisitDeleted}
                 />
               </div>
             )}
