@@ -2,43 +2,50 @@ import { useState, useEffect, useCallback } from "react";
 import type { DoctorVisit } from "../../types";
 import { getVisits } from "../../services/doctor-visit-service";
 import { VisitTile } from "./VisitTile";
+import { VisitFilters } from "./VisitFilters";
 import { Plus, Loader2 } from "lucide-react";
 
 export interface VisitRegistryProps {
   onAddVisit: () => void;
   onOpenVisit: (visit: DoctorVisit) => void;
-  visits?: DoctorVisit[];
-  onVisitsChange?: (visits: DoctorVisit[]) => void;
+  /** Callback при загрузке/обновлении списка */
+  onLoad?: (visits: DoctorVisit[]) => void;
 }
 
 /**
- * Реестр приёмов — плитки с загрузкой данных и кнопкой добавления.
+ * Реестр приёмов — плитки с загрузкой данных, фильтрацией и кнопкой добавления.
+ * Самостоятельно загружает данные через IPC.
  */
-export function VisitRegistry({ onAddVisit, onOpenVisit, visits: externalVisits, onVisitsChange }: VisitRegistryProps) {
-  const [visits, setVisits] = useState<DoctorVisit[]>(externalVisits ?? []);
-  const [loading, setLoading] = useState(!externalVisits);
+export function VisitRegistry({ onAddVisit, onOpenVisit, onLoad }: VisitRegistryProps) {
+  const [visits, setVisits] = useState<DoctorVisit[]>([]);
+  const [filteredVisits, setFilteredVisits] = useState<DoctorVisit[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filtersActive, setFiltersActive] = useState(false);
 
   const loadVisits = useCallback(async () => {
-    if (externalVisits) return;
     setLoading(true);
     try {
       const data = await getVisits();
+      // Сортировка по дате DESC
+      data.sort((a, b) => b.date.localeCompare(a.date));
       setVisits(data);
-      onVisitsChange?.(data);
+      setFilteredVisits(data);
+      onLoad?.(data);
     } catch {
       // Ошибка уже залогирована в сервисе
     } finally {
       setLoading(false);
     }
-  }, [externalVisits, onVisitsChange]);
+  }, []);
 
   useEffect(() => {
     loadVisits();
   }, [loadVisits]);
 
-  useEffect(() => {
-    if (externalVisits) setVisits(externalVisits);
-  }, [externalVisits]);
+  const handleFilteredChange = useCallback((filtered: DoctorVisit[]) => {
+    setFilteredVisits(filtered);
+    setFiltersActive(true);
+  }, []);
 
   if (loading) {
     return (
@@ -48,6 +55,8 @@ export function VisitRegistry({ onAddVisit, onOpenVisit, visits: externalVisits,
       </div>
     );
   }
+
+  const displayVisits = filtersActive ? filteredVisits : visits;
 
   if (visits.length === 0) {
     return (
@@ -68,10 +77,18 @@ export function VisitRegistry({ onAddVisit, onOpenVisit, visits: externalVisits,
 
   return (
     <div className="space-y-4">
+      {/* Фильтры */}
+      <VisitFilters
+        visits={visits}
+        onFilteredChange={handleFilteredChange}
+      />
+
       {/* Панель действий */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          {visits.length} {visits.length === 1 ? "приём" : visits.length < 5 ? "приёма" : "приёмов"}
+          {filtersActive
+            ? `Найдено: ${filteredVisits.length} из ${visits.length}`
+            : `${visits.length} ${visits.length === 1 ? "приём" : visits.length < 5 ? "приёма" : "приёмов"}`}
         </p>
         <button
           onClick={onAddVisit}
@@ -83,11 +100,17 @@ export function VisitRegistry({ onAddVisit, onOpenVisit, visits: externalVisits,
       </div>
 
       {/* Плитки */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {visits.map((visit) => (
-          <VisitTile key={visit.id} visit={visit} onClick={() => onOpenVisit(visit)} />
-        ))}
-      </div>
+      {displayVisits.length === 0 ? (
+        <div className="py-8 text-center text-sm text-muted-foreground">
+          Нет приёмов, соответствующих фильтрам
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {displayVisits.map((visit) => (
+            <VisitTile key={visit.id} visit={visit} onClick={() => onOpenVisit(visit)} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

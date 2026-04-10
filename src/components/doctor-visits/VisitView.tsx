@@ -12,8 +12,9 @@ import { Loader2 } from "lucide-react";
 export function VisitView() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalKey, setModalKey] = useState(0);
-  const [visits, setVisits] = useState<DoctorVisit[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [allVisits, setAllVisits] = useState<DoctorVisit[]>([]);
 
   const handleAddVisit = useCallback(() => {
     setModalKey((k) => k + 1);
@@ -29,7 +30,11 @@ export function VisitView() {
       setSaving(true);
       try {
         const saved = await addVisitService(visitData);
-        setVisits((prev) => [saved, ...prev.filter((v) => v.id !== saved.id)]);
+        setRefreshKey((k) => k + 1);
+        setAllVisits((prev) => {
+          const existing = prev.filter((v) => v.id !== saved.id);
+          return [saved, ...existing];
+        });
         setModalOpen(false);
       } finally {
         setSaving(false);
@@ -43,17 +48,13 @@ export function VisitView() {
     console.log("Open visit:", _visit.id);
   }, []);
 
-  const handleVisitsChange = useCallback((newVisits: DoctorVisit[]) => {
-    setVisits(newVisits);
-  }, []);
-
   return (
     <div className="space-y-6">
       <VisitRegistry
+        key={refreshKey}
         onAddVisit={handleAddVisit}
         onOpenVisit={handleOpenVisit}
-        visits={visits}
-        onVisitsChange={handleVisitsChange}
+        onLoad={setAllVisits}
       />
 
       <VisitModal
@@ -61,7 +62,7 @@ export function VisitView() {
         open={modalOpen}
         onClose={handleCloseModal}
         onSave={handleSave}
-        previousVisits={visits}
+        previousVisits={allVisits}
       />
 
       {saving && (

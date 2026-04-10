@@ -81,8 +81,8 @@
 
 ### Реализация для пользовательской истории 2
 
-- [ ] T024 [US2] Создать `src/components/doctor-visits/VisitFilters.tsx` — компонент фильтров: DatePicker (период «от»/«до»), Dropdown специальностей (уникальные из записей), кнопка «Сбросить», состояние фильтров
-- [ ] T025 [US2] Дополнить `src/components/doctor-visits/VisitRegistry.tsx`: интегрировать VisitFilters, применить фильтрацию через `filterVisitsByPeriod` и `filterVisitsBySpecialty`, сортировка по дате DESC
+- [x] T024 [US2] Создать `src/components/doctor-visits/VisitFilters.tsx`
+- [x] T025 [US2] Дополнить `src/components/doctor-visits/VisitRegistry.tsx`: фильтры + фильтрация
 
 **Контрольная точка**: US2 полностью функциональна — реестр фильтруется по периоду и специальности, сортировка по дате работает.
 

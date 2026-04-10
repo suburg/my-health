@@ -2,7 +2,6 @@ import { invoke } from "@tauri-apps/api/core";
 import type {
   DoctorVisit,
   LLMRecognitionResult,
-  GetDoctorVisitsResponse,
   RecognizeScanResponse,
   UploadScanResponse,
   IpcError,
@@ -19,15 +18,15 @@ const MODULE_NAME = "doctor-visit-service";
 export async function getVisits(): Promise<DoctorVisit[]> {
   logger.debug(MODULE_NAME, "Вызов getVisits");
   try {
-    const result = await invoke<GetDoctorVisitsResponse | IpcError>("get_doctor_visits");
+    const result = await invoke<DoctorVisit[] | IpcError>("get_doctor_visits");
 
     if ("error" in result) {
       logger.error(MODULE_NAME, `getVisits вернул ошибку: ${result.error}`);
       return [];
     }
 
-    logger.debug(MODULE_NAME, `Получено записей о приёмах: ${result.visits.length}`);
-    return result.visits;
+    logger.debug(MODULE_NAME, `Получено записей о приёмах: ${result.length}`);
+    return result;
   } catch (error) {
     logger.error(MODULE_NAME, `Ошибка при вызове getVisits: ${error}`);
     return [];
