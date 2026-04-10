@@ -134,11 +134,11 @@
 
 ### Реализация для пользовательской истории 5
 
-- [ ] T038 [US5] Реализовать `src-tauri/src/commands/doctor_visits.rs`: `update_doctor_visit()` — частичное обновление записи по `id`, обновление `updatedAt`, валидация обязательных полей
-- [ ] T039 [US5] Реализовать `src-tauri/src/commands/doctor_visits.rs`: `delete_doctor_visit()` — удаление записи по `id` из `doctor-visits.json`
-- [ ] T040 [US5] Реализовать `src-tauri/src/commands/doctor_visits.rs`: `delete_scan(scanPath)` — удаление файла скана из директории `scans/`
-- [ ] T041 [US5] Дополнить `src/components/doctor-visits/VisitModal.tsx`: режим редактирования — предзаполнение полей из существующей записи, отправка через `updateVisit()` вместо `addVisit()`
-- [ ] T042 [US5] Дополнить `src/components/doctor-visits/VisitDetailView.tsx`: кнопка «Удалить» → диалог подтверждения → вызов `deleteVisit()`, при наличии скана — вызов `deleteScan(scanPath)`
+- [x] T038 [US5] `update_doctor_visit()` — реализовано в Фазе 5
+- [x] T039 [US5] `delete_doctor_visit()` — реализовано в Фазе 5
+- [x] T040 [US5] `delete_scan()` — реализовано в Фазе 5
+- [x] T041 [US5] Режим редактирования в VisitModal — реализовано в Фазе 6
+- [x] T042 [US5] Удаление с подтверждением в карточке — реализовано в Фазе 6
 
 **Контрольная точка**: US5 полностью функциональна — редактирование и удаление работают с подтверждением.
 
