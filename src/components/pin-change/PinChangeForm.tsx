@@ -75,7 +75,7 @@ export function PinChangeForm({ onSave, onCancel }: PinChangeFormProps) {
   const isFormValid = currentPin.length === 4 && newPin.length >= 4 && newPin.length <= 6 && newPin === confirmPin;
 
   return (
-    <div className="mx-auto max-w-lg">
+    <div className="max-w-lg">
       {/* Ошибка */}
       {error && (
         <div className="mb-4 rounded-md border border-destructive/50 bg-destructive/10 p-3">

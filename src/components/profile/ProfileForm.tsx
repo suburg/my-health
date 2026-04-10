@@ -167,7 +167,7 @@ export function ProfileForm({ onSave, onCancel, onChangePin }: ProfileFormProps)
   }
 
   return (
-    <div className="mx-auto max-w-lg">
+    <div className="max-w-lg">
       {/* Ошибка */}
       {error && (
         <div className="mb-4 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">

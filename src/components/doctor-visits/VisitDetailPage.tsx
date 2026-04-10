@@ -136,7 +136,7 @@ export function VisitDetailPage({ visitId, onBack, onVisitChanged, onVisitDelete
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="space-y-4">
       {/* Кнопка назад */}
       <button
         onClick={onBack}
@@ -147,36 +147,20 @@ export function VisitDetailPage({ visitId, onBack, onVisitChanged, onVisitDelete
       </button>
 
       {/* Карточка */}
-      <div className="rounded-xl border border-border bg-background shadow-sm">
-        <div className="border-b border-border px-6 py-4">
-          <h2 className="text-lg font-semibold text-foreground">
-            {new Date(visit.date + "T00:00:00Z").toLocaleDateString("ru-RU", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}{" "}
-            — {visit.doctorName}
-          </h2>
-          <p className="text-sm text-muted-foreground">{visit.specialty}</p>
-        </div>
-
-        <div className="p-6">
-          <VisitCard
-            visit={visit}
-            onEdit={() => handleEdit(visit)}
-            onDelete={handleDelete}
-            prevVisit={prevVisit}
-            nextVisit={nextVisit}
-            onPrevVisit={handlePrevVisit}
-            onNextVisit={handleNextVisit}
-          />
-          {confirmDelete && (
-            <p className="mt-3 text-sm text-destructive">
-              Нажмите «Удалить» ещё раз для подтверждения.
-            </p>
-          )}
-        </div>
-      </div>
+      <VisitCard
+        visit={visit}
+        onEdit={() => handleEdit(visit)}
+        onDelete={handleDelete}
+        prevVisit={prevVisit}
+        nextVisit={nextVisit}
+        onPrevVisit={handlePrevVisit}
+        onNextVisit={handleNextVisit}
+      />
+      {confirmDelete && (
+        <p className="px-1 text-sm text-destructive">
+          Нажмите «Удалить» ещё раз для подтверждения.
+        </p>
+      )}
 
       {/* Модалка редактирования */}
       <VisitModal

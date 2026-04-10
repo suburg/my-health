@@ -251,7 +251,7 @@ function AppRouter() {
             )}
 
             {currentScreen === "health" && (
-              <div className="mx-auto max-w-6xl w-full">
+              <div className="w-full px-4">
                 <HealthView
                   mode={healthViewMode}
                   onModeChange={setHealthViewMode}
@@ -260,13 +260,13 @@ function AppRouter() {
             )}
 
             {currentScreen === "doctorVisits" && (
-              <div className="mx-auto max-w-6xl w-full">
+              <div className="w-full px-4">
                 <VisitView onOpenVisit={handleOpenVisit} />
               </div>
             )}
 
             {currentScreen === "doctorVisitDetail" && selectedVisitId && (
-              <div className="mx-auto max-w-6xl w-full">
+              <div className="w-full px-4">
                 <VisitDetailPage
                   visitId={selectedVisitId}
                   onBack={navigateBackToRegistry}
