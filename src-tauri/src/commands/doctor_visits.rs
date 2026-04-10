@@ -22,7 +22,8 @@ pub struct VisitInput {
     pub doctor_name: String,
     pub specialty: String,
     pub clinic: Option<String>,
-    pub results: Option<String>,
+    pub diagnosis: Option<String>,
+    pub summary: Option<String>,
     pub medications: Option<String>,
     pub procedures: Option<String>,
     pub scan_path: Option<String>,
@@ -42,7 +43,8 @@ pub struct VisitUpdate {
     pub doctor_name: Option<String>,
     pub specialty: Option<String>,
     pub clinic: Option<String>,
-    pub results: Option<String>,
+    pub diagnosis: Option<String>,
+    pub summary: Option<String>,
     pub medications: Option<String>,
     pub procedures: Option<String>,
     pub scan_path: Option<String>,
@@ -85,7 +87,7 @@ pub struct LlmRecognitionResult {
     pub specialty: Option<String>,
     pub clinic: Option<String>,
     pub date: Option<String>,
-    pub results: Option<String>,
+    pub diagnosis: Option<String>,
     pub medications: Option<String>,
     pub procedures: Option<String>,
 }
@@ -152,7 +154,8 @@ pub fn add_doctor_visit(
         doctor_name: visit.doctor_name,
         specialty: visit.specialty,
         clinic: visit.clinic,
-        results: visit.results,
+        diagnosis: visit.diagnosis,
+        summary: visit.summary,
         medications: visit.medications,
         procedures: visit.procedures,
         scan_path: visit.scan_path,
@@ -214,7 +217,8 @@ pub fn update_doctor_visit(
         visits[pos].specialty = v.clone();
     }
     visits[pos].clinic.clone_from(&visit.clinic);
-    visits[pos].results.clone_from(&visit.results);
+    visits[pos].diagnosis.clone_from(&visit.diagnosis);
+    visits[pos].summary.clone_from(&visit.summary);
     visits[pos].medications.clone_from(&visit.medications);
     visits[pos].procedures.clone_from(&visit.procedures);
     visits[pos].scan_path.clone_from(&visit.scan_path);

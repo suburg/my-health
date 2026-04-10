@@ -92,11 +92,18 @@ export function VisitCard({
         </div>
       </div>
 
-      {/* Блок: Основные результаты */}
+      {/* Блок: Заключение (диагноз) */}
       <SectionBlock
         icon={<FileText size={16} />}
-        title="Основные результаты"
-        content={visit.results}
+        title="Заключение (диагноз)"
+        content={visit.diagnosis}
+      />
+
+      {/* Блок: Итоги */}
+      <SectionBlock
+        icon={<ClipboardList size={16} />}
+        title="Итоги"
+        content={visit.summary}
       />
 
       {/* Блок: Препараты */}

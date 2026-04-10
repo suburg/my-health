@@ -214,7 +214,8 @@ export const doctorVisitSchema = z.object({
     .min(1, "Специальность обязательна")
     .max(100, "Специальность не более 100 символов"),
   clinic: z.string().max(200, "Название клиники не более 200 символов").nullable().optional(),
-  results: z.string().nullable().optional(),
+  diagnosis: z.string().nullable().optional(),
+  summary: z.string().nullable().optional(),
   medications: z.string().nullable().optional(),
   procedures: z.string().nullable().optional(),
   scanPath: z.string().nullable().optional(),

@@ -6,7 +6,8 @@
       "Bash(npx *)",
       "Bash(npm run *)",
       "Bash(dir *)",
-      "Bash(mkdir *)"
+      "Bash(mkdir *)",
+      "Bash(npm test)"
     ]
   },
   "$version": 3

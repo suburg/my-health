@@ -202,7 +202,8 @@ export interface DoctorVisit {
   doctorName: string;
   specialty: string;
   clinic: string | null;
-  results: string | null;
+  diagnosis: string | null; // Заключение (диагноз) — автозаполнение из LLM
+  summary: string | null; // Итоги — ручное заполнение пользователем
   medications: string | null;
   procedures: string | null;
   scanPath: string | null;
@@ -221,7 +222,7 @@ export interface LLMRecognitionResult {
   specialty: string | null;
   clinic: string | null;
   date: string | null;
-  results: string | null;
+  diagnosis: string | null; // Заключение (диагноз) из документа
   medications: string | null;
   procedures: string | null;
 }

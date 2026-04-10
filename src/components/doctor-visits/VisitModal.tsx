@@ -31,7 +31,8 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
   const [doctorName, setDoctorName] = useState("");
   const [specialty, setSpecialty] = useState("");
   const [clinic, setClinic] = useState("");
-  const [results, setResults] = useState("");
+  const [diagnosis, setDiagnosis] = useState("");
+  const [summary, setSummary] = useState("");
   const [medications, setMedications] = useState("");
   const [procedures, setProcedures] = useState("");
   const [rating, setRating] = useState<number | null>(null);
@@ -48,7 +49,8 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
         setDoctorName(editVisit.doctorName);
         setSpecialty(editVisit.specialty);
         setClinic(editVisit.clinic || "");
-        setResults(editVisit.results || "");
+        setDiagnosis(editVisit.diagnosis || "");
+        setSummary(editVisit.summary || "");
         setMedications(editVisit.medications || "");
         setProcedures(editVisit.procedures || "");
         setRating(editVisit.rating);
@@ -61,7 +63,8 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
       setDoctorName("");
       setSpecialty("");
       setClinic("");
-      setResults("");
+      setDiagnosis("");
+      setSummary("");
       setMedications("");
       setProcedures("");
       setRating(null);
@@ -106,13 +109,13 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
 
   /** Заполнить поля формы данными из LLM */
   const fillFormFromRecognition = (result: LLMRecognitionResult) => {
-    if (result.doctorName) setDoctorName(result.doctorName);
-    if (result.specialty) setSpecialty(result.specialty);
-    if (result.clinic) setClinic(result.clinic);
+    setDoctorName(result.doctorName || "");
+    setSpecialty(result.specialty || "");
+    setClinic(result.clinic || "");
     if (result.date) setDate(toDisplayDate(result.date));
-    if (result.results) setResults(result.results);
-    if (result.medications) setMedications(result.medications);
-    if (result.procedures) setProcedures(result.procedures);
+    setDiagnosis(result.diagnosis || "");
+    setMedications(result.medications || "");
+    setProcedures(result.procedures || "");
   };
 
   if (!open) return null;
@@ -133,7 +136,8 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
       doctorName,
       specialty,
       clinic: clinic || null,
-      results: results || null,
+      diagnosis: diagnosis || null,
+      summary: summary || null,
       medications: medications || null,
       procedures: procedures || null,
       scanPath: null,
@@ -249,18 +253,33 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
             disabled={saving}
           />
 
-          {/* Основные результаты */}
+          {/* Заключение (диагноз) — автозаполнение из LLM */}
           <div>
-            <label htmlFor="visit-results" className="mb-1 block text-sm font-medium text-foreground">
-              Основные результаты
+            <label htmlFor="visit-diagnosis" className="mb-1 block text-sm font-medium text-foreground">
+              Заключение (диагноз)
             </label>
             <textarea
-              id="visit-results"
-              value={results}
-              onChange={(e) => setResults(e.target.value)}
-              rows={3}
+              id="visit-diagnosis"
+              value={diagnosis}
+              onChange={(e) => setDiagnosis(e.target.value)}
+              rows={2}
               className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm resize-none"
-              placeholder="Результаты приёма, жалобы, наблюдения..."
+              placeholder="Диагноз, заключение из документа..."
+            />
+          </div>
+
+          {/* Итоги — ручное заполнение */}
+          <div>
+            <label htmlFor="visit-summary" className="mb-1 block text-sm font-medium text-foreground">
+              Итоги
+            </label>
+            <textarea
+              id="visit-summary"
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              rows={2}
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm resize-none"
+              placeholder="Оценка результатов консультации, выводы..."
             />
           </div>
 
