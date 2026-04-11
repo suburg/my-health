@@ -347,7 +347,7 @@ pub async fn recognize_lab_test_scan(
     let llm_cfg = storage::llm_config::load_llm_config(&app_data_dir);
 
     let (api_url, api_key, model, timeout_secs) = if let Some(cfg) = llm_cfg {
-        (cfg.api_url, cfg.api_key, cfg.model, cfg.timeout.unwrap_or(60))
+        (cfg.api_url, cfg.api_key, cfg.model, cfg.timeout.unwrap_or(120))
     } else {
         let api_url = std::env::var("LLM_API_URL").map_err(|_| {
             "LLM не настроена. Укажите llm в config.json или переменные LLM_API_URL/LLM_API_KEY.".to_string()
@@ -356,7 +356,7 @@ pub async fn recognize_lab_test_scan(
             "LLM_API_KEY не задан".to_string()
         })?;
         let model = std::env::var("LLM_MODEL").unwrap_or_else(|_| "gpt-4o".to_string());
-        (api_url, api_key, model, 60)
+        (api_url, api_key, model, 120)
     };
 
     // Формируем справочник как текст для промпта
@@ -390,22 +390,10 @@ pub async fn recognize_lab_test_scan(
         lines.join("\n")
     };
 
-    // Системный промпт
-    let system_prompt = format!(
-        "Ты — ассистент для распознавания лабораторных анализов. \
-        Проанализируй изображение(я) медицинского документа (бланк лабораторного анализа) \
-        и извлеки информацию в формате JSON.\n\n\
-        ВНИМАНИЕ: Тебе может быть передано несколько изображений — это страницы одного документа. \
-        Анализируй все страницы совместно.\n\n\
-        Ожидаемые поля:\n\
-        - date: Дата анализа в формате YYYY-MM-DD (строка, если не распознано — null)\n\
-        - laboratory: Название лаборатории (строка, если не распознано — null)\n\
-        - testType: Тип анализа — один из: blood (кровь), urine (моча), stool (кал), saliva (слюна), swab (соскоб). Определи по материалу\n\
-        - indicators: Массив показателей. Каждый показатель:\n  \
-        {{ canonicalName: Эталонное название из СПРАВОЧНИКА ниже. Выбери НАИБОЛЕЕ БЛИЗКОЕ совпадение. Если совпадений нет — используй распознанное название, originalName: Распознанное название (если отличается от canonicalName, иначе null), valueType: \"numeric\" или \"textual\", actualValue: Число для числовых, строка для текстовых, unit: Единица измерения, referenceMin: Мин. референс (число или null), referenceMax: Макс. референс (число или null), referenceValue: Конкретное референсное значение (число или null), allowedValues: null для числовых, note: Примечание (null если нет) }}\n\n\
-        СПРАВОЧНИК ПОКАЗАТЕЛЕЙ (используй для нормализации canonicalName):\n{reference_text}\n\n\
-        Ответь ТОЛЬКО валидным JSON объектом без дополнительного текста, markdown-обрамления или комментариев."
-    );
+    // Системный промпт из файла с подстановкой справочника
+    let prompt_config = storage::lab_test_llm_prompt::load_prompt(&app)
+        .map_err(|e| format!("Ошибка загрузки промпта: {e}"))?;
+    let system_prompt = storage::lab_test_llm_prompt::build_system_prompt(&prompt_config, &reference_text);
 
     // Content с изображениями
     let mut content_parts: Vec<serde_json::Value> = Vec::new();

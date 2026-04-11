@@ -125,6 +125,21 @@ export function ScanUploader({
             </button>
           )}
         </div>
+      ) : scanPath ? (
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2">
+          <ImageIcon size={18} className="text-muted-foreground" />
+          <span className="flex-1 text-sm text-muted-foreground">{scanPath.split("/").pop()}</span>
+          <span className="text-xs text-muted-foreground">сохранён</span>
+          {!disabled && (
+            <button
+              type="button"
+              onClick={handleClear}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
       ) : (
         <div
           onDrop={handleDrop}

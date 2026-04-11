@@ -215,7 +215,17 @@ export function LabTestModal({
         setTestType(matchedType);
       }
       if (result.indicators && result.indicators.length > 0) {
-        setIndicators(result.indicators);
+        // Дедупликация по canonicalName — если LLM вернул дубликаты, оставляем первый
+        const seen = new Set<string>();
+        const deduped: typeof result.indicators = [];
+        for (const ind of result.indicators) {
+          const key = ind.canonicalName.toLowerCase();
+          if (!seen.has(key)) {
+            seen.add(key);
+            deduped.push(ind);
+          }
+        }
+        setIndicators(deduped);
       }
     } catch (err) {
       setLlmError(err instanceof Error ? err.message : "Ошибка распознавания");

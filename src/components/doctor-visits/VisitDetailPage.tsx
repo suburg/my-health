@@ -4,7 +4,7 @@ import { getVisits, deleteVisit, deleteScanFile, updateVisit } from "../../servi
 import { findPrevVisit, findNextVisit } from "../../lib/doctor-visit-utils";
 import { VisitCard } from "./VisitCard";
 import { VisitModal } from "./VisitModal";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
 
 export interface VisitDetailPageProps {
   visitId: string;
@@ -87,13 +87,16 @@ export function VisitDetailPage({ visitId, onBack, onVisitChanged, onVisitDelete
     [editVisit, onVisitChanged],
   );
 
-  // Удаление
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const handleDelete = useCallback(async () => {
-    if (!confirmDelete) {
-      setConfirmDelete(true);
-      return;
-    }
+  // Удаление с модальным подтверждением
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const handleDeleteRequest = useCallback(() => {
+    setShowDeleteConfirm(true);
+  }, []);
+  const handleDeleteCancel = useCallback(() => {
+    setShowDeleteConfirm(false);
+  }, []);
+  const handleDeleteConfirm = useCallback(async () => {
+    setShowDeleteConfirm(false);
     if (!visit) return;
     try {
       if (visit.scanPath) {
@@ -109,7 +112,7 @@ export function VisitDetailPage({ visitId, onBack, onVisitChanged, onVisitDelete
     } catch (err) {
       console.error("Ошибка удаления:", err);
     }
-  }, [confirmDelete, visit, onVisitDeleted, onBack]);
+  }, [visit, onVisitDeleted, onBack]);
 
   if (loading) {
     return (
@@ -137,29 +140,69 @@ export function VisitDetailPage({ visitId, onBack, onVisitChanged, onVisitDelete
 
   return (
     <div className="space-y-4">
-      {/* Кнопка назад */}
-      <button
-        onClick={onBack}
-        className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft size={16} />
-        Все приёмы
-      </button>
+      {/* Кнопка назад + действия */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft size={16} />
+          Все приёмы
+        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleEdit(visit)}
+            className="rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted"
+          >
+            Редактировать
+          </button>
+          <button
+            onClick={handleDeleteRequest}
+            className="rounded-md bg-destructive px-3 py-1.5 text-sm font-medium text-white hover:bg-destructive/90"
+          >
+            Удалить
+          </button>
+        </div>
+      </div>
 
       {/* Карточка */}
       <VisitCard
         visit={visit}
-        onEdit={() => handleEdit(visit)}
-        onDelete={handleDelete}
         prevVisit={prevVisit}
         nextVisit={nextVisit}
         onPrevVisit={handlePrevVisit}
         onNextVisit={handleNextVisit}
       />
-      {confirmDelete && (
-        <p className="px-1 text-sm text-destructive">
-          Нажмите «Удалить» ещё раз для подтверждения.
-        </p>
+      {/* Модалка подтверждения удаления */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-xl border border-border bg-background p-6 shadow-xl">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+                <Trash2 size={20} className="text-destructive" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground">Удалить приём?</h3>
+            </div>
+            <p className="mb-6 text-sm text-muted-foreground">
+              Это действие нельзя отменить. Запись о приёме и связанные файлы будут удалены.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={handleDeleteCancel}
+                className="rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="flex items-center gap-2 rounded-md bg-destructive px-4 py-2 text-sm font-medium text-white hover:bg-destructive/90"
+              >
+                <Trash2 size={14} />
+                Удалить
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Модалка редактирования */}

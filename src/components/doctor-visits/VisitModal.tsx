@@ -1,14 +1,11 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import type { DoctorVisit, LLMRecognitionResult } from "../../types";
-import { doctorVisitSchema } from "../../lib/validations";
 import { handleDateInput, toIsoDate, toDisplayDate } from "../../lib/date-utils";
 import { fileToBase64 } from "../../lib/file-utils";
-import { recognizeScan } from "../../services/doctor-visit-service";
+import { recognizeScan, uploadScan, uploadAttachment } from "../../services/doctor-visit-service";
 import { StarRating } from "./StarRating";
-import { ScanUploader } from "./ScanUploader";
 import { AttachmentUploader } from "./AttachmentUploader";
-import { VisitAutocomplete } from "./VisitAutocomplete";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, Upload } from "lucide-react";
 
 export interface VisitModalProps {
   open: boolean;
@@ -35,6 +32,7 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
   const [diagnosis, setDiagnosis] = useState("");
   const [summary, setSummary] = useState("");
   const [attachments, setAttachments] = useState<string[]>([]);
+  const [newAttachmentFiles, setNewAttachmentFiles] = useState<File[]>([]);
   const [medications, setMedications] = useState("");
   const [procedures, setProcedures] = useState("");
   const [rating, setRating] = useState<number | null>(null);
@@ -42,6 +40,9 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
   const [saving, setSaving] = useState(false);
   const [recognizing, setRecognizing] = useState(false);
   const [llmError, setLlmError] = useState<string | null>(null);
+  const [scanPath, setScanPath] = useState<string | null>(null);
+  const [scanFile, setScanFile] = useState<File | null>(null);
+  const scanFileInputRef = useRef<HTMLInputElement>(null);
 
   // При открытии модалки — инициализируем поля
   useEffect(() => {
@@ -54,9 +55,12 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
         setDiagnosis(editVisit.diagnosis || "");
         setSummary(editVisit.summary || "");
         setAttachments(editVisit.attachments || []);
+        setNewAttachmentFiles([]);
         setMedications(editVisit.medications || "");
         setProcedures(editVisit.procedures || "");
         setRating(editVisit.rating);
+        setScanPath(editVisit.scanPath || null);
+        setScanFile(null);
       }
       setInitialized(true);
     }
@@ -69,11 +73,14 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
       setDiagnosis("");
       setSummary("");
       setAttachments([]);
+      setNewAttachmentFiles([]);
       setMedications("");
       setProcedures("");
       setRating(null);
       setErrors({});
       setLlmError(null);
+      setScanPath(null);
+      setScanFile(null);
       setInitialized(false);
     }
   }, [open, initialized, editVisit]);
@@ -135,33 +142,35 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
     }
     const isoDate = toIsoDate(date);
 
-    const data = {
-      date: isoDate,
-      doctorName,
-      specialty,
-      clinic: clinic || null,
-      diagnosis: diagnosis || null,
-      summary: summary || null,
-      attachments,
-      medications: medications || null,
-      procedures: procedures || null,
-      scanPath: null,
-      rating,
-    };
-
-    const result = doctorVisitSchema.safeParse(data);
-    if (!result.success) {
-      const fieldErrors: FormErrors = {};
-      for (const issue of result.error.issues) {
-        const field = issue.path[0] as keyof DoctorVisit;
-        fieldErrors[field] = issue.message;
-      }
-      setErrors(fieldErrors);
-      return;
-    }
-
     setSaving(true);
     try {
+      // Загрузка нового скана (если выбран файл)
+      let finalScanPath = scanPath;
+      if (scanFile) {
+        finalScanPath = await uploadScan(scanFile, isoDate, specialty);
+      }
+
+      // Загрузка новых приложений
+      const newAttachmentPaths: string[] = [];
+      for (const file of newAttachmentFiles) {
+        const path = await uploadAttachment(file);
+        newAttachmentPaths.push(path);
+      }
+
+      const data = {
+        date: isoDate,
+        doctorName,
+        specialty,
+        clinic: clinic || null,
+        diagnosis: diagnosis || null,
+        summary: summary || null,
+        attachments: [...attachments, ...newAttachmentPaths],
+        medications: medications || null,
+        procedures: procedures || null,
+        scanPath: finalScanPath,
+        rating,
+      };
+
       onSave({
         id: editVisit?.id || crypto.randomUUID(),
         ...data,
@@ -180,7 +189,7 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-4 pt-12 overflow-y-auto"
       onClick={handleBackdropClick}
     >
-      <div className="w-full max-w-2xl rounded-xl border border-border bg-background shadow-2xl">
+      <div className="w-full max-w-4xl rounded-xl border border-border bg-background shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <h2 className="text-lg font-semibold text-foreground">
@@ -193,11 +202,12 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4 p-6">
-          <div className="grid grid-cols-2 gap-4">
+          {/* Первая строка: Дата, ФИО врача, Оценка */}
+          <div className="grid grid-cols-3 gap-4">
             {/* Дата */}
             <div>
-              <label htmlFor="visit-date" className="mb-1 block text-sm font-medium text-foreground">
-                Дата приёма <span className="text-destructive">*</span>
+              <label htmlFor="visit-date" className="mb-1 block text-xs font-medium text-muted-foreground">
+                Дата <span className="text-destructive">*</span>
               </label>
               <input
                 id="visit-date"
@@ -206,71 +216,145 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
                 onChange={(e) => setDate(handleDateInput(e.target.value))}
                 placeholder="ДД.ММ.ГГГГ"
                 maxLength={10}
-                className={`w-full rounded-md border bg-background px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${errors.date ? "border-destructive" : "border-border"}`}
+                className={`w-full rounded-md border bg-background px-3 py-2 text-sm tabular-nums transition-colors placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${errors.date ? "border-destructive" : "border-border"}`}
               />
               {errors.date && <p className="mt-1 text-xs text-destructive">{errors.date}</p>}
             </div>
 
-            {/* Рейтинг */}
+            {/* ФИО врача */}
             <div>
-              <label className="mb-1 block text-sm font-medium text-foreground">Оценка врача</label>
+              <label htmlFor="visit-doctor" className="mb-1 block text-xs font-medium text-muted-foreground">
+                ФИО врача <span className="text-destructive">*</span>
+              </label>
+              <input
+                id="visit-doctor"
+                type="text"
+                value={doctorName}
+                onChange={(e) => setDoctorName(e.target.value)}
+                list="doctor-suggestions"
+                placeholder="Иванов Иван Иванович"
+                className={`w-full rounded-md border bg-background px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${errors.doctorName ? "border-destructive" : "border-border"}`}
+              />
+              <datalist id="doctor-suggestions">
+                {autocompleteOptions.doctors.map((d) => (
+                  <option key={d} value={d} />
+                ))}
+              </datalist>
+              {errors.doctorName && <p className="mt-1 text-xs text-destructive">{errors.doctorName}</p>}
+            </div>
+
+            {/* Оценка */}
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">Оценка врача</label>
               <div className="flex h-10 items-center">
                 <StarRating value={rating} onChange={setRating} />
               </div>
             </div>
           </div>
 
-          {/* ФИО врача */}
-          <VisitAutocomplete
-            id="visit-doctor"
-            label="ФИО врача"
-            value={doctorName}
-            onChange={setDoctorName}
-            options={autocompleteOptions.doctors}
-            placeholder="Иванов Иван Иванович"
-            required
-            error={errors.doctorName}
-            disabled={saving}
-          />
+          {/* Вторая строка: Специальность + Клиника (2 столбца) */}
+          <div className="grid grid-cols-3 gap-4">
+            {/* Специальность */}
+            <div>
+              <label htmlFor="visit-specialty" className="mb-1 block text-xs font-medium text-muted-foreground">
+                Специальность <span className="text-destructive">*</span>
+              </label>
+              <input
+                id="visit-specialty"
+                type="text"
+                value={specialty}
+                onChange={(e) => setSpecialty(e.target.value)}
+                list="specialty-suggestions"
+                placeholder="Кардиолог, терапевт..."
+                className={`w-full rounded-md border bg-background px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${errors.specialty ? "border-destructive" : "border-border"}`}
+              />
+              <datalist id="specialty-suggestions">
+                {autocompleteOptions.specialties.map((s) => (
+                  <option key={s} value={s} />
+                ))}
+              </datalist>
+              {errors.specialty && <p className="mt-1 text-xs text-destructive">{errors.specialty}</p>}
+            </div>
 
-          {/* Специальность */}
-          <VisitAutocomplete
-            id="visit-specialty"
-            label="Специальность"
-            value={specialty}
-            onChange={setSpecialty}
-            options={autocompleteOptions.specialties}
-            placeholder="Кардиолог, терапевт, невролог..."
-            required
-            error={errors.specialty}
-            disabled={saving}
-          />
+            {/* Клиника */}
+            <div className="col-span-2">
+              <label htmlFor="visit-clinic" className="mb-1 block text-xs font-medium text-muted-foreground">
+                Клиника
+              </label>
+              <input
+                id="visit-clinic"
+                type="text"
+                value={clinic}
+                onChange={(e) => setClinic(e.target.value)}
+                list="clinic-suggestions"
+                placeholder="Название медицинского учреждения"
+                className={`w-full rounded-md border bg-background px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${errors.clinic ? "border-destructive" : "border-border"}`}
+              />
+              <datalist id="clinic-suggestions">
+                {autocompleteOptions.clinics.map((c) => (
+                  <option key={c} value={c} />
+                ))}
+              </datalist>
+            </div>
+          </div>
 
-          {/* Клиника */}
-          <VisitAutocomplete
-            id="visit-clinic"
-            label="Клиника"
-            value={clinic}
-            onChange={setClinic}
-            options={autocompleteOptions.clinics}
-            placeholder="Название медицинского учреждения"
-            error={undefined}
-            disabled={saving}
-          />
+          {/* Скан */}
+          <div className="rounded-lg border border-border p-4">
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-sm font-medium">Скан заключения</h3>
+              {scanFile && (
+                <button
+                  type="button"
+                  onClick={() => handleRecognize(scanFile)}
+                  disabled={recognizing || saving}
+                  className="flex items-center gap-1.5 rounded-md bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/20 disabled:opacity-50"
+                >
+                  {recognizing ? (
+                    <Loader2 size={12} className="animate-spin" />
+                  ) : (
+                    <Upload size={12} />
+                  )}
+                  {recognizing ? "Распознавание…" : "Распознать через LLM"}
+                </button>
+              )}
+            </div>
 
-          {/* Заключение (диагноз) — автозаполнение из LLM */}
-          <div>
-            <label htmlFor="visit-diagnosis" className="mb-1 block text-sm font-medium text-foreground">
-              Заключение (диагноз)
-            </label>
-            <textarea
-              id="visit-diagnosis"
-              value={diagnosis}
-              onChange={(e) => setDiagnosis(e.target.value)}
-              rows={2}
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm resize-none"
-              placeholder="Диагноз, заключение из документа..."
-            />
+            {llmError && (
+              <div className="mb-2 rounded-md border border-destructive/20 bg-destructive/5 px-2 py-1.5 text-xs text-destructive">
+                {llmError}
+              </div>
+            )}
+
+            <div className="flex items-center gap-3">
+              <input
+                ref={scanFileInputRef}
+                type="file"
+                accept=".jpg,.jpeg,.png,.webp,.gif,.bmp,.pdf"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) setScanFile(file);
+                }}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => scanFileInputRef.current?.click()}
+                disabled={saving}
+                className="flex items-center gap-1.5 rounded-md border border-dashed border-border px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+              >
+                <Upload size={14} />
+                {scanFile ? scanFile.name : scanPath ? scanPath.split("/").pop() : "Загрузить скан"}
+              </button>
+
+              {scanFile && (
+                <span className="text-xs text-green-600">
+                  <span className="inline-block h-2 w-2 rounded-full bg-green-500"></span> Выбран
+                </span>
+              )}
+              {scanPath && !scanFile && (
+                <span className="text-xs text-muted-foreground">Текущий: {scanPath.split("/").pop()}</span>
+              )}
+            </div>
           </div>
 
           {/* Итоги — ручное заполнение */}
@@ -285,6 +369,21 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
               rows={2}
               className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm resize-none"
               placeholder="Оценка результатов консультации, выводы..."
+            />
+          </div>
+
+          {/* Заключение (диагноз) — автозаполнение из LLM */}
+          <div>
+            <label htmlFor="visit-diagnosis" className="mb-1 block text-sm font-medium text-foreground">
+              Заключение (диагноз)
+            </label>
+            <textarea
+              id="visit-diagnosis"
+              value={diagnosis}
+              onChange={(e) => setDiagnosis(e.target.value)}
+              rows={2}
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm resize-none"
+              placeholder="Диагноз, заключение из документа..."
             />
           </div>
 
@@ -317,15 +416,6 @@ export function VisitModal({ open, onClose, onSave, previousVisits = [], editVis
               placeholder="ЭКГ, анализы..."
             />
           </div>
-
-          {/* Скан */}
-          <ScanUploader
-            onRecognize={handleRecognize}
-            disabled={saving}
-            recognizing={recognizing}
-            llmError={llmError}
-            showRecognizeButton
-          />
 
           {/* Приложения (снимки, памятки — не распознаются) */}
           <AttachmentUploader
