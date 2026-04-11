@@ -272,3 +272,104 @@ export interface UploadScanResponse {
 export interface DeleteScanRequest {
   scanPath: string;
 }
+
+// ============================================================================
+// Lab Tests (004-lab-tests)
+// ============================================================================
+
+export type LabTestType = "blood" | "urine" | "stool" | "saliva" | "swab";
+export type LabIndicatorValueType = "numeric" | "textual";
+
+export interface LabTestIndicator {
+  canonicalName: string;
+  originalName: string | null;
+  valueType: LabIndicatorValueType;
+  actualValue: number | string;
+  unit: string | null;
+  referenceMin: number | null;
+  referenceMax: number | null;
+  referenceValue: number | null;
+  allowedValues: string[] | null;
+  note: string | null;
+}
+
+export interface LabTest {
+  id: string;
+  date: string;
+  laboratory: string;
+  testType: LabTestType;
+  scanPath: string | null;
+  indicators: LabTestIndicator[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LabTestsFile {
+  schemaVersion: number;
+  tests: LabTest[];
+}
+
+export interface LabTestIndicatorReference {
+  canonicalName: string;
+  synonyms: string[];
+  valueType: LabIndicatorValueType;
+  testTypes: LabTestType[];
+  unit: string | null;
+  referenceType: "interval" | "value" | "list";
+  typicalReference: { min?: number; max?: number; value?: number } | null;
+  allowedValues: string[] | null;
+}
+
+// --- IPC Request / Response типы для Lab Tests ---
+
+export interface GetLabTestsResponse {
+  tests: LabTest[];
+}
+
+export interface AddLabTestRequest {
+  test: Omit<LabTest, "createdAt" | "updatedAt">;
+}
+
+export interface UpdateLabTestRequest {
+  id: string;
+  test: Partial<Omit<LabTest, "id" | "createdAt">>;
+}
+
+export interface DeleteLabTestRequest {
+  id: string;
+}
+
+export interface RecognizeLabTestScanRequest {
+  imagesBase64: Array<{
+    data: string;
+    mimeType: string;
+  }>;
+  referenceContext: LabTestIndicatorReference[];
+}
+
+export interface LabTestRecognitionResult {
+  date: string | null;
+  laboratory: string | null;
+  testType: string | null;
+  description: string | null;
+  indicators: LabTestIndicator[];
+}
+
+export interface RecognizeLabTestScanResponse {
+  recognized: LabTestRecognitionResult;
+}
+
+export interface UploadLabTestScanRequest {
+  fileName: string;
+  data: number[];
+  testDate: string;
+  testType: string;
+}
+
+export interface UploadLabTestScanResponse {
+  scanPath: string;
+}
+
+export interface DeleteLabTestScanRequest {
+  scanPath: string;
+}

@@ -7,6 +7,7 @@ import { PinChangeForm } from "./components/pin-change/PinChangeForm";
 import { HealthView, type HealthViewMode } from "./components/health/HealthView";
 import { VisitView } from "./components/doctor-visits/VisitView";
 import { VisitDetailPage } from "./components/doctor-visits/VisitDetailPage";
+import { LabTestView } from "./components/lab-tests/LabTestView";
 import { logger } from "./lib/logger";
 import { configManager } from "./config/app-config";
 import { useState, useEffect, useCallback } from "react";
@@ -14,7 +15,7 @@ import { useState, useEffect, useCallback } from "react";
 /**
  * Типы экранов для навигации внутри приложения.
  */
-type Screen = "main" | "profile" | "pinChange" | "health" | "doctorVisits" | "doctorVisitDetail";
+type Screen = "main" | "profile" | "pinChange" | "health" | "doctorVisits" | "doctorVisitDetail" | "labTests";
 
 /**
  * Компонент-маршрутизатор на основе состояния аутентификации.
@@ -45,6 +46,9 @@ function AppRouter() {
   const navigateBackToRegistry = useCallback(() => {
     setSelectedVisitId(null);
     setCurrentScreen("doctorVisits");
+  }, []);
+  const navigateToLabTests = useCallback(() => {
+    setCurrentScreen("labTests");
   }, []);
 
   const handleOpenVisit = useCallback((visit: { id: string }) => {
@@ -102,6 +106,16 @@ function AppRouter() {
         </svg>
       ),
       onClick: () => navigateToDoctorVisits(),
+    },
+    {
+      label: "Анализы",
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-5">
+          <path d="M6.28 5.22a.75.75 0 00-1.06 1.06l8.89 8.89a.75.75 0 001.06-1.06L6.28 5.22z" />
+          <path fillRule="evenodd" d="M3 4.25A2.25 2.25 0 015.25 2h5.5A2.25 2.25 0 0113 4.25v2a.75.75 0 01-1.5 0v-2a.75.75 0 00-.75-.75h-5.5a.75.75 0 00-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-2a.75.75 0 011.5 0v2A2.25 2.25 0 0110.75 18h-5.5A2.25 2.25 0 013 15.75V4.25z" clipRule="evenodd" />
+        </svg>
+      ),
+      onClick: () => navigateToLabTests(),
     },
     {
       label: "Профиль",
@@ -173,6 +187,7 @@ function AppRouter() {
                   {currentScreen === "health" && "Показатели"}
                   {currentScreen === "doctorVisits" && "Приёмы"}
                   {currentScreen === "doctorVisitDetail" && "Карточка приёма"}
+                  {currentScreen === "labTests" && "Анализы"}
                   {currentScreen === "profile" && "Профиль"}
                   {currentScreen === "pinChange" && "Смена пин-кода"}
                 </h1>
@@ -181,6 +196,7 @@ function AppRouter() {
                   {currentScreen === "health" && "Журнал здоровья"}
                   {currentScreen === "doctorVisits" && "История приёмов врача"}
                   {currentScreen === "doctorVisitDetail" && "Подробная информация о приёме"}
+                  {currentScreen === "labTests" && "Результаты лабораторных анализов"}
                   {currentScreen === "profile" && "Просмотр и редактирование данных"}
                   {currentScreen === "pinChange" && "Введите текущий и новый пин-код"}
                 </p>
@@ -273,6 +289,12 @@ function AppRouter() {
                   onVisitChanged={handleVisitChanged}
                   onVisitDeleted={handleVisitDeleted}
                 />
+              </div>
+            )}
+
+            {currentScreen === "labTests" && (
+              <div className="w-full px-4">
+                <LabTestView />
               </div>
             )}
 

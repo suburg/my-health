@@ -27,10 +27,10 @@
 
 **Цель**: Инициализация проекта и базовая структура
 
-- [ ] T001 [P] Создать структуру директорий модуля: `src/components/lab-tests/`, `src-tauri/src/commands/`, `src-tauri/src/storage/`, `scans/lab-tests/`, `src/config/`
+- [x] T001 [P] Создать структуру директорий модуля: `src/components/lab-tests/`, `src-tauri/src/commands/`, `src-tauri/src/storage/`, `scans/lab-tests/`, `src/config/`
 - [x] T002 [P] Создать встроенный справочник показателей `src/config/indicator-reference.json` — 77 записей: ОАК (20), ОАМ (16), биохимия (20), витамины (7), микроэлементы (4), гормоны щитовидной железы (7). Все с синонимами, единицами, референсными интервалами/допустимыми значениями
-- [ ] T003 [P] Добавить типы `LabTest`, `LabTestIndicator`, `LabTestIndicatorReference` в `src/types/index.ts`
-- [ ] T004 [P] Добавить IPC-типы запросов/ответов в `src/contracts/lab-test-commands.ts`
+- [x] T003 [P] Добавить типы `LabTest`, `LabTestIndicator`, `LabTestIndicatorReference` в `src/types/index.ts`
+- [x] T004 [P] Добавить IPC-типы запросов/ответов в `src/types/index.ts`
 
 ---
 
@@ -40,12 +40,12 @@
 
 **⚠️ КРИТИЧНО**: Ни одна пользовательская история не может начаться, пока эта фаза не завершена
 
-- [ ] T005 Реализовать Rust-хранилище `src-tauri/src/storage/lab_test_store.rs` — чтение/запись `lab-tests.json`, атомарная запись, управление файлами сканов
-- [ ] T006 Реализовать Tauri-команды `src-tauri/src/commands/lab_tests.rs` — `get_lab_tests`, `add_lab_test`, `update_lab_test`, `delete_lab_test`, `upload_lab_test_scan`, `delete_lab_test_scan`
-- [ ] T007 Реализовать IPC-сервис `src/services/lab-test-service.ts` — обёртки над Tauri invoke для CRUD-операций и файловых операций
-- [ ] T008 Реализовать утилиты `src/lib/lab-test-utils.ts` — фильтрация по периоду/типу, сортировка по дате, поиск предыдущего/следующего анализа
-- [ ] T009 Зарегистрировать Tauri-команды в `src-tauri/src/main.rs` (или `lib.rs`)
-- [ ] T010 Добавить zod-схемы валидации для `LabTest` и `LabTestIndicator` в `src/lib/validations.ts`
+- [x] T005 Реализовать Rust-хранилище `src-tauri/src/storage/lab_test_store.rs` — чтение/запись `lab-tests.json`, атомарная запись, управление файлами сканов
+- [x] T006 Реализовать Tauri-команды `src-tauri/src/commands/lab_tests.rs` — `get_lab_tests`, `add_lab_test`, `update_lab_test`, `delete_lab_test`, `upload_lab_test_scan`, `delete_lab_test_scan`
+- [x] T007 Реализовать IPC-сервис `src/services/lab-test-service.ts` — обёртки над Tauri invoke для CRUD-операций и файловых операций
+- [x] T008 Реализовать утилиты `src/lib/lab-test-utils.ts` — фильтрация по периоду/типу, сортировка по дате, поиск предыдущего/следующего анализа
+- [x] T009 Зарегистрировать Tauri-команды в `src-tauri/src/lib.rs`
+- [x] T010 Добавить zod-схемы валидации для `LabTest` и `LabTestIndicator` в `src/lib/validations.ts`
 
 **Контрольная точка**: Фундамент готов — CRUD анализов работает, файлы сканов загружаются/удаляются, данные сохраняются в JSON
 
@@ -59,12 +59,12 @@
 
 ### Реализация для пользовательской истории 1
 
-- [ ] T011 [US1] Создать компонент `src/components/lab-tests/LabTestTile.tsx` — плитка анализа (дата, тип, лаборатория, кол-во показателей, индикатор скана)
-- [ ] T012 [US1] Создать компонент `src/components/lab-tests/LabTestFilters.tsx` — фильтр по периоду дат и типу анализа
-- [ ] T013 [US1] Создать компонент `src/components/lab-tests/LabTestRegistry.tsx` — реестр с загрузкой данных через `getLabTest`, сортировкой, фильтрацией, пустым состоянием
-- [ ] T014 [US1] Создать компонент `src/components/lab-tests/LabTestView.tsx` — главный экран модуля (обёртка над реестром)
-- [ ] T015 [US1] Добавить роутинг/навигацию к модулю «Анализы» в главном меню приложения (`src/App.tsx`)
-- [ ] T016 [US1] Добавить стили для реестра и плиток через Tailwind CSS
+- [x] T011 [US1] Создать компонент `src/components/lab-tests/LabTestTile.tsx` — плитка анализа (дата, тип, лаборатория, кол-во показателей, индикатор скана)
+- [x] T012 [US1] Создать компонент `src/components/lab-tests/LabTestFilters.tsx` — фильтр по периоду дат и типу анализа
+- [x] T013 [US1] Создать компонент `src/components/lab-tests/LabTestRegistry.tsx` — реестр с загрузкой данных, сортировкой, фильтрацией, пустым состоянием
+- [x] T014 [US1] Создать компонент `src/components/lab-tests/LabTestView.tsx` — главный экран модуля (обёртка над реестром)
+- [x] T015 [US1] Добавить роутинг/навигацию к модулю «Анализы» в главном меню приложения (`src/App.tsx`)
+- [x] T016 [US1] Добавить стили для реестра и плиток через Tailwind CSS
 
 **Контрольная точка**: Пользовательская история 1 полностью функциональна — реестр загружается, сортирует, фильтрует, отображает пустое состояние
 
@@ -78,14 +78,14 @@
 
 ### Реализация для пользовательской истории 2
 
-- [ ] T017 [P] [US2] Создать компонент `src/components/lab-tests/IndicatorAutocomplete.tsx` — автодополнение названия показателя из справочника с автоподстановкой единицы и типа значения
-- [ ] T018 [P] [US2] Создать компонент `src/components/lab-tests/LabTestIndicatorTable.tsx` — динамическая таблица показателей (добавление/удаление строк, контекстные колонки для числовых/текстовых, мгновенная подсветка отклонений)
-- [ ] T019 [US2] Создать компонент `src/components/lab-tests/LabTestModal.tsx` — модальная форма создания/редактирования анализа (дата, лаборатория, тип, описание, ScanUploader, таблица показателей, валидация, сохранение)
-- [ ] T020 [US2] Интегрировать `LabTestModal` с `LabTestView` — состояние открытия/закрытия, обработка сохранения через `lab-test-service`
-- [ ] T021 [US2] Реализовать Tauri-команду `recognize_lab_test_scan` в `src-tauri/src/commands/lab_tests.rs` — вызов LLM с передачей справочника как контекста
-- [ ] T022 [US2] Добавить в `lab-test-service.ts` метод `recognizeScan(images, referenceContext)` для IPC-вызова распознавания
-- [ ] T023 [US2] Реализовать логику нормализации показателей — LLM возвращает эталонные названия, сохранение оригинального названия при отличии
-- [ ] T024 [P] [US2] Unit-тесты `src/lib/__tests__/lab-test-utils.test.ts` — тесты фильтрации, сортировки, подсветки отклонений (числовые интервалы, текстовые допустимые значения)
+- [x] T017 [P] [US2] Создать компонент `src/components/lab-tests/IndicatorAutocomplete.tsx` — автодополнение названия показателя из справочника с автоподстановкой единицы и типа значения
+- [x] T018 [P] [US2] Создать компонент `src/components/lab-tests/LabTestIndicatorTable.tsx` — динамическая таблица показателей (добавление/удаление строк, контекстные колонки для числовых/текстовых, мгновенная подсветка отклонений)
+- [x] T019 [US2] Создать компонент `src/components/lab-tests/LabTestModal.tsx` — модальная форма создания/редактирования анализа (дата, лаборатория, тип, описание, ScanUploader, таблица показателей, валидация, сохранение)
+- [x] T020 [US2] Интегрировать `LabTestModal` с `LabTestView` — состояние открытия/закрытия, обработка сохранения через `lab-test-service`
+- [x] T021 [US2] Реализовать Tauri-команду `recognize_lab_test_scan` в `src-tauri/src/commands/lab_tests.rs` — вызов LLM с передачей справочника как контекста
+- [x] T022 [US2] Добавить в `lab-test-service.ts` метод `recognizeScan(images, referenceContext)` для IPC-вызова распознавания
+- [x] T023 [US2] Реализовать логику нормализации показателей — LLM возвращает эталонные названия, сохранение оригинального названия при отличии
+- [x] T024 [P] [US2] Unit-тесты `src/lib/__tests__/lab-test-utils.test.ts` — тесты фильтрации, сортировки, подсветки отклонений (числовые интервалы, текстовые допустимые значения), поиска предыдущего значения показателя, справочника
 
 **Контрольная точка**: Пользовательская история 2 полностью функциональна — создание/редактирование анализа с показателями, LLM-распознавание, валидация
 
