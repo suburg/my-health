@@ -1,29 +1,29 @@
 import { useState, useCallback, useEffect } from "react";
-import type { DoctorVisit } from "../../types";
-import { getVisits, deleteVisit, deleteScanFile, updateVisit } from "../../services/doctor-visit-service";
-import { findPrevVisit, findNextVisit } from "../../lib/doctor-visit-utils";
-import { VisitCard } from "./VisitCard";
-import { VisitModal } from "./VisitModal";
+import type { LabTest } from "../../types";
+import { getTests, deleteTest } from "../../services/lab-test-service";
+import { findPrevVisit, findNextVisit } from "../../lib/lab-test-utils";
+import { LabTestCard } from "./LabTestCard";
+import { LabTestModal } from "./LabTestModal";
 import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
 
-export interface VisitDetailPageProps {
-  visitId: string;
+export interface LabTestDetailPageProps {
+  testId: string;
   onBack: () => void;
-  onVisitChanged: (visit: DoctorVisit) => void;
-  onVisitDeleted: (visitId: string) => void;
+  onTestChanged: (test: LabTest) => void;
+  onTestDeleted: (testId: string) => void;
 }
 
 /**
- * Страница детального просмотра карточки приёма.
- * Не модальное окно — полноценная страница с навигацией.
+ * Страница детального просмотра карточки анализа.
  */
-export function VisitDetailPage({ visitId, onBack, onVisitChanged, onVisitDeleted }: VisitDetailPageProps) {
-  const [visit, setVisit] = useState<DoctorVisit | null>(null);
-  const [allVisits, setAllVisits] = useState<DoctorVisit[]>([]);
+export function LabTestDetailPage({ testId, onBack, onTestChanged, onTestDeleted }: LabTestDetailPageProps) {
+  const [test, setTest] = useState<LabTest | null>(null);
+  const [allTests, setAllTests] = useState<LabTest[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editVisit, setEditVisit] = useState<DoctorVisit | null>(null);
+  const [editTest, setEditTest] = useState<LabTest | null>(null);
   const [saving, setSaving] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Загрузка данных
   useEffect(() => {
@@ -31,12 +31,12 @@ export function VisitDetailPage({ visitId, onBack, onVisitChanged, onVisitDelete
     const loadData = async () => {
       setLoading(true);
       try {
-        const visits = await getVisits();
-        visits.sort((a, b) => b.date.localeCompare(a.date));
+        const tests = await getTests();
+        tests.sort((a, b) => b.date.localeCompare(a.date));
         if (cancelled) return;
-        setAllVisits(visits);
-        const found = visits.find((v) => v.id === visitId) || null;
-        setVisit(found);
+        setAllTests(tests);
+        const found = tests.find((t) => t.id === testId) || null;
+        setTest(found);
       } catch {
         // Ошибка залогирована
       } finally {
@@ -45,50 +45,54 @@ export function VisitDetailPage({ visitId, onBack, onVisitChanged, onVisitDelete
     };
     loadData();
     return () => { cancelled = true; };
-  }, [visitId]);
+  }, [testId]);
 
   // Навигация
-  const prevVisit = visit ? findPrevVisit(allVisits, visit.id) : null;
-  const nextVisit = visit ? findNextVisit(allVisits, visit.id) : null;
+  const prevTest = test ? findPrevVisit(allTests, test.id) : null;
+  const nextTest = test ? findNextVisit(allTests, test.id) : null;
 
-  const handlePrevVisit = useCallback(() => {
-    if (prevVisit) setVisit(prevVisit);
-  }, [prevVisit]);
-  const handleNextVisit = useCallback(() => {
-    if (nextVisit) setVisit(nextVisit);
-  }, [nextVisit]);
+  const handlePrevTest = useCallback(() => {
+    if (prevTest) {
+      setTest(prevTest);
+    }
+  }, [prevTest]);
+  const handleNextTest = useCallback(() => {
+    if (nextTest) {
+      setTest(nextTest);
+    }
+  }, [nextTest]);
 
   // Редактирование
-  const handleEdit = useCallback((v: DoctorVisit) => {
-    setEditVisit(v);
+  const handleEdit = useCallback((t: LabTest) => {
+    setEditTest(t);
     setModalOpen(true);
   }, []);
 
   const handleModalClose = useCallback(() => {
     setModalOpen(false);
-    setEditVisit(null);
+    setEditTest(null);
   }, []);
 
   const handleModalSave = useCallback(
-    async (visitData: Omit<DoctorVisit, "createdAt" | "updatedAt">) => {
-      if (!editVisit) return;
+    async (testData: Omit<LabTest, "createdAt" | "updatedAt">) => {
+      if (!editTest) return;
       setSaving(true);
       try {
-        const saved = await updateVisit(editVisit.id, visitData);
-        setVisit(saved);
-        setAllVisits((prev) => prev.map((v) => (v.id === saved.id ? saved : v)));
-        onVisitChanged(saved);
+        const { updateTest } = await import("../../services/lab-test-service");
+        const saved = await updateTest(editTest.id, testData);
+        setTest(saved);
+        setAllTests((prev) => prev.map((t) => (t.id === saved.id ? saved : t)));
+        onTestChanged(saved);
         setModalOpen(false);
-        setEditVisit(null);
+        setEditTest(null);
       } finally {
         setSaving(false);
       }
     },
-    [editVisit, onVisitChanged],
+    [editTest, onTestChanged],
   );
 
   // Удаление с модальным подтверждением
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const handleDeleteRequest = useCallback(() => {
     setShowDeleteConfirm(true);
   }, []);
@@ -97,36 +101,37 @@ export function VisitDetailPage({ visitId, onBack, onVisitChanged, onVisitDelete
   }, []);
   const handleDeleteConfirm = useCallback(async () => {
     setShowDeleteConfirm(false);
-    if (!visit) return;
+    if (!test) return;
     try {
-      if (visit.scanPath) {
+      if (test.scanPath) {
+        const { deleteScanFile } = await import("../../services/lab-test-service");
         try {
-          await deleteScanFile(visit.scanPath);
+          await deleteScanFile(test.scanPath);
         } catch {
           // Файл уже удалён
         }
       }
-      await deleteVisit(visit.id);
-      onVisitDeleted(visit.id);
+      await deleteTest(test.id);
+      onTestDeleted(test.id);
       onBack();
     } catch (err) {
       console.error("Ошибка удаления:", err);
     }
-  }, [visit, onVisitDeleted, onBack]);
+  }, [test, onTestDeleted, onBack]);
 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         <Loader2 size={24} className="animate-spin text-muted-foreground" />
-        <p className="mt-3 text-sm text-muted-foreground">Загрузка приёма...</p>
+        <p className="mt-3 text-sm text-muted-foreground">Загрузка анализа...</p>
       </div>
     );
   }
 
-  if (!visit) {
+  if (!test) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
-        <p className="mb-4 text-sm text-muted-foreground">Приём не найден</p>
+        <p className="mb-4 text-sm text-muted-foreground">Анализ не найден</p>
         <button
           onClick={onBack}
           className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-muted"
@@ -147,32 +152,34 @@ export function VisitDetailPage({ visitId, onBack, onVisitChanged, onVisitDelete
           className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft size={16} />
-          Все приёмы
+          Все анализы
         </button>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => handleEdit(visit)}
+            onClick={() => handleEdit(test)}
             className="rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted"
           >
             Редактировать
           </button>
           <button
             onClick={handleDeleteRequest}
-            className="rounded-md bg-destructive px-3 py-1.5 text-sm font-medium text-white hover:bg-destructive/90"
+            className="flex items-center gap-1.5 rounded-md bg-destructive px-3 py-1.5 text-sm font-medium text-white hover:bg-destructive/90"
           >
+            <Trash2 size={14} />
             Удалить
           </button>
         </div>
       </div>
 
       {/* Карточка */}
-      <VisitCard
-        visit={visit}
-        prevVisit={prevVisit}
-        nextVisit={nextVisit}
-        onPrevVisit={handlePrevVisit}
-        onNextVisit={handleNextVisit}
+      <LabTestCard
+        test={test}
+        prevTest={prevTest}
+        nextTest={nextTest}
+        onPrevTest={handlePrevTest}
+        onNextTest={handleNextTest}
       />
+
       {/* Модалка подтверждения удаления */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4">
@@ -181,10 +188,10 @@ export function VisitDetailPage({ visitId, onBack, onVisitChanged, onVisitDelete
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
                 <Trash2 size={20} className="text-destructive" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground">Удалить приём?</h3>
+              <h3 className="text-lg font-semibold text-foreground">Удалить анализ?</h3>
             </div>
             <p className="mb-6 text-sm text-muted-foreground">
-              Это действие нельзя отменить. Запись о приёме и связанные файлы будут удалены.
+              Это действие нельзя отменить. Запись об анализе и связанные файлы будут удалены.
             </p>
             <div className="flex justify-end gap-3">
               <button
@@ -206,13 +213,13 @@ export function VisitDetailPage({ visitId, onBack, onVisitChanged, onVisitDelete
       )}
 
       {/* Модалка редактирования */}
-      <VisitModal
-        key={editVisit?.id || "new"}
-        open={modalOpen}
+      <LabTestModal
+        key={editTest?.id || "new"}
+        isOpen={modalOpen}
         onClose={handleModalClose}
-        onSave={handleModalSave}
-        previousVisits={allVisits}
-        editVisit={editVisit}
+        onSaved={handleModalSave}
+        existingTest={editTest}
+        existingTests={allTests}
       />
 
       {saving && (

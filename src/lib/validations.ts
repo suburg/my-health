@@ -17,6 +17,18 @@ function isValidDate(dateStr: string): boolean {
   );
 }
 
+/** Проверяет, что строка является корректной датой в формате ДД.ММ.ГГГГ */
+function isValidDateDDMMYYYY(dateStr: string): boolean {
+  if (!/^\d{2}\.\d{2}\.\d{4}$/.test(dateStr)) return false;
+
+  const [day, month, year] = dateStr.split(".").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  return (
+    date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
+  );
+}
+
 // ============================================================================
 // Пин-код
 // ============================================================================
@@ -230,3 +242,55 @@ export const doctorVisitSchema = z.object({
 });
 
 export type DoctorVisitInput = z.infer<typeof doctorVisitSchema>;
+
+// ============================================================================
+// Lab Tests (004-lab-tests)
+// ============================================================================
+
+export const labTestIndicatorSchema = z.object({
+  canonicalName: z.string().min(1, "Название показателя обязательно").max(200),
+  originalName: z.string().max(200).nullable().optional(),
+  valueType: z.enum(["numeric", "textual"]),
+  actualValue: z.union([z.number(), z.string()]),
+  unit: z.string().max(50).nullable().optional(),
+  referenceMin: z.number().nullable().optional(),
+  referenceMax: z.number().nullable().optional(),
+  referenceValue: z.number().nullable().optional(),
+  allowedValues: z.array(z.string()).nullable().optional(),
+  note: z.string().max(500).nullable().optional(),
+});
+
+export const labTestSchema = z.object({
+  date: z
+    .string()
+    .refine(isValidDateDDMMYYYY, "Некорректная дата. Формат: ДД.ММ.ГГГГ"),
+  laboratory: z
+    .string()
+    .min(1, "Название лаборатории обязательно")
+    .max(200, "Название лаборатории не более 200 символов"),
+  testType: z.enum(["blood", "urine", "stool", "saliva", "swab"], {
+    message: "Выберите тип анализа",
+  }),
+  scanPath: z.string().nullable().optional(),
+  indicators: z
+    .array(labTestIndicatorSchema)
+    .min(1, "Минимум 1 показатель обязателен"),
+});
+
+/** Схема для уже конвертированных данных (ISO-дата YYYY-MM-DD) — используется в сервисе */
+export const labTestIsoSchema = z.object({
+  date: z
+    .string()
+    .refine(isValidDate, "Некорректная дата"),
+  laboratory: z
+    .string()
+    .min(1, "Название лаборатории обязательно")
+    .max(200, "Название лаборатории не более 200 символов"),
+  testType: z.enum(["blood", "urine", "stool", "saliva", "swab"]),
+  scanPath: z.string().nullable().optional(),
+  indicators: z
+    .array(labTestIndicatorSchema)
+    .min(1, "Минимум 1 показатель обязателен"),
+});
+
+export type LabTestInput = z.infer<typeof labTestSchema>;

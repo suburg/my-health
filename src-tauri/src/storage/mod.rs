@@ -11,6 +11,12 @@ pub mod health_store;
 /// Модуль работы с записями о приёмах врача.
 pub mod doctor_visit_store;
 
+/// Модуль работы с записями лабораторных анализов.
+pub mod lab_test_store;
+
+/// Модуль загрузки конфигурации промпта LLM для анализов.
+pub mod lab_test_llm_prompt;
+
 /// Модуль загрузки конфигурации промпта LLM.
 pub mod llm_prompt;
 

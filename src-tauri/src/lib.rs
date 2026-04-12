@@ -31,6 +31,13 @@ pub fn run() {
             commands::doctor_visits::delete_scan,
             commands::doctor_visits::upload_attachment,
             commands::doctor_visits::delete_attachment,
+            commands::lab_tests::get_lab_tests,
+            commands::lab_tests::add_lab_test,
+            commands::lab_tests::update_lab_test,
+            commands::lab_tests::delete_lab_test,
+            commands::lab_tests::upload_lab_test_scan,
+            commands::lab_tests::delete_lab_test_scan,
+            commands::lab_tests::recognize_lab_test_scan,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

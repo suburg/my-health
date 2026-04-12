@@ -238,7 +238,13 @@ pub fn update_doctor_visit(
     visits[pos].summary.clone_from(&visit.summary);
     visits[pos].medications.clone_from(&visit.medications);
     visits[pos].procedures.clone_from(&visit.procedures);
-    visits[pos].scan_path.clone_from(&visit.scan_path);
+    if let Some(v) = &visit.scan_path {
+        if v.is_empty() {
+            visits[pos].scan_path = None;
+        } else {
+            visits[pos].scan_path = Some(v.clone());
+        }
+    }
     if let Some(v) = &visit.attachments {
         visits[pos].attachments = v.clone();
     }
@@ -298,7 +304,7 @@ pub async fn recognize_scan(
     let llm_cfg = storage::llm_config::load_llm_config(&app_data_dir);
 
     let (api_url, api_key, model, timeout_secs) = if let Some(cfg) = llm_cfg {
-        (cfg.api_url, cfg.api_key, cfg.model, cfg.timeout.unwrap_or(60))
+        (cfg.api_url, cfg.api_key, cfg.model, cfg.timeout.unwrap_or(120))
     } else {
         // Fallback на переменные окружения
         let api_url = std::env::var("LLM_API_URL").map_err(|_| {
@@ -308,7 +314,7 @@ pub async fn recognize_scan(
             "LLM_API_KEY не задан".to_string()
         })?;
         let model = std::env::var("LLM_MODEL").unwrap_or_else(|_| "gpt-4o".to_string());
-        (api_url, api_key, model, 60)
+        (api_url, api_key, model, 120)
     };
 
     // Загружаем промпт
