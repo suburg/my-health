@@ -153,8 +153,8 @@ export function IndicatorAutocomplete({
   const exactMatch = findIndicatorInReference(value, reference);
 
   return (
-    <div className="relative">
-      <div className="relative">
+    <div className="relative w-full">
+      <div className="relative w-full">
         <input
           ref={inputRef}
           type="text"
