@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import type { LabIndicatorValueType } from "../../types";
 import { findIndicatorInReference, loadIndicatorReference } from "../../lib/lab-test-utils";
 import { Check } from "lucide-react";
@@ -38,6 +39,35 @@ export function IndicatorAutocomplete({
   }>>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
+
+  // Update dropdown position when opened
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      setDropdownPos({
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+      });
+    }
+  }, [isOpen, value]);
+
+  // Recalculate on scroll
+  useEffect(() => {
+    const onScroll = () => {
+      if (isOpen && inputRef.current) {
+        const rect = inputRef.current.getBoundingClientRect();
+        setDropdownPos({
+          top: rect.bottom + 4,
+          left: rect.left,
+          width: rect.width,
+        });
+      }
+    };
+    window.addEventListener("scroll", onScroll, true);
+    return () => window.removeEventListener("scroll", onScroll, true);
+  }, [isOpen, value]);
 
   // Загрузка справочника при монтировании
   useEffect(() => {
@@ -150,10 +180,15 @@ export function IndicatorAutocomplete({
         )}
       </div>
 
-      {isOpen && matches.length > 0 && (
+      {isOpen && matches.length > 0 && dropdownPos && createPortal(
         <ul
           ref={listRef}
-          className="absolute z-50 mt-1 max-h-48 w-full overflow-auto rounded-md border border-border bg-background shadow-lg"
+          className="fixed z-[100] max-h-48 overflow-auto rounded-md border border-border bg-background shadow-lg"
+          style={{
+            top: `${dropdownPos.top}px`,
+            left: `${dropdownPos.left}px`,
+            width: `${dropdownPos.width}px`,
+          }}
         >
           {matches.slice(0, 10).map((ref, index) => (
             <li
@@ -178,7 +213,8 @@ export function IndicatorAutocomplete({
               </span>
             </li>
           ))}
-        </ul>
+        </ul>,
+        document.body,
       )}
     </div>
   );

@@ -1,8 +1,9 @@
 import type { LabTestIndicator, LabIndicatorValueType } from "../../types";
 import { IndicatorAutocomplete } from "./IndicatorAutocomplete";
+import { LabTestBindDialog } from "./LabTestBindDialog";
 import { getIndicatorStatus, loadIndicatorReference } from "../../lib/lab-test-utils";
-import { Plus, Trash2 } from "lucide-react";
-import { useEffect, useCallback } from "react";
+import { Plus, Trash2, Link } from "lucide-react";
+import { useEffect, useCallback, useState } from "react";
 
 export interface LabTestIndicatorTableProps {
   indicators: LabTestIndicator[];
@@ -17,9 +18,21 @@ export function LabTestIndicatorTable({
   indicators,
   onChange,
 }: LabTestIndicatorTableProps) {
+  const [bindIndex, setBindIndex] = useState<number | null>(null);
+
   useEffect(() => {
     loadIndicatorReference().catch(console.error);
   }, []);
+
+  const handleBind = useCallback((canonicalName: string) => {
+    if (bindIndex === null) return;
+    const ind = indicators[bindIndex];
+    updateIndicator(bindIndex, {
+      canonicalName,
+      originalName: ind.canonicalName || ind.originalName,
+    });
+    setBindIndex(null);
+  }, [bindIndex, indicators]);
 
   const addIndicator = useCallback(() => {
     const newIndicator: LabTestIndicator = {
@@ -131,16 +144,25 @@ export function LabTestIndicatorTable({
 
   return (
     <div className="space-y-2">
-      <div className="overflow-x-auto rounded-md border border-border">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border bg-muted/50">
-              <th className="px-2 py-2 text-left font-medium tabular-nums">Название</th>
-              <th className="px-2 py-2 text-left font-medium tabular-nums w-24">Факт</th>
-              <th className="px-2 py-2 text-left font-medium tabular-nums w-16">Ед.</th>
-              <th className="px-2 py-2 text-left font-medium tabular-nums w-32">Референс</th>
-              <th className="px-2 py-2 text-left font-medium tabular-nums w-32">Прим.</th>
-              <th className="w-8"></th>
+      <div className="rounded-md border border-border">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm table-fixed">
+            <colgroup>
+              <col style={{ width: "300px" }} />
+              <col style={{ width: "100px" }} />
+              <col style={{ width: "70px" }} />
+              <col style={{ width: "160px" }} />
+              <col style={{ width: "120px" }} />
+              <col style={{ width: "32px" }} />
+            </colgroup>
+            <thead>
+              <tr className="border-b border-border bg-muted/50">
+                <th className="px-2 py-2 text-left font-medium tabular-nums">Название</th>
+                <th className="px-2 py-2 text-left font-medium tabular-nums">Факт</th>
+                <th className="px-2 py-2 text-left font-medium tabular-nums">Ед.</th>
+                <th className="px-2 py-2 text-left font-medium tabular-nums">Референс</th>
+                <th className="px-2 py-2 text-left font-medium tabular-nums">Прим.</th>
+                <th></th>
             </tr>
           </thead>
           <tbody>
@@ -148,14 +170,26 @@ export function LabTestIndicatorTable({
               <tr key={index} className="border-b border-border last:border-0">
                 {/* Название */}
                 <td className="px-2 py-1.5">
-                  <IndicatorAutocomplete
-                    value={ind.canonicalName}
-                    onChange={(value, match) => handleNameChange(index, value, match)}
-                    placeholder="Показатель…"
-                  />
+                  <div className="flex items-center gap-1">
+                    <IndicatorAutocomplete
+                      value={ind.canonicalName}
+                      onChange={(value, match) => handleNameChange(index, value, match)}
+                      placeholder="Показатель…"
+                    />
+                    {/* Кнопка привязки — показывается если originalName отличается от canonicalName */}
+                    {ind.originalName && ind.originalName !== ind.canonicalName && (
+                      <button
+                        type="button"
+                        onClick={() => setBindIndex(index)}
+                        className="shrink-0 rounded p-1 text-muted-foreground transition-colors hover:text-primary"
+                        title="Привязать к эталонному"
+                      >
+                        <Link size={14} />
+                      </button>
+                    )}
+                  </div>
                 </td>
 
-                {/* Фактическое значение */}
                 <td className="px-2 py-1.5">
                   <input
                     type={ind.valueType === "numeric" ? "number" : "text"}
@@ -250,6 +284,7 @@ export function LabTestIndicatorTable({
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Кнопка добавления */}
@@ -261,6 +296,16 @@ export function LabTestIndicatorTable({
         <Plus size={14} />
         Добавить показатель
       </button>
+
+      {/* Диалог привязки */}
+      {bindIndex !== null && (
+        <LabTestBindDialog
+          open={bindIndex !== null}
+          originalName={indicators[bindIndex].originalName || indicators[bindIndex].canonicalName}
+          onBind={handleBind}
+          onCancel={() => setBindIndex(null)}
+        />
+      )}
     </div>
   );
 }
