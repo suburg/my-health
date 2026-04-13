@@ -15,6 +15,8 @@ export interface FuturePlanRegistryProps {
   onAddPlan: () => void;
   onOpenPlan: (plan: FuturePlan) => void;
   onLoad?: (plans: FuturePlan[]) => void;
+  onCompletePlan?: (plan: FuturePlan) => void;
+  onCancelPlan?: (plan: FuturePlan) => void;
 }
 
 /**
@@ -25,6 +27,8 @@ export function FuturePlanRegistry({
   onAddPlan,
   onOpenPlan,
   onLoad,
+  onCompletePlan,
+  onCancelPlan,
 }: FuturePlanRegistryProps) {
   const [plans, setPlans] = useState<FuturePlan[]>([]);
   const [filteredPlans, setFilteredPlans] = useState<FuturePlan[]>([]);
@@ -133,6 +137,8 @@ export function FuturePlanRegistry({
               key={plan.id}
               plan={plan}
               onClick={() => onOpenPlan(plan)}
+              onComplete={onCompletePlan}
+              onCancel={onCancelPlan}
             />
           ))}
         </div>
