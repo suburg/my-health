@@ -416,3 +416,58 @@ export interface UpdateMedicationRequest {
 export interface DeleteMedicationRequest {
   id: string;
 }
+
+// ============================================================================
+// Future Plans (006-future-plans)
+// ============================================================================
+
+export type FuturePlanType = "appointment" | "labTest" | "research";
+export type FuturePlanStatus = "planned" | "completed" | "cancelled";
+
+export interface FuturePlan {
+  id: string;
+  planType: FuturePlanType;
+  plannedDate: string;
+  isMandatory: boolean;
+  description: string | null;
+  status: FuturePlanStatus;
+  completedDate: string | null;
+  cancelReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FuturePlansFile {
+  schemaVersion: number;
+  plans: FuturePlan[];
+}
+
+// --- IPC Request / Response типы для Future Plans ---
+
+export interface GetFuturePlansResponse {
+  schemaVersion: number;
+  plans: FuturePlan[];
+}
+
+export interface AddFuturePlanRequest {
+  plan: Omit<FuturePlan, "id" | "createdAt" | "updatedAt" | "status" | "completedDate" | "cancelReason">;
+}
+
+export interface UpdateFuturePlanRequest {
+  id: string;
+  plan: Partial<Omit<FuturePlan, "id" | "createdAt">>;
+}
+
+export interface DeleteFuturePlanRequest {
+  id: string;
+}
+
+export interface CompleteFuturePlanRequest {
+  id: string;
+  completedDate: string;
+}
+
+export interface CancelFuturePlanRequest {
+  id: string;
+  cancelReason: string | null;
+}

@@ -27,8 +27,8 @@
 
 **Цель**: Инициализация структуры проекта и типов
 
-- [ ] T001 Создать структуру директорий модуля: `src/components/future-plans/`, `src-tauri/src/commands/`, `src-tauri/src/storage/`, `src/contracts/`, `src/lib/validations/`
-- [ ] T002 [P] Добавить типы `FuturePlan`, `FuturePlanType`, `FuturePlanStatus`, `FuturePlansFile`, `GetFuturePlansResponse`, `AddFuturePlanRequest`, `UpdateFuturePlanRequest`, `DeleteFuturePlanRequest`, `CompleteFuturePlanRequest`, `CancelFuturePlanRequest` в `src/types/index.ts`
+- [x] T001 Создать структуру директорий модуля: `src/components/future-plans/`, `src-tauri/src/commands/`, `src-tauri/src/storage/`, `src/contracts/`, `src/lib/validations/`
+- [x] T002 [P] Добавить типы `FuturePlan`, `FuturePlanType`, `FuturePlanStatus`, `FuturePlansFile`, `GetFuturePlansResponse`, `AddFuturePlanRequest`, `UpdateFuturePlanRequest`, `DeleteFuturePlanRequest`, `CompleteFuturePlanRequest`, `CancelFuturePlanRequest` в `src/types/index.ts`
 
 ---
 
@@ -38,15 +38,15 @@
 
 **⚠️ КРИТИЧНО**: Ни одна пользовательская история не может начаться, пока эта фаза не завершена
 
-- [ ] T003 Реализовать Rust-хранилище `src-tauri/src/storage/future_plan_store.rs` — чтение/запись `future-plans.json` с полем `schemaVersion` (FR-012), атомарная запись (временный файл → переименование), функции `load_future_plans()`, `save_future_plans()`. Обработка ошибок (FR-013): файл отсутствует — создать новый с текущей schemaVersion; файл повреждён (невалидный JSON) — вернуть ошибку с понятным сообщением; schemaVersion несовместим — вернуть ошибку с информацией о требуемой версии
-- [ ] T004 [P] Реализовать Tauri-команды `src-tauri/src/commands/future_plans.rs` — `get_future_plans`, `add_future_plan`, `update_future_plan`, `delete_future_plan`, `complete_future_plan`, `cancel_future_plan` с валидацией обязательных полей и проверкой переходов состояний. Команды `complete_future_plan` и `cancel_future_plan` ДОЛЖНЫ отвергать задачи не в статусе «planned» (FR-014)
-- [ ] T005 [P] Реализовать IPC-сервис `src/services/future-plan-service.ts` — обёртки над Tauri invoke для CRUD-операций и действий (complete, cancel) с отладочным логированием согласно принципу VI конституции (без описаний задач)
-- [ ] T006 [P] Создать zod-схему валидации для `FuturePlan` в `src/lib/validations/future-plan-validation.ts` — `futurePlanSchema` с ограничениями длины полей (description ≤ 500, cancelReason ≤ 300), валидация дат ДД.ММ.ГГГГ, проверка enum-значений planType и status
-- [ ] T007 Реализовать утилиты `src/lib/future-plan-utils.ts` — `filterByType(plans, type)`, `filterByStatus(plans, status)`, `filterByMandatory(plans, isMandatory)`, `sortByPlannedDateAsc(plans)`, `isPlanOverdue(plan)` — определение просроченности, `getPlanStatusLabel(plan)` — маппинг статуса на человекочитаемую строку
-- [ ] T008 Зарегистрировать Tauri-команды в `src-tauri/src/commands/mod.rs` (добавить `pub mod future_plans`), в `src-tauri/src/storage/mod.rs` (добавить `pub mod future_plan_store`), в `src-tauri/src/lib.rs` (добавить 6 команд в `generate_handler![]`)
-- [ ] T008a [P] Проверить конфигурационный механизм путей к данным — убедиться что `future-plans.json` использует существующий механизм (configManager / app.path().app_data_dir())
-- [ ] T009 [P] Unit-тесты `src/lib/__tests__/future-plan-utils.test.ts` — тесты фильтрации по виду/статусу/обязательности, сортировки по дате, определения просроченности
-- [ ] T009a [P] Unit-тесты `src-tauri/src/storage/__tests__/future_plan_store_test.rs` — тесты обработки missing файла, повреждённого JSON, несовместимой schemaVersion, атомарной записи
+- [x] T003 Реализовать Rust-хранилище `src-tauri/src/storage/future_plan_store.rs` — чтение/запись `future-plans.json` с полем `schemaVersion` (FR-012), атомарная запись (временный файл → переименование), функции `load_future_plans()`, `save_future_plans()`. Обработка ошибок (FR-013): файл отсутствует — создать новый с текущей schemaVersion; файл повреждён (невалидный JSON) — вернуть ошибку с понятным сообщением; schemaVersion несовместим — вернуть ошибку с информацией о требуемой версии
+- [x] T004 [P] Реализовать Tauri-команды `src-tauri/src/commands/future_plans.rs` — `get_future_plans`, `add_future_plan`, `update_future_plan`, `delete_future_plan`, `complete_future_plan`, `cancel_future_plan` с валидацией обязательных полей и проверкой переходов состояний. Команды `complete_future_plan` и `cancel_future_plan` ДОЛЖНЫ отвергать задачи не в статусе «planned» (FR-014)
+- [x] T005 [P] Реализовать IPC-сервис `src/services/future-plan-service.ts` — обёртки над Tauri invoke для CRUD-операций и действий (complete, cancel) с отладочным логированием согласно принципу VI конституции (без описаний задач)
+- [x] T006 [P] Создать zod-схему валидации для `FuturePlan` в `src/lib/validations/future-plan-validation.ts` — `futurePlanSchema` с ограничениями длины полей (description ≤ 500, cancelReason ≤ 300), валидация дат ДД.ММ.ГГГГ, проверка enum-значений planType и status
+- [x] T007 Реализовать утилиты `src/lib/future-plan-utils.ts` — `filterByType(plans, type)`, `filterByStatus(plans, status)`, `filterByMandatory(plans, isMandatory)`, `sortByPlannedDateAsc(plans)`, `isPlanOverdue(plan)` — определение просроченности, `getPlanStatusLabel(plan)` — маппинг статуса на человекочитаемую строку
+- [x] T008 Зарегистрировать Tauri-команды в `src-tauri/src/commands/mod.rs` (добавить `pub mod future_plans`), в `src-tauri/src/storage/mod.rs` (добавить `pub mod future_plan_store`), в `src-tauri/src/lib.rs` (добавить 6 команд в `generate_handler![]`)
+- [x] T008a [P] Проверить конфигурационный механизм путей к данным — убедиться что `future-plans.json` использует существующий механизм (configManager / app.path().app_data_dir())
+- [x] T009 [P] Unit-тесты `src/lib/__tests__/future-plan-utils.test.ts` — тесты фильтрации по виду/статусу/обязательности, сортировки по дате, определения просроченности
+- [x] T009a [P] Unit-тесты `src-tauri/src/storage/__tests__/future_plan_store_test.rs` — тесты обработки missing файла, повреждённого JSON, несовместимой schemaVersion, атомарной записи
 
 **Контрольная точка**: Фундамент готов — CRUD плановых задач работает, данные сохраняются в JSON, утилиты протестированы
 
@@ -60,11 +60,11 @@
 
 ### Реализация для пользовательской истории 1
 
-- [ ] T010 [P] [US1] Создать компонент `src/components/future-plans/FuturePlanTile.tsx` — плитка задачи (вид, плановая дата, статус, признак обязательности, описание — первая строка до 100 символов, индикатор просроченности)
-- [ ] T011 [P] [US1] Создать компонент `src/components/future-plans/FuturePlanFilters.tsx` — выпадающие списки вида и статуса, чекбокс обязательности, кнопка «Применить»
-- [ ] T012 [US1] Создать компонент `src/components/future-plans/FuturePlanRegistry.tsx` — реестр с загрузкой данных через `getFuturePlans`, сортировкой по возрастанию плановой даты, фильтрацией по кнопке «Применить» (AND логика), пустым состоянием
-- [ ] T013 [US1] Создать компонент `src/components/future-plans/FuturePlanView.tsx` — главный экран модуля (обёртка над реестром)
-- [ ] T014 [US1] Добавить роутинг/навигацию к модулю «Планы» в главном меню приложения (`src/App.tsx`)
+- [x] T010 [P] [US1] Создать компонент `src/components/future-plans/FuturePlanTile.tsx` — плитка задачи (вид, плановая дата, статус, признак обязательности, описание — первая строка до 100 символов, индикатор просроченности)
+- [x] T011 [P] [US1] Создать компонент `src/components/future-plans/FuturePlanFilters.tsx` — выпадающие списки вида и статуса, чекбокс обязательности, кнопка «Применить»
+- [x] T012 [US1] Создать компонент `src/components/future-plans/FuturePlanRegistry.tsx` — реестр с загрузкой данных через `getFuturePlans`, сортировкой по возрастанию плановой даты, фильтрацией по кнопке «Применить» (AND логика), пустым состоянием
+- [x] T013 [US1] Создать компонент `src/components/future-plans/FuturePlanView.tsx` — главный экран модуля (обёртка над реестром)
+- [x] T014 [US1] Добавить роутинг/навигацию к модулю «Планы» в главном меню приложения (`src/App.tsx`)
 
 **Контрольная точка**: Пользовательская история 1 полностью функциональна — реестр загружается, сортирует, фильтрует, отображает пустое состояние
 

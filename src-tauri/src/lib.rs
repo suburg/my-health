@@ -42,6 +42,12 @@ pub fn run() {
             commands::medications::add_medication,
             commands::medications::update_medication,
             commands::medications::delete_medication,
+            commands::future_plans::get_future_plans,
+            commands::future_plans::add_future_plan,
+            commands::future_plans::update_future_plan,
+            commands::future_plans::delete_future_plan,
+            commands::future_plans::complete_future_plan,
+            commands::future_plans::cancel_future_plan,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
