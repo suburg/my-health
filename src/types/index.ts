@@ -373,3 +373,46 @@ export interface UploadLabTestScanResponse {
 export interface DeleteLabTestScanRequest {
   scanPath: string;
 }
+
+// ============================================================================
+// Medications (005-medications)
+// ============================================================================
+
+export interface Medication {
+  id: string;
+  name: string;
+  category: string;
+  activeIngredient: string | null;
+  dosage: string;
+  frequency: string;
+  startDate: string;
+  endDate: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MedicationsFile {
+  schemaVersion: number;
+  medications: Medication[];
+}
+
+// --- IPC Request / Response типы для Medications ---
+
+export interface GetMedicationsResponse {
+  schemaVersion: number;
+  medications: Medication[];
+}
+
+export interface AddMedicationRequest {
+  medication: Omit<Medication, "id" | "createdAt" | "updatedAt">;
+}
+
+export interface UpdateMedicationRequest {
+  id: string;
+  medication: Partial<Omit<Medication, "id" | "createdAt">>;
+}
+
+export interface DeleteMedicationRequest {
+  id: string;
+}

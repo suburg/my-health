@@ -14,6 +14,9 @@ pub mod doctor_visit_store;
 /// Модуль работы с записями лабораторных анализов.
 pub mod lab_test_store;
 
+/// Модуль работы с записями о препаратах.
+pub mod medication_store;
+
 /// Модуль загрузки конфигурации промпта LLM для анализов.
 pub mod lab_test_llm_prompt;
 

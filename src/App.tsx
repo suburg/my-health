@@ -8,6 +8,9 @@ import { HealthView, type HealthViewMode } from "./components/health/HealthView"
 import { VisitView } from "./components/doctor-visits/VisitView";
 import { VisitDetailPage } from "./components/doctor-visits/VisitDetailPage";
 import { LabTestView } from "./components/lab-tests/LabTestView";
+import { MedicationView } from "./components/medications/MedicationView";
+import { MedicationDetailPage } from "./components/medications/MedicationDetailPage";
+import type { Medication } from "./types";
 import { logger } from "./lib/logger";
 import { configManager } from "./config/app-config";
 import { useState, useEffect, useCallback } from "react";
@@ -15,7 +18,7 @@ import { useState, useEffect, useCallback } from "react";
 /**
  * Типы экранов для навигации внутри приложения.
  */
-type Screen = "main" | "profile" | "pinChange" | "health" | "doctorVisits" | "doctorVisitDetail" | "labTests";
+type Screen = "main" | "profile" | "pinChange" | "health" | "doctorVisits" | "doctorVisitDetail" | "labTests" | "medications" | "medicationDetail";
 
 /**
  * Компонент-маршрутизатор на основе состояния аутентификации.
@@ -25,6 +28,7 @@ function AppRouter() {
   const [currentScreen, setCurrentScreen] = useState<Screen>("main");
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
   const [selectedVisitId, setSelectedVisitId] = useState<string | null>(null);
+  const [_selectedMedicationId, setSelectedMedicationId] = useState<string | null>(null);
 
   // Режим просмотра здоровья
   const [healthViewMode, setHealthViewMode] = useState<HealthViewMode>("table");
@@ -50,6 +54,18 @@ function AppRouter() {
   const navigateToLabTests = useCallback(() => {
     setCurrentScreen("labTests");
   }, []);
+  const navigateToMedications = useCallback(() => {
+    setSelectedMedicationId(null);
+    setCurrentScreen("medications");
+  }, []);
+  const navigateToMedicationDetail = useCallback((medicationId: string) => {
+    setSelectedMedicationId(medicationId);
+    setCurrentScreen("medicationDetail");
+  }, []);
+  const navigateBackToMedicationRegistry = useCallback(() => {
+    setSelectedMedicationId(null);
+    setCurrentScreen("medications");
+  }, []);
 
   const handleOpenVisit = useCallback((visit: { id: string }) => {
     navigateToVisitDetail(visit.id);
@@ -64,6 +80,20 @@ function AppRouter() {
       navigateBackToRegistry();
     }
   }, [selectedVisitId, navigateBackToRegistry]);
+
+  const handleOpenMedication = useCallback((medication: Medication) => {
+    navigateToMedicationDetail(medication.id);
+  }, [navigateToMedicationDetail]);
+
+  const handleMedicationChanged = useCallback((_medication: Medication) => {
+    // При изменении — просто обновим данные при следующем открытии
+  }, []);
+
+  const handleMedicationDeleted = useCallback((id: string) => {
+    if (_selectedMedicationId === id) {
+      navigateBackToMedicationRegistry();
+    }
+  }, [_selectedMedicationId]);
 
   // Обработчик выхода
   const handleLogout = useCallback(() => {
@@ -116,6 +146,17 @@ function AppRouter() {
         </svg>
       ),
       onClick: () => navigateToLabTests(),
+    },
+    {
+      label: "Препараты",
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-5">
+          <path d="m6.628 7.628-3.12 3.121a3.5 3.5 0 0 0 4.95 4.95l3.12-3.12a42.728 42.728 0 0 0-1.337-1.338l-1.943 1.944a1 1 0 1 1-1.415-1.415l1.944-1.943a44.587 44.587 0 0 0-1.337-1.338Z" />
+          <path d="M6.25 3.75a3.5 3.5 0 0 1 3.5-3.5h.5a3.5 3.5 0 0 1 3.5 3.5v.5a3.5 3.5 0 0 1-3.5 3.5h-.5a3.5 3.5 0 0 1-3.5-3.5v-.5Z" />
+          <path fillRule="evenodd" d="M3 4.25A2.25 2.25 0 015.25 2h5.5A2.25 2.25 0 0113 4.25v2a.75.75 0 01-1.5 0v-2a.75.75 0 00-.75-.75h-5.5a.75.75 0 00-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-2a.75.75 0 011.5 0v2A2.25 2.25 0 0110.75 18h-5.5A2.25 2.25 0 013 15.75V4.25z" clipRule="evenodd" />
+        </svg>
+      ),
+      onClick: () => navigateToMedications(),
     },
     {
       label: "Профиль",
@@ -188,6 +229,8 @@ function AppRouter() {
                   {currentScreen === "doctorVisits" && "Приёмы"}
                   {currentScreen === "doctorVisitDetail" && "Карточка приёма"}
                   {currentScreen === "labTests" && "Анализы"}
+                  {currentScreen === "medications" && "Препараты"}
+                  {currentScreen === "medicationDetail" && "Карточка препарата"}
                   {currentScreen === "profile" && "Профиль"}
                   {currentScreen === "pinChange" && "Смена пин-кода"}
                 </h1>
@@ -197,6 +240,8 @@ function AppRouter() {
                   {currentScreen === "doctorVisits" && "История приёмов врача"}
                   {currentScreen === "doctorVisitDetail" && "Подробная информация о приёме"}
                   {currentScreen === "labTests" && "Результаты лабораторных анализов"}
+                  {currentScreen === "medications" && "Журнал принимаемых препаратов"}
+                  {currentScreen === "medicationDetail" && "Подробная информация о препарате"}
                   {currentScreen === "profile" && "Просмотр и редактирование данных"}
                   {currentScreen === "pinChange" && "Введите текущий и новый пин-код"}
                 </p>
@@ -295,6 +340,23 @@ function AppRouter() {
             {currentScreen === "labTests" && (
               <div className="w-full px-4">
                 <LabTestView />
+              </div>
+            )}
+
+            {currentScreen === "medications" && (
+              <div className="w-full px-4">
+                <MedicationView onOpenMedication={handleOpenMedication} />
+              </div>
+            )}
+
+            {currentScreen === "medicationDetail" && _selectedMedicationId && (
+              <div className="w-full px-4">
+                <MedicationDetailPage
+                  medicationId={_selectedMedicationId}
+                  onBack={navigateBackToMedicationRegistry}
+                  onMedicationChanged={handleMedicationChanged}
+                  onMedicationDeleted={handleMedicationDeleted}
+                />
               </div>
             )}
 
