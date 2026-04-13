@@ -39,8 +39,8 @@
 **⚠️ КРИТИЧНО**: Ни одна пользовательская история не может начаться, пока эта фаза не завершена
 
 - [ ] T003 Реализовать Rust-хранилище `src-tauri/src/storage/future_plan_store.rs` — чтение/запись `future-plans.json` с полем `schemaVersion` (FR-012), атомарная запись (временный файл → переименование), функции `load_future_plans()`, `save_future_plans()`. Обработка ошибок (FR-013): файл отсутствует — создать новый с текущей schemaVersion; файл повреждён (невалидный JSON) — вернуть ошибку с понятным сообщением; schemaVersion несовместим — вернуть ошибку с информацией о требуемой версии
-- [ ] T004 [P] Реализовать Tauri-команды `src-tauri/src/commands/future_plans.rs` — `get_future_plans`, `add_future_plan`, `update_future_plan`, `delete_future_plan`, `complete_future_plan`, `cancel_future_plan` с валидацией обязательных полей и проверкой переходов состояний
-- [ ] T005 [P] Реализовать IPC-сервис `src/services/future-plan-service.ts` — обёртки над Tauri invoke для CRUD-операций и действий (complete, cancel)
+- [ ] T004 [P] Реализовать Tauri-команды `src-tauri/src/commands/future_plans.rs` — `get_future_plans`, `add_future_plan`, `update_future_plan`, `delete_future_plan`, `complete_future_plan`, `cancel_future_plan` с валидацией обязательных полей и проверкой переходов состояний. Команды `complete_future_plan` и `cancel_future_plan` ДОЛЖНЫ отвергать задачи не в статусе «planned» (FR-014)
+- [ ] T005 [P] Реализовать IPC-сервис `src/services/future-plan-service.ts` — обёртки над Tauri invoke для CRUD-операций и действий (complete, cancel) с отладочным логированием согласно принципу VI конституции (без описаний задач)
 - [ ] T006 [P] Создать zod-схему валидации для `FuturePlan` в `src/lib/validations/future-plan-validation.ts` — `futurePlanSchema` с ограничениями длины полей (description ≤ 500, cancelReason ≤ 300), валидация дат ДД.ММ.ГГГГ, проверка enum-значений planType и status
 - [ ] T007 Реализовать утилиты `src/lib/future-plan-utils.ts` — `filterByType(plans, type)`, `filterByStatus(plans, status)`, `filterByMandatory(plans, isMandatory)`, `sortByPlannedDateAsc(plans)`, `isPlanOverdue(plan)` — определение просроченности, `getPlanStatusLabel(plan)` — маппинг статуса на человекочитаемую строку
 - [ ] T008 Зарегистрировать Tauri-команды в `src-tauri/src/commands/mod.rs` (добавить `pub mod future_plans`), в `src-tauri/src/storage/mod.rs` (добавить `pub mod future_plan_store`), в `src-tauri/src/lib.rs` (добавить 6 команд в `generate_handler![]`)
@@ -62,7 +62,7 @@
 
 - [ ] T010 [P] [US1] Создать компонент `src/components/future-plans/FuturePlanTile.tsx` — плитка задачи (вид, плановая дата, статус, признак обязательности, описание — первая строка до 100 символов, индикатор просроченности)
 - [ ] T011 [P] [US1] Создать компонент `src/components/future-plans/FuturePlanFilters.tsx` — выпадающие списки вида и статуса, чекбокс обязательности, кнопка «Применить»
-- [ ] T012 [US1] Создать компонент `src/components/future-plans/FuturePlanRegistry.tsx` — реестр с загрузкой данных через `getFuturePlans`, сортировкой по возрастанию плановой даты, фильтрацией (AND логика), пустым состоянием
+- [ ] T012 [US1] Создать компонент `src/components/future-plans/FuturePlanRegistry.tsx` — реестр с загрузкой данных через `getFuturePlans`, сортировкой по возрастанию плановой даты, фильтрацией по кнопке «Применить» (AND логика), пустым состоянием
 - [ ] T013 [US1] Создать компонент `src/components/future-plans/FuturePlanView.tsx` — главный экран модуля (обёртка над реестром)
 - [ ] T014 [US1] Добавить роутинг/навигацию к модулю «Планы» в главном меню приложения (`src/App.tsx`)
 
@@ -80,7 +80,6 @@
 
 - [ ] T015 [US2] Создать компонент `src/components/future-plans/FuturePlanModal.tsx` — модальная форма создания/редактирования (вид, плановая дата с авто-расстановкой точек, чекбокс обязательности, описание, валидация, сохранение)
 - [ ] T016 [US2] Интегрировать `FuturePlanModal` с `FuturePlanView` — состояние открытия/закрытия, обработка сохранения через `future-plan-service`, обновление списка после сохранения
-- [ ] T017 [US2] Реализовать автодополнение описания по ранее введённым описаниям (опционально, через datalist)
 
 **Контрольная точка**: Пользовательская история 2 полностью функциональна — создание задачи с валидацией
 
@@ -125,9 +124,8 @@
 
 - [ ] T025 [P] Добавить unit-тесты для `future-plan-service.ts` в `src/services/__tests__/future-plan-service.test.ts` — тесты CRUD-методов и действий (complete, cancel), моки IPC
 - [ ] T026 Обеспечить `tabular-nums` для всех числовых/датных отображений в карточках и реестре плановых задач
-- [ ] T027 [P] Добавить отладочное логирование операций с данными в `future-plan-service.ts` согласно принципу VI конституции (без описаний задач)
-- [ ] T028 Протестировать quickstart.md — запуск, проверка структуры
-- [ ] T029 Финальная проверка всех пользовательских историй по сценариям приёма из spec.md
+- [ ] T027 Протестировать quickstart.md — запуск, проверка структуры
+- [ ] T028 Финальная проверка всех пользовательских историй по сценариям приёма из spec.md
 
 ---
 
@@ -217,13 +215,13 @@
 
 | Метрика | Значение |
 |---------|----------|
-| Всего задач | 29 |
+| Всего задач | 27 |
 | Фаза 1 (Настройка) | 2 |
 | Фаза 2 (Фундаментальные) | 9 |
 | US1 — Реестр | 5 |
-| US2 — Создание | 3 |
+| US2 — Создание | 2 |
 | US3 — Выполнение/Отмена | 3 |
 | US4 — Детальная карточка | 4 |
-| Фаза 7 (Полировка) | 5 |
-| Параллельные задачи | 9 (T001-T002, T004-T006, T008a, T009-T009a, T010-T011, T018-T019, T021-T022, T025-T027) |
+| Фаза 7 (Полировка) | 4 |
+| Параллельные задачи | 8 (T001-T002, T004-T006, T008a, T009-T009a, T010-T011, T018-T019, T021-T022, T025-T026) |
 | Unit-тесты | 3 набора (T009 utils, T009a store, T025 service) |
