@@ -9,6 +9,7 @@ import { VisitView } from "./components/doctor-visits/VisitView";
 import { VisitDetailPage } from "./components/doctor-visits/VisitDetailPage";
 import { LabTestView } from "./components/lab-tests/LabTestView";
 import { MedicationView } from "./components/medications/MedicationView";
+import { MedicationDetailPage } from "./components/medications/MedicationDetailPage";
 import type { Medication } from "./types";
 import { logger } from "./lib/logger";
 import { configManager } from "./config/app-config";
@@ -61,6 +62,10 @@ function AppRouter() {
     setSelectedMedicationId(medicationId);
     setCurrentScreen("medicationDetail");
   }, []);
+  const navigateBackToMedicationRegistry = useCallback(() => {
+    setSelectedMedicationId(null);
+    setCurrentScreen("medications");
+  }, []);
 
   const handleOpenVisit = useCallback((visit: { id: string }) => {
     navigateToVisitDetail(visit.id);
@@ -79,6 +84,16 @@ function AppRouter() {
   const handleOpenMedication = useCallback((medication: Medication) => {
     navigateToMedicationDetail(medication.id);
   }, [navigateToMedicationDetail]);
+
+  const handleMedicationChanged = useCallback((_medication: Medication) => {
+    // При изменении — просто обновим данные при следующем открытии
+  }, []);
+
+  const handleMedicationDeleted = useCallback((id: string) => {
+    if (_selectedMedicationId === id) {
+      navigateBackToMedicationRegistry();
+    }
+  }, [_selectedMedicationId]);
 
   // Обработчик выхода
   const handleLogout = useCallback(() => {
@@ -331,6 +346,17 @@ function AppRouter() {
             {currentScreen === "medications" && (
               <div className="w-full px-4">
                 <MedicationView onOpenMedication={handleOpenMedication} />
+              </div>
+            )}
+
+            {currentScreen === "medicationDetail" && _selectedMedicationId && (
+              <div className="w-full px-4">
+                <MedicationDetailPage
+                  medicationId={_selectedMedicationId}
+                  onBack={navigateBackToMedicationRegistry}
+                  onMedicationChanged={handleMedicationChanged}
+                  onMedicationDeleted={handleMedicationDeleted}
+                />
               </div>
             )}
 
