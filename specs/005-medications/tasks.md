@@ -27,8 +27,8 @@
 
 **Цель**: Инициализация структуры проекта и типов
 
-- [ ] T001 Создать структуру директорий модуля: `src/components/medications/`, `src-tauri/src/commands/`, `src-tauri/src/storage/`, `src/contracts/`
-- [ ] T002 [P] Добавить типы `Medication`, `MedicationsFile`, `GetMedicationsResponse`, `AddMedicationRequest`, `UpdateMedicationRequest`, `DeleteMedicationRequest` в `src/types/index.ts`
+- [x] T001 Создать структуру директорий модуля: `src/components/medications/`, `src-tauri/src/commands/`, `src-tauri/src/storage/`, `src/contracts/`
+- [x] T002 [P] Добавить типы `Medication`, `MedicationsFile`, `GetMedicationsResponse`, `AddMedicationRequest`, `UpdateMedicationRequest`, `DeleteMedicationRequest` в `src/types/index.ts`
 
 ---
 
@@ -38,15 +38,15 @@
 
 **⚠️ КРИТИЧНО**: Ни одна пользовательская история не может начаться, пока эта фаза не завершена
 
-- [ ] T003 Реализовать Rust-хранилище `src-tauri/src/storage/medication_store.rs` — чтение/запись `medications.json` с полем `schemaVersion` (FR-009), атомарная запись (временный файл → переименование), функции `load_medications()`, `save_medications()`. Обработка ошибок (FR-011): файл отсутствует — создать новый с текущей schemaVersion; файл повреждён (невалидный JSON) — вернуть ошибку с понятным сообщением; schemaVersion несовместим — вернуть ошибку с информацией о требуемой версии
-- [ ] T004 [P] Реализовать Tauri-команды `src-tauri/src/commands/medications.rs` — `get_medications`, `add_medication`, `update_medication`, `delete_medication` с валидацией обязательных полей
-- [ ] T005 [P] Реализовать IPC-сервис `src/services/medication-service.ts` — обёртки над Tauri invoke для CRUD-операций
-- [ ] T006 [P] Создать zod-схему валидации для `Medication` в `src/lib/validations/medication-validation.ts` — `medicationSchema` с ограничениями длины полей (name ≤ 200, category ≤ 100, dosage ≤ 100, frequency ≤ 100, activeIngredient ≤ 200, notes ≤ 500), валидация дат ДД.ММ.ГГГГ, проверка endDate ≥ startDate
-- [ ] T007 Реализовать утилиты `src/lib/medication-utils.ts` — `filterByActive(medications, isActive)` для фильтра «Принимаемые сейчас», `filterByName(medications, query)`, `filterByCategory(medications, category)`, `sortByStartDateDesc(medications)`, `findPrevMedication(medications, currentId, currentCategory)`, `findNextMedication(medications, currentId, currentCategory)`, `isMedicationActive(medication)` — определение статуса активности
-- [ ] T008 Зарегистрировать Tauri-команды в `src-tauri/src/lib.rs` (или `main.rs`)
-- [ ] T008a [P] Создать/проверить конфигурационный механизм для путей к данным: если уже существует (из других модулей) — убедиться что `medications.json` использует тот же механизм; если нет — создать `src/lib/config.ts` с функциями `getConfig()`, `getDataPath()` для определения путей к JSON-файлам. Пути не захардкожены, а читаются из конфига
-- [ ] T009 [P] Unit-тесты `src/lib/__tests__/medication-utils.test.ts` — тесты фильтрации по активности/наименованию/категории, сортировки, навигации prev/next, определения статуса «принимается сейчас»
-- [ ] T009a [P] Unit-тесты `src-tauri/src/storage/__tests__/medication_store_test.rs` — тесты обработки missing файла, повреждённого JSON, несовместимой schemaVersion, атомарной записи
+- [x] T003 Реализовать Rust-хранилище `src-tauri/src/storage/medication_store.rs` — чтение/запись `medications.json` с полем `schemaVersion` (FR-009), атомарная запись (временный файл → переименование), функции `load_medications()`, `save_medications()`. Обработка ошибок (FR-011): файл отсутствует — создать новый с текущей schemaVersion; файл повреждён (невалидный JSON) — вернуть ошибку с понятным сообщением; schemaVersion несовместим — вернуть ошибку с информацией о требуемой версии
+- [x] T004 [P] Реализовать Tauri-команды `src-tauri/src/commands/medications.rs` — `get_medications`, `add_medication`, `update_medication`, `delete_medication` с валидацией обязательных полей
+- [x] T005 [P] Реализовать IPC-сервис `src/services/medication-service.ts` — обёртки над Tauri invoke для CRUD-операций
+- [x] T006 [P] Создать zod-схему валидации для `Medication` в `src/lib/validations/medication-validation.ts` — `medicationSchema` с ограничениями длины полей (name ≤ 200, category ≤ 100, dosage ≤ 100, frequency ≤ 100, activeIngredient ≤ 200, notes ≤ 500), валидация дат ДД.ММ.ГГГГ, проверка endDate ≥ startDate
+- [x] T007 Реализовать утилиты `src/lib/medication-utils.ts` — `filterByActive(medications, isActive)` для фильтра «Принимаемые сейчас», `filterByName(medications, query)`, `filterByCategory(medications, category)`, `sortByStartDateDesc(medications)`, `findPrevMedication(medications, currentId, currentCategory)`, `findNextMedication(medications, currentId, currentCategory)`, `isMedicationActive(medication)` — определение статуса активности
+- [x] T008 Зарегистрировать Tauri-команды в `src-tauri/src/lib.rs` (или `main.rs`)
+- [x] T008a [P] Создать/проверить конфигурационный механизм для путей к данным: если уже существует (из других модулей) — убедиться что `medications.json` использует тот же механизм; если нет — создать `src/lib/config.ts` с функциями `getConfig()`, `getDataPath()` для определения путей к JSON-файлам. Пути не захардкожены, а читаются из конфига
+- [x] T009 [P] Unit-тесты `src/lib/__tests__/medication-utils.test.ts` — тесты фильтрации по активности/наименованию/категории, сортировки, навигации prev/next, определения статуса «принимается сейчас»
+- [x] T009a [P] Unit-тесты `src-tauri/src/storage/__tests__/medication_store_test.rs` — тесты обработки missing файла, повреждённого JSON, несовместимой schemaVersion, атомарной записи
 
 **Контрольная точка**: Фундамент готов — CRUD препаратов работает, данные сохраняются в JSON, утилиты протестированы
 
@@ -60,11 +60,11 @@
 
 ### Реализация для пользовательской истории 1
 
-- [ ] T010 [P] [US1] Создать компонент `src/components/medications/MedicationTile.tsx` — плитка препарата (наименование, категория, период приёма, индикатор «принимается сейчас»)
-- [ ] T011 [P] [US1] Создать компонент `src/components/medications/MedicationFilters.tsx` — переключатель «Принимаемые сейчас», фильтр по категории с автодополнением, фильтр по наименованию с автодополнением
-- [ ] T012 [US1] Создать компонент `src/components/medications/MedicationRegistry.tsx` — реестр с загрузкой данных через `getMedications`, сортировкой, мгновенной фильтрацией (фильтры комбинируются по AND), пустым состоянием
-- [ ] T013 [US1] Создать компонент `src/components/medications/MedicationView.tsx` — главный экран модуля (обёртка над реестром и модалкой)
-- [ ] T014 [US1] Добавить роутинг/навигацию к модулю «Препараты» в главном меню приложения (`src/App.tsx`)
+- [x] T010 [P] [US1] Создать компонент `src/components/medications/MedicationTile.tsx` — плитка препарата (наименование, категория, период приёма, индикатор «принимается сейчас»)
+- [x] T011 [P] [US1] Создать компонент `src/components/medications/MedicationFilters.tsx` — переключатель «Принимаемые сейчас», фильтр по категории с автодополнением, фильтр по наименованию с автодополнением
+- [x] T012 [US1] Создать компонент `src/components/medications/MedicationRegistry.tsx` — реестр с загрузкой данных через `getMedications`, сортировкой, мгновенной фильтрацией (фильтры комбинируются по AND), пустым состоянием
+- [x] T013 [US1] Создать компонент `src/components/medications/MedicationView.tsx` — главный экран модуля (обёртка над реестром и модалкой)
+- [x] T014 [US1] Добавить роутинг/навигацию к модулю «Препараты» в главном меню приложения (`src/App.tsx`)
 
 **Контрольная точка**: Пользовательская история 1 полностью функциональна — реестр загружается, сортирует, фильтрует, отображает пустое состояние
 
@@ -78,8 +78,8 @@
 
 ### Реализация для пользовательской истории 2
 
-- [ ] T015 [P] [US2] Создать компонент `src/components/medications/MedicationAutocomplete.tsx` — текстовое поле с выпадающим списком уникальных значений из ранее введённых записей (аналог `VisitAutocomplete`)
-- [ ] T016 [US2] Создать компонент `src/components/medications/MedicationModal.tsx` — модальная форма создания/редактирования (наименование, категория, действующее вещество с автодополнением, дозировка, кратность, даты начала/окончания, допинформация, валидация, сохранение)
+- [x] T015 [P] [US2] Создать компонент `src/components/medications/MedicationAutocomplete.tsx` — текстовое поле с выпадающим списком уникальных значений из ранее введённых записей (аналог `VisitAutocomplete`)
+- [x] T016 [US2] Создать компонент `src/components/medications/MedicationModal.tsx` — модальная форма создания/редактирования (наименование, категория, действующее вещество с автодополнением, дозировка, кратность, даты начала/окончания, допинформация, валидация, сохранение)
 - [ ] T017 [US2] Интегрировать `MedicationModal` с `MedicationView` — состояние открытия/закрытия, обработка сохранения через `medication-service`, обновление списка после сохранения
 - [ ] T018 [US2] Реализовать автодополнение для фильтров реестра — уникальные наименования и категории из текущих записей
 

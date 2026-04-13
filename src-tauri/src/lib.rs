@@ -38,6 +38,10 @@ pub fn run() {
             commands::lab_tests::upload_lab_test_scan,
             commands::lab_tests::delete_lab_test_scan,
             commands::lab_tests::recognize_lab_test_scan,
+            commands::medications::get_medications,
+            commands::medications::add_medication,
+            commands::medications::update_medication,
+            commands::medications::delete_medication,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
