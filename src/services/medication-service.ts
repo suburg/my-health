@@ -37,7 +37,7 @@ export async function getMedications(): Promise<Medication[]> {
 export async function addMedication(
   medication: Omit<Medication, "createdAt" | "updatedAt">,
 ): Promise<Medication> {
-  logger.debug(MODULE_NAME, `Вызов addMedication: ${medication.name}`);
+  logger.debug(MODULE_NAME, "Вызов addMedication");
 
   try {
     const result = await invoke<Medication | IpcError>("add_medication", {
@@ -49,7 +49,7 @@ export async function addMedication(
       throw new Error(result.error);
     }
 
-    logger.info(MODULE_NAME, `Препарат ${medication.name} сохранён`);
+    logger.info(MODULE_NAME, "Препарат сохранён");
     return result as Medication;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
