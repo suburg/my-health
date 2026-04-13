@@ -7,6 +7,7 @@ import {
   getUniqueCategories,
   getUniqueNames,
 } from "../../lib/medication-utils";
+import { MedicationAutocomplete } from "./MedicationAutocomplete";
 import { X, Filter } from "lucide-react";
 
 export interface MedicationFiltersProps {
@@ -16,7 +17,7 @@ export interface MedicationFiltersProps {
 
 /**
  * Компонент фильтров реестра препаратов.
- * Переключатель «Принимаемые сейчас», фильтр по категории и наименованию.
+ * Переключатель «Принимаемые сейчас», фильтр по категории и наименованию с автодополнением.
  * Фильтры применяются по кнопке «Применить».
  */
 export function MedicationFilters({ medications, onFilteredChange }: MedicationFiltersProps) {
@@ -70,7 +71,7 @@ export function MedicationFilters({ medications, onFilteredChange }: MedicationF
 
       <div className="grid grid-cols-12 gap-3">
         {/* Переключатель «Принимаемые сейчас» */}
-        <div className="col-span-12 sm:col-span-3">
+        <div className="col-span-12 sm:col-span-4">
           <label className="mb-1 block text-xs font-medium text-muted-foreground">Статус</label>
           <select
             value={activeFilter === null ? "" : activeFilter ? "active" : "inactive"}
@@ -86,41 +87,28 @@ export function MedicationFilters({ medications, onFilteredChange }: MedicationF
           </select>
         </div>
 
-        {/* Фильтр по наименованию */}
+        {/* Фильтр по наименованию — автодополнение */}
         <div className="col-span-12 sm:col-span-4">
-          <label className="mb-1 block text-xs font-medium text-muted-foreground">
-            Наименование
-          </label>
-          <input
-            type="text"
+          <MedicationAutocomplete
+            id="filter-name"
+            label="Наименование"
             value={nameFilter}
-            onChange={(e) => setNameFilter(e.target.value)}
-            list="medication-name-suggestions"
+            onChange={setNameFilter}
+            options={names}
             placeholder="Введите название..."
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
-          <datalist id="medication-name-suggestions">
-            {names.map((n) => (
-              <option key={n} value={n} />
-            ))}
-          </datalist>
         </div>
 
-        {/* Фильтр по категории */}
-        <div className="col-span-12 sm:col-span-3">
-          <label className="mb-1 block text-xs font-medium text-muted-foreground">Категория</label>
-          <select
+        {/* Фильтр по категории — автодополнение */}
+        <div className="col-span-12 sm:col-span-2">
+          <MedicationAutocomplete
+            id="filter-category"
+            label="Категория"
             value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <option value="">Все категории</option>
-            {categories.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
+            onChange={setCategoryFilter}
+            options={categories}
+            placeholder="Категория..."
+          />
         </div>
 
         {/* Кнопка применить */}

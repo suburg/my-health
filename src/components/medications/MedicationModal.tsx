@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import type { Medication } from "../../types";
 import { toIsoDate, toDisplayDate, medicationSchema } from "../../lib/validations/medication-validation";
 import { handleDateInput } from "../../lib/date-utils";
@@ -7,6 +7,7 @@ import {
   getUniqueCategories,
   getUniqueActiveIngredients,
 } from "../../lib/medication-utils";
+import { MedicationAutocomplete } from "./MedicationAutocomplete";
 import { X, Loader2 } from "lucide-react";
 
 export interface MedicationModalProps {
@@ -41,9 +42,6 @@ export function MedicationModal({
   const [notes, setNotes] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
   const [saving, setSaving] = useState(false);
-  const [nameOpen, setNameOpen] = useState(false);
-  const [categoryOpen, setCategoryOpen] = useState(false);
-  const [activeIngredientOpen, setActiveIngredientOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   // Уникальные значения для автодополнения
@@ -52,17 +50,6 @@ export function MedicationModal({
     categories: getUniqueCategories(previousMedications),
     activeIngredients: getUniqueActiveIngredients(previousMedications),
   }), [previousMedications]);
-
-  // Фильтрованные опции
-  const nameOptions = useMemo(() =>
-    name ? autocompleteOptions.names.filter((o) => o.toLowerCase().includes(name.toLowerCase())) : autocompleteOptions.names,
-    [name, autocompleteOptions.names]);
-  const categoryOptions = useMemo(() =>
-    category ? autocompleteOptions.categories.filter((o) => o.toLowerCase().includes(category.toLowerCase())) : autocompleteOptions.categories,
-    [category, autocompleteOptions.categories]);
-  const activeIngredientOptions = useMemo(() =>
-    activeIngredient ? autocompleteOptions.activeIngredients.filter((o) => o.toLowerCase().includes(activeIngredient.toLowerCase())) : autocompleteOptions.activeIngredients,
-    [activeIngredient, autocompleteOptions.activeIngredients]);
 
   // Инициализация формы
   useEffect(() => {
@@ -100,28 +87,9 @@ export function MedicationModal({
     }
   }, [open, initialized, editMedication]);
 
-  // Закрытие при клике вне
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setNameOpen(false);
-        setCategoryOpen(false);
-        setActiveIngredientOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) onClose();
   };
-
-  const handleSelect = useCallback((field: string, value: string) => {
-    if (field === "name") { setName(value); setNameOpen(false); }
-    if (field === "category") { setCategory(value); setCategoryOpen(false); }
-    if (field === "activeIngredient") { setActiveIngredient(value); setActiveIngredientOpen(false); }
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -169,51 +137,6 @@ export function MedicationModal({
 
   if (!open) return null;
 
-  // Autocomplete field renderer
-  const renderAutocomplete = (
-    field: "name" | "category" | "activeIngredient",
-    label: string,
-    value: string,
-    onChange: (v: string) => void,
-    options: string[],
-    isOpen: boolean,
-    onOpenChange: (open: boolean) => void,
-    placeholder: string,
-    required?: boolean,
-  ) => (
-    <div className="relative">
-      <label className="mb-1 block text-xs font-medium text-muted-foreground">
-        {label} {required && <span className="text-destructive">*</span>}
-      </label>
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => { onChange(e.target.value); onOpenChange(true); }}
-        onFocus={() => { if (options.length > 0) onOpenChange(true); }}
-        placeholder={placeholder}
-        autoComplete="off"
-        className={`w-full rounded-md border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${errors[field] ? "border-destructive" : "border-border"}`}
-      />
-      {isOpen && options.length > 0 && (
-        <ul className="absolute z-50 mt-1 max-h-48 w-full overflow-auto rounded-md border border-border bg-background py-1 shadow-lg">
-          {options.map((option) => (
-            <li key={option}>
-              <button
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => handleSelect(field, option)}
-                className="w-full px-3 py-1.5 text-left text-sm text-foreground hover:bg-muted/50"
-              >
-                {option}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      {errors[field] && <p className="mt-1 text-xs text-destructive">{errors[field]}</p>}
-    </div>
-  );
-
   return (
     <div
       ref={wrapperRef}
@@ -235,20 +158,47 @@ export function MedicationModal({
         <form onSubmit={handleSubmit} className="space-y-4 p-6">
           {/* Наименование + Категория */}
           <div className="grid grid-cols-2 gap-4">
-            {renderAutocomplete("name", "Наименование", name, setName, nameOptions, nameOpen, setNameOpen, "Парацетамол...", true)}
-            {renderAutocomplete("category", "Категория", category, setCategory, categoryOptions, categoryOpen, setCategoryOpen, "Лекарство...", true)}
+            <MedicationAutocomplete
+              id="med-name"
+              label="Наименование"
+              value={name}
+              onChange={setName}
+              options={autocompleteOptions.names}
+              placeholder="Парацетамол..."
+              required
+              error={errors.name}
+            />
+            <MedicationAutocomplete
+              id="med-category"
+              label="Категория"
+              value={category}
+              onChange={setCategory}
+              options={autocompleteOptions.categories}
+              placeholder="Лекарство..."
+              required
+              error={errors.category}
+            />
           </div>
 
           {/* Действующее вещество */}
-          {renderAutocomplete("activeIngredient", "Действующее вещество", activeIngredient, setActiveIngredient, activeIngredientOptions, activeIngredientOpen, setActiveIngredientOpen, "МНН...")}
+          <MedicationAutocomplete
+            id="med-active"
+            label="Действующее вещество"
+            value={activeIngredient}
+            onChange={setActiveIngredient}
+            options={autocompleteOptions.activeIngredients}
+            placeholder="МНН..."
+            error={errors.activeIngredient}
+          />
 
           {/* Дозировка + Кратность */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-foreground">
+              <label htmlFor="med-dosage" className="mb-1 block text-xs font-medium text-muted-foreground">
                 Дозировка <span className="text-destructive">*</span>
               </label>
               <input
+                id="med-dosage"
                 type="text"
                 value={dosage}
                 onChange={(e) => setDosage(e.target.value)}
@@ -258,10 +208,11 @@ export function MedicationModal({
               {errors.dosage && <p className="mt-1 text-xs text-destructive">{errors.dosage}</p>}
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-foreground">
+              <label htmlFor="med-frequency" className="mb-1 block text-xs font-medium text-muted-foreground">
                 Кратность приёма <span className="text-destructive">*</span>
               </label>
               <input
+                id="med-frequency"
                 type="text"
                 value={frequency}
                 onChange={(e) => setFrequency(e.target.value)}
@@ -275,10 +226,11 @@ export function MedicationModal({
           {/* Даты начала/окончания */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-foreground">
+              <label htmlFor="med-start" className="mb-1 block text-xs font-medium text-muted-foreground">
                 Дата начала <span className="text-destructive">*</span>
               </label>
               <input
+                id="med-start"
                 type="text"
                 value={startDate}
                 onChange={(e) => setStartDate(handleDateInput(e.target.value))}
@@ -290,7 +242,7 @@ export function MedicationModal({
             </div>
             <div>
               <div className="mb-1 flex items-center gap-2">
-                <label className="text-xs font-medium text-muted-foreground">Дата окончания</label>
+                <label htmlFor="med-end" className="text-xs font-medium text-muted-foreground">Дата окончания</label>
                 <input
                   type="checkbox"
                   checked={hasEndDate}
@@ -302,6 +254,7 @@ export function MedicationModal({
                 />
               </div>
               <input
+                id="med-end"
                 type="text"
                 value={endDate}
                 onChange={(e) => setEndDate(handleDateInput(e.target.value))}
@@ -316,8 +269,9 @@ export function MedicationModal({
 
           {/* Дополнительная информация */}
           <div>
-            <label className="mb-1 block text-xs font-medium text-muted-foreground">Дополнительная информация</label>
+            <label htmlFor="med-notes" className="mb-1 block text-xs font-medium text-muted-foreground">Дополнительная информация</label>
             <textarea
+              id="med-notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
