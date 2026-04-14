@@ -10,7 +10,10 @@ import { VisitDetailPage } from "./components/doctor-visits/VisitDetailPage";
 import { LabTestView } from "./components/lab-tests/LabTestView";
 import { MedicationView } from "./components/medications/MedicationView";
 import { MedicationDetailPage } from "./components/medications/MedicationDetailPage";
+import { FuturePlanView } from "./components/future-plans/FuturePlanView";
+import { FuturePlanDetailPage } from "./components/future-plans/FuturePlanDetailPage";
 import type { Medication } from "./types";
+import type { FuturePlan } from "./types";
 import { logger } from "./lib/logger";
 import { configManager } from "./config/app-config";
 import { useState, useEffect, useCallback } from "react";
@@ -18,7 +21,7 @@ import { useState, useEffect, useCallback } from "react";
 /**
  * Типы экранов для навигации внутри приложения.
  */
-type Screen = "main" | "profile" | "pinChange" | "health" | "doctorVisits" | "doctorVisitDetail" | "labTests" | "medications" | "medicationDetail";
+type Screen = "main" | "profile" | "pinChange" | "health" | "doctorVisits" | "doctorVisitDetail" | "labTests" | "medications" | "medicationDetail" | "futurePlans" | "futurePlanDetail";
 
 /**
  * Компонент-маршрутизатор на основе состояния аутентификации.
@@ -29,6 +32,7 @@ function AppRouter() {
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
   const [selectedVisitId, setSelectedVisitId] = useState<string | null>(null);
   const [_selectedMedicationId, setSelectedMedicationId] = useState<string | null>(null);
+  const [_selectedFuturePlanId, setSelectedFuturePlanId] = useState<string | null>(null);
 
   // Режим просмотра здоровья
   const [healthViewMode, setHealthViewMode] = useState<HealthViewMode>("table");
@@ -95,6 +99,35 @@ function AppRouter() {
     }
   }, [_selectedMedicationId]);
 
+  const navigateToFuturePlans = useCallback(() => {
+    setSelectedFuturePlanId(null);
+    setCurrentScreen("futurePlans");
+  }, []);
+
+  const navigateToFuturePlanDetail = useCallback((planId: string) => {
+    setSelectedFuturePlanId(planId);
+    setCurrentScreen("futurePlanDetail");
+  }, []);
+
+  const navigateBackToFuturePlanRegistry = useCallback(() => {
+    setSelectedFuturePlanId(null);
+    setCurrentScreen("futurePlans");
+  }, []);
+
+  const handleOpenFuturePlan = useCallback((plan: FuturePlan) => {
+    navigateToFuturePlanDetail(plan.id);
+  }, [navigateToFuturePlanDetail]);
+
+  const handleFuturePlanChanged = useCallback((_plan: FuturePlan) => {
+    // Обновление будет через ре-рендер реестра
+  }, []);
+
+  const handleFuturePlanDeleted = useCallback((id: string) => {
+    if (_selectedFuturePlanId === id) {
+      navigateBackToFuturePlanRegistry();
+    }
+  }, [_selectedFuturePlanId, navigateBackToFuturePlanRegistry]);
+
   // Обработчик выхода
   const handleLogout = useCallback(() => {
     setCurrentScreen("main");
@@ -157,6 +190,15 @@ function AppRouter() {
         </svg>
       ),
       onClick: () => navigateToMedications(),
+    },
+    {
+      label: "Планы",
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-5">
+          <path fillRule="evenodd" d="M5.75 2a.75.75 0 01.75.75v3.5h3.5a.75.75 0 010 1.5h-3.5v3.5a.75.75 0 01-1.5 0v-3.5h-3.5a.75.75 0 010-1.5h3.5v-3.5A.75.75 0 015.75 2zM12 5a.75.75 0 01.75-.75h3.5a.75.75 0 010 1.5h-3.5A.75.75 0 0112 5zm0 5a.75.75 0 01.75-.75h3.5a.75.75 0 010 1.5h-3.5A.75.75 0 0112 10zm0 5a.75.75 0 01.75-.75h3.5a.75.75 0 010 1.5h-3.5A.75.75 0 0112 15z" clipRule="evenodd" />
+        </svg>
+      ),
+      onClick: () => navigateToFuturePlans(),
     },
     {
       label: "Профиль",
@@ -231,6 +273,8 @@ function AppRouter() {
                   {currentScreen === "labTests" && "Анализы"}
                   {currentScreen === "medications" && "Препараты"}
                   {currentScreen === "medicationDetail" && "Карточка препарата"}
+                  {currentScreen === "futurePlans" && "Планы"}
+                  {currentScreen === "futurePlanDetail" && "Карточка плановой задачи"}
                   {currentScreen === "profile" && "Профиль"}
                   {currentScreen === "pinChange" && "Смена пин-кода"}
                 </h1>
@@ -242,6 +286,8 @@ function AppRouter() {
                   {currentScreen === "labTests" && "Результаты лабораторных анализов"}
                   {currentScreen === "medications" && "Журнал принимаемых препаратов"}
                   {currentScreen === "medicationDetail" && "Подробная информация о препарате"}
+                  {currentScreen === "futurePlans" && "Плановые визиты к врачу, исследования, анализы"}
+                  {currentScreen === "futurePlanDetail" && "Подробная информация о плановой задаче"}
                   {currentScreen === "profile" && "Просмотр и редактирование данных"}
                   {currentScreen === "pinChange" && "Введите текущий и новый пин-код"}
                 </p>
@@ -356,6 +402,25 @@ function AppRouter() {
                   onBack={navigateBackToMedicationRegistry}
                   onMedicationChanged={handleMedicationChanged}
                   onMedicationDeleted={handleMedicationDeleted}
+                />
+              </div>
+            )}
+
+            {currentScreen === "futurePlans" && (
+              <div className="w-full px-4">
+                <FuturePlanView
+                  onOpenPlan={handleOpenFuturePlan}
+                />
+              </div>
+            )}
+
+            {currentScreen === "futurePlanDetail" && _selectedFuturePlanId && (
+              <div className="w-full px-4">
+                <FuturePlanDetailPage
+                  planId={_selectedFuturePlanId}
+                  onBack={navigateBackToFuturePlanRegistry}
+                  onPlanChanged={handleFuturePlanChanged}
+                  onPlanDeleted={handleFuturePlanDeleted}
                 />
               </div>
             )}
