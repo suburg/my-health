@@ -5,16 +5,22 @@ import { FuturePlanRegistry } from "./FuturePlanRegistry";
 import { FuturePlanModal } from "./FuturePlanModal";
 import { FuturePlanCompleteModal } from "./FuturePlanCompleteModal";
 import { FuturePlanCancelModal } from "./FuturePlanCancelModal";
+import { FuturePlanDetailPage } from "./FuturePlanDetailPage";
 import { Loader2 } from "lucide-react";
 
 export interface FuturePlanViewProps {
   onOpenPlan: (plan: FuturePlan) => void;
+  initialPlanId?: string | null;
+  onPlanChanged?: (plan: FuturePlan) => void;
+  onPlanDeleted?: (planId: string) => void;
+  onBack?: () => void;
 }
 
 /**
  * Экран «Планы» — реестр плановых задач + модальные окна создания, выполнения, отмены.
+ * Если передан initialPlanId — показывает детальную страницу.
  */
-export function FuturePlanView({ onOpenPlan }: FuturePlanViewProps) {
+export function FuturePlanView({ onOpenPlan, initialPlanId, onPlanChanged, onPlanDeleted, onBack }: FuturePlanViewProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalKey, setModalKey] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -124,39 +130,54 @@ export function FuturePlanView({ onOpenPlan }: FuturePlanViewProps) {
 
   return (
     <div className="space-y-6">
-      <FuturePlanRegistry
-        key={refreshKey}
-        onAddPlan={handleAddPlan}
-        onOpenPlan={handleOpenPlan}
-        onLoad={setAllPlans}
-        onCompletePlan={handleCompleteRequest}
-        onCancelPlan={handleCancelRequest}
-      />
+      {/* Детальная страница */}
+      {initialPlanId && (
+        <FuturePlanDetailPage
+          planId={initialPlanId}
+          onBack={onBack || (() => {})}
+          onPlanChanged={onPlanChanged || (() => {})}
+          onPlanDeleted={onPlanDeleted || (() => {})}
+        />
+      )}
 
-      {/* Модальное окно создания/редактирования */}
-      <FuturePlanModal
-        key={modalKey}
-        open={modalOpen}
-        onClose={handleCloseModal}
-        onSave={handleSave}
-        editPlan={editPlan}
-      />
+      {/* Реестр */}
+      {!initialPlanId && (
+        <>
+          <FuturePlanRegistry
+            key={refreshKey}
+            onAddPlan={handleAddPlan}
+            onOpenPlan={handleOpenPlan}
+            onLoad={setAllPlans}
+            onCompletePlan={handleCompleteRequest}
+            onCancelPlan={handleCancelRequest}
+          />
 
-      {/* Модальное окно выполнения */}
-      <FuturePlanCompleteModal
-        open={completeModalOpen}
-        plan={completePlan}
-        onClose={handleCompleteClose}
-        onConfirm={handleCompleteConfirm}
-      />
+          {/* Модальное окно создания/редактирования */}
+          <FuturePlanModal
+            key={modalKey}
+            open={modalOpen}
+            onClose={handleCloseModal}
+            onSave={handleSave}
+            editPlan={editPlan}
+          />
 
-      {/* Модальное окно отмены */}
-      <FuturePlanCancelModal
-        open={cancelModalOpen}
-        plan={cancelPlan}
-        onClose={handleCancelClose}
-        onConfirm={handleCancelConfirm}
-      />
+          {/* Модальное окно выполнения */}
+          <FuturePlanCompleteModal
+            open={completeModalOpen}
+            plan={completePlan}
+            onClose={handleCompleteClose}
+            onConfirm={handleCompleteConfirm}
+          />
+
+          {/* Модальное окно отмены */}
+          <FuturePlanCancelModal
+            open={cancelModalOpen}
+            plan={cancelPlan}
+            onClose={handleCancelClose}
+            onConfirm={handleCancelConfirm}
+          />
+        </>
+      )}
 
       {saving && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20">

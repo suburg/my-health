@@ -11,6 +11,7 @@ import { LabTestView } from "./components/lab-tests/LabTestView";
 import { MedicationView } from "./components/medications/MedicationView";
 import { MedicationDetailPage } from "./components/medications/MedicationDetailPage";
 import { FuturePlanView } from "./components/future-plans/FuturePlanView";
+import { FuturePlanDetailPage } from "./components/future-plans/FuturePlanDetailPage";
 import type { Medication } from "./types";
 import type { FuturePlan } from "./types";
 import { logger } from "./lib/logger";
@@ -20,7 +21,7 @@ import { useState, useEffect, useCallback } from "react";
 /**
  * Типы экранов для навигации внутри приложения.
  */
-type Screen = "main" | "profile" | "pinChange" | "health" | "doctorVisits" | "doctorVisitDetail" | "labTests" | "medications" | "medicationDetail" | "futurePlans";
+type Screen = "main" | "profile" | "pinChange" | "health" | "doctorVisits" | "doctorVisitDetail" | "labTests" | "medications" | "medicationDetail" | "futurePlans" | "futurePlanDetail";
 
 /**
  * Компонент-маршрутизатор на основе состояния аутентификации.
@@ -103,10 +104,29 @@ function AppRouter() {
     setCurrentScreen("futurePlans");
   }, []);
 
-  const handleOpenFuturePlan = useCallback((plan: FuturePlan) => {
-    // TODO: навигация на детальную страницу (Фаза 6)
-    void plan;
+  const navigateToFuturePlanDetail = useCallback((planId: string) => {
+    setSelectedFuturePlanId(planId);
+    setCurrentScreen("futurePlanDetail");
   }, []);
+
+  const navigateBackToFuturePlanRegistry = useCallback(() => {
+    setSelectedFuturePlanId(null);
+    setCurrentScreen("futurePlans");
+  }, []);
+
+  const handleOpenFuturePlan = useCallback((plan: FuturePlan) => {
+    navigateToFuturePlanDetail(plan.id);
+  }, [navigateToFuturePlanDetail]);
+
+  const handleFuturePlanChanged = useCallback((_plan: FuturePlan) => {
+    // Обновление будет через ре-рендер реестра
+  }, []);
+
+  const handleFuturePlanDeleted = useCallback((id: string) => {
+    if (_selectedFuturePlanId === id) {
+      navigateBackToFuturePlanRegistry();
+    }
+  }, [_selectedFuturePlanId, navigateBackToFuturePlanRegistry]);
 
   // Обработчик выхода
   const handleLogout = useCallback(() => {
@@ -254,6 +274,7 @@ function AppRouter() {
                   {currentScreen === "medications" && "Препараты"}
                   {currentScreen === "medicationDetail" && "Карточка препарата"}
                   {currentScreen === "futurePlans" && "Планы"}
+                  {currentScreen === "futurePlanDetail" && "Карточка плановой задачи"}
                   {currentScreen === "profile" && "Профиль"}
                   {currentScreen === "pinChange" && "Смена пин-кода"}
                 </h1>
@@ -266,6 +287,7 @@ function AppRouter() {
                   {currentScreen === "medications" && "Журнал принимаемых препаратов"}
                   {currentScreen === "medicationDetail" && "Подробная информация о препарате"}
                   {currentScreen === "futurePlans" && "Плановые визиты к врачу, исследования, анализы"}
+                  {currentScreen === "futurePlanDetail" && "Подробная информация о плановой задаче"}
                   {currentScreen === "profile" && "Просмотр и редактирование данных"}
                   {currentScreen === "pinChange" && "Введите текущий и новый пин-код"}
                 </p>
@@ -386,7 +408,20 @@ function AppRouter() {
 
             {currentScreen === "futurePlans" && (
               <div className="w-full px-4">
-                <FuturePlanView onOpenPlan={handleOpenFuturePlan} />
+                <FuturePlanView
+                  onOpenPlan={handleOpenFuturePlan}
+                />
+              </div>
+            )}
+
+            {currentScreen === "futurePlanDetail" && _selectedFuturePlanId && (
+              <div className="w-full px-4">
+                <FuturePlanDetailPage
+                  planId={_selectedFuturePlanId}
+                  onBack={navigateBackToFuturePlanRegistry}
+                  onPlanChanged={handleFuturePlanChanged}
+                  onPlanDeleted={handleFuturePlanDeleted}
+                />
               </div>
             )}
 

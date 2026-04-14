@@ -63,7 +63,11 @@ export function filterByMandatory(
  * Сортировать плановые задачи по плановой дате (ближайшие сверху).
  */
 export function sortByPlannedDateAsc(plans: FuturePlan[]): FuturePlan[] {
-  return [...plans].sort((a, b) => a.plannedDate.localeCompare(b.plannedDate));
+  return [...plans].sort((a, b) => {
+    const dateA = parseDate(a.plannedDate);
+    const dateB = parseDate(b.plannedDate);
+    return dateA.getTime() - dateB.getTime();
+  });
 }
 
 /**
