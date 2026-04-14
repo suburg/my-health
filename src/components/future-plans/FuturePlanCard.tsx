@@ -4,6 +4,8 @@ import { CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 
 export interface FuturePlanCardProps {
   plan: FuturePlan;
+  onComplete?: () => void;
+  onCancel?: () => void;
 }
 
 /** Форматирует дату YYYY-MM-DD или ДД.ММ.ГГГГ → «01.04.2026» */
@@ -38,9 +40,11 @@ function ContentBlock({
 
 /**
  * Полная карточка плановой задачи в 3 столбца.
+ * Для запланированных задач — кнопки «Выполнить» и «Отменить» внизу блока.
  */
-export function FuturePlanCard({ plan }: FuturePlanCardProps) {
+export function FuturePlanCard({ plan, onComplete, onCancel }: FuturePlanCardProps) {
   const overdue = isPlanOverdue(plan);
+  const isPlanned = plan.status === "planned";
 
   /** Цвет бейджа статуса */
   function statusBadgeClass(): string {
@@ -87,6 +91,32 @@ export function FuturePlanCard({ plan }: FuturePlanCardProps) {
             <span className="text-foreground">{plan.isMandatory ? "Да" : "Нет"}</span>
           </div>
         </div>
+
+        {/* Кнопки действий — только для запланированных, внизу блока */}
+        {isPlanned && (onComplete || onCancel) && (
+          <div className="mt-4 flex items-center gap-2 border-t border-border pt-4">
+            {onComplete && (
+              <button
+                onClick={onComplete}
+                className="inline-flex items-center gap-1.5 rounded-md bg-green-600/10 px-3 py-1.5 text-sm font-medium text-green-700 transition-colors hover:bg-green-600/20"
+                title="Отметить как выполненное"
+              >
+                <CheckCircle2 size={16} />
+                Выполнить
+              </button>
+            )}
+            {onCancel && (
+              <button
+                onClick={onCancel}
+                className="inline-flex items-center gap-1.5 rounded-md bg-destructive/10 px-3 py-1.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/20"
+                title="Отменить задачу"
+              >
+                <XCircle size={16} />
+                Отменить
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Блок результата — фактическая дата или причина отмены */}

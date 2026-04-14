@@ -199,22 +199,6 @@ export function FuturePlanDetailPage({
           Все плановые задачи
         </button>
         <div className="flex items-center gap-2">
-          {isPlanned && (
-            <>
-              <button
-                onClick={handleCompleteRequest}
-                className="rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700"
-              >
-                Выполнить
-              </button>
-              <button
-                onClick={handleCancelRequest}
-                className="rounded-md bg-destructive/10 px-3 py-1.5 text-sm font-medium text-destructive hover:bg-destructive/20"
-              >
-                Отменить
-              </button>
-            </>
-          )}
           <button
             onClick={handleEditRequest}
             className="rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted"
@@ -232,7 +216,11 @@ export function FuturePlanDetailPage({
       </div>
 
       {/* Карточка */}
-      <FuturePlanCard plan={plan} />
+      <FuturePlanCard
+        plan={plan}
+        onComplete={isPlanned ? handleCompleteRequest : undefined}
+        onCancel={isPlanned ? handleCancelRequest : undefined}
+      />
 
       {/* Модалка удаления */}
       {showDeleteConfirm && (

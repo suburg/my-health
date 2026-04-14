@@ -1,10 +1,8 @@
 import { useState, useCallback } from "react";
 import type { FuturePlan } from "../../types";
-import { addFuturePlan, updateFuturePlan, completeFuturePlan, cancelFuturePlan } from "../../services/future-plan-service";
+import { addFuturePlan, updateFuturePlan } from "../../services/future-plan-service";
 import { FuturePlanRegistry } from "./FuturePlanRegistry";
 import { FuturePlanModal } from "./FuturePlanModal";
-import { FuturePlanCompleteModal } from "./FuturePlanCompleteModal";
-import { FuturePlanCancelModal } from "./FuturePlanCancelModal";
 import { FuturePlanDetailPage } from "./FuturePlanDetailPage";
 import { Loader2 } from "lucide-react";
 
@@ -27,14 +25,6 @@ export function FuturePlanView({ onOpenPlan, initialPlanId, onPlanChanged, onPla
   const [saving, setSaving] = useState(false);
   const [_allPlans, setAllPlans] = useState<FuturePlan[]>([]);
   const [editPlan, setEditPlan] = useState<FuturePlan | null>(null);
-
-  // Модалка выполнения
-  const [completeModalOpen, setCompleteModalOpen] = useState(false);
-  const [completePlan, setCompletePlan] = useState<FuturePlan | null>(null);
-
-  // Модалка отмены
-  const [cancelModalOpen, setCancelModalOpen] = useState(false);
-  const [cancelPlan, setCancelPlan] = useState<FuturePlan | null>(null);
 
   // --- Создание/редактирование ---
   const handleAddPlan = useCallback(() => {
@@ -73,54 +63,6 @@ export function FuturePlanView({ onOpenPlan, initialPlanId, onPlanChanged, onPla
     [editPlan],
   );
 
-  // --- Выполнение ---
-  const handleCompleteRequest = useCallback((plan: FuturePlan) => {
-    setCompletePlan(plan);
-    setCompleteModalOpen(true);
-  }, []);
-
-  const handleCompleteConfirm = useCallback(async (completedDate: string) => {
-    if (!completePlan) return;
-    setSaving(true);
-    try {
-      const saved = await completeFuturePlan(completePlan.id, completedDate);
-      setAllPlans((prev) => prev.map((p) => (p.id === saved.id ? saved : p)));
-      setCompleteModalOpen(false);
-      setCompletePlan(null);
-    } finally {
-      setSaving(false);
-    }
-  }, [completePlan]);
-
-  const handleCompleteClose = useCallback(() => {
-    setCompleteModalOpen(false);
-    setCompletePlan(null);
-  }, []);
-
-  // --- Отмена ---
-  const handleCancelRequest = useCallback((plan: FuturePlan) => {
-    setCancelPlan(plan);
-    setCancelModalOpen(true);
-  }, []);
-
-  const handleCancelConfirm = useCallback(async (cancelReason: string | null) => {
-    if (!cancelPlan) return;
-    setSaving(true);
-    try {
-      const saved = await cancelFuturePlan(cancelPlan.id, cancelReason);
-      setAllPlans((prev) => prev.map((p) => (p.id === saved.id ? saved : p)));
-      setCancelModalOpen(false);
-      setCancelPlan(null);
-    } finally {
-      setSaving(false);
-    }
-  }, [cancelPlan]);
-
-  const handleCancelClose = useCallback(() => {
-    setCancelModalOpen(false);
-    setCancelPlan(null);
-  }, []);
-
   const handleOpenPlan = useCallback(
     (plan: FuturePlan) => {
       onOpenPlan(plan);
@@ -148,8 +90,6 @@ export function FuturePlanView({ onOpenPlan, initialPlanId, onPlanChanged, onPla
             onAddPlan={handleAddPlan}
             onOpenPlan={handleOpenPlan}
             onLoad={setAllPlans}
-            onCompletePlan={handleCompleteRequest}
-            onCancelPlan={handleCancelRequest}
           />
 
           {/* Модальное окно создания/редактирования */}
@@ -159,22 +99,6 @@ export function FuturePlanView({ onOpenPlan, initialPlanId, onPlanChanged, onPla
             onClose={handleCloseModal}
             onSave={handleSave}
             editPlan={editPlan}
-          />
-
-          {/* Модальное окно выполнения */}
-          <FuturePlanCompleteModal
-            open={completeModalOpen}
-            plan={completePlan}
-            onClose={handleCompleteClose}
-            onConfirm={handleCompleteConfirm}
-          />
-
-          {/* Модальное окно отмены */}
-          <FuturePlanCancelModal
-            open={cancelModalOpen}
-            plan={cancelPlan}
-            onClose={handleCancelClose}
-            onConfirm={handleCancelConfirm}
           />
         </>
       )}
